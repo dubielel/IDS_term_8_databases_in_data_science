@@ -14,11 +14,9 @@ services:
       - .postgres_data:/var/lib/postgresql/data
 
   sqlite:
-    image: keinos/sqlite3:latest # since this one has arm64 arch
+    build:
+      context: ./sqlite
     container_name: sqlite_db
-    command: tail -f /dev/null # Keeps the container running
-    volumes:
-      - sqlite_data:/data
 
   # Funfacts:
   # MSSQL does not have arm64 arch (only amd64)
@@ -37,5 +35,4 @@ services:
 
 volumes:
   postgres_data:
-  sqlite_data:
   mssql_data:
