@@ -22,7 +22,8 @@ services:
   # MSSQL does not have arm64 arch (only amd64)
   # Known issue for Docker for Mac is that mounting volumes does not work
   mssql:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    build:
+      context: ./mssql
     container_name: mssql_db
     restart: always
     environment:
@@ -31,7 +32,7 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - mssql_data:/var/opt/mssql
+      - .mssql_data:/var/opt/mssql
 
 volumes:
   postgres_data:
