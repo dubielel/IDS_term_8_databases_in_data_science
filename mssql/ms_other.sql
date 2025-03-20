@@ -1,15 +1,15 @@
 -- drop tables
 
-drop table orderhist
+DROP TABLE IF EXISTS orderhist
 go
 
-drop table sales
+DROP TABLE IF EXISTS sales
 go
 
-drop table produce
+DROP TABLE IF EXISTS produce
 go
 
-drop table buyers
+DROP TABLE IF EXISTS buyers
 go
 
 -- cereate tables

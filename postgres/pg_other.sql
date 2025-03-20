@@ -1,12 +1,12 @@
 -- drop tables
 
-drop table orderhist;
+drop table IF EXISTS orderhist;
 
-drop table sales;
+drop table IF EXISTS sales;
 
-drop table produce;
+drop table IF EXISTS produce;
 
-drop table buyers;
+drop table IF EXISTS buyers;
 
 -- create tables
 
