@@ -1,2 +1,3 @@
 .mssql_data/
 .postgres_data/
+sqlite/northwind.sqlite
