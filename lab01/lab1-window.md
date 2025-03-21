@@ -4,7 +4,8 @@
 ---
 
 **Imiona i nazwiska:**
-
+Kacper Cienkosz,
+Miłosz Dubiel
 --- 
 
 
@@ -98,9 +99,40 @@ Jaka jest są podobieństwa, jakie różnice pomiędzy grupowaniem danych a dzia
 > Wyniki: 
 
 ```sql
---  ...
+northwind.public> select avg(unitprice) avgprice from products p
+[2025-03-21 10:36:29] 1 row retrieved starting from 1 in 60 ms (execution: 10 ms, fetching: 50 ms)
+```
+![img.png](img.png)
+
+```sql
+northwind.public> select avg(unitprice) over () as avgprice from products p
+[2025-03-21 10:41:16] 77 rows retrieved starting from 1 in 20 ms (execution: 3 ms, fetching: 17 ms)
+
 ```
 
+![img_1.png](img_1.png)
+
+
+```sql
+northwind.public> select categoryid, avg(unitprice) avgprice
+                  from products p
+                  group by categoryid
+[2025-03-21 10:42:36] 8 rows retrieved starting from 1 in 20 ms (execution: 5 ms, fetching: 15 ms)
+```
+
+![img_2.png](img_2.png)
+
+```sql
+northwind.public> select avg(unitprice) over (partition by categoryid) as avgprice
+				  from products p
+[2025-03-21 10:44:36] 77 rows retrieved starting from 1 in 23 ms (execution: 4 ms, fetching: 19 ms)
+```
+
+![img_3.png](img_3.png)
+
+Główna różnica, którą zauważyliśmy, polega na tym, że funkcje okna nie zmieniają ilości wierszy zwracanych w wynikach zapytania.
+Jedynie dodana jest kolumna z odpowiednimi wartościami przypisanymi do odpowieniego wiersza.
+Grupowanie danych zmienia wyniki, ponieważ łączy wiersze na podstawie określonej kolumny, przez co liczba wyników może się zmniejszyć.
 
 ---
 # Zadanie 2 - obserwacja
@@ -124,18 +156,60 @@ where productid < 10
 
 
 Jaka jest różnica? Czego dotyczy warunek w każdym z przypadków? Napisz polecenie równoważne 
-- 1) z wykorzystaniem funkcji okna. Napisz polecenie równoważne 
+- 1) z wykorzystaniem funkcji okna. Napisz polecenie równoważne
 - 2) z wykorzystaniem podzapytania
 
-
 ---
-> Wyniki: 
+> Wyniki:
 
+1) Wyniki z wykorzystaniem grupowania
 ```sql
---  ...
+northwind.public> select p.productid, p.ProductName, p.unitprice,
+                         (select avg(unitprice) from products) as avgprice
+                  from products p
+                  where productid < 10
+[2025-03-21 10:49:46] 9 rows retrieved starting from 1 in 40 ms (execution: 8 ms, fetching: 32 ms)
+```
+![img_4.png](img_4.png)
+
+Polecenie równowążne z wykorzystaniem funkcji okna
+```sql
+select
+	p.productid,
+	p.ProductName,
+	p.unitprice,
+	avg(p.unitprice) over () as avgprice
+from products p
+order by productid
+limit 9;
 ```
 
----
+![img_5.png](img_5.png)
+
+2) Wyniki z wykorzystaniem funkcji okna
+```sql
+northwind.public> select p.productid, p.ProductName, p.unitprice,
+						 avg(unitprice) over () as avgprice
+				  from products p
+				  where productid < 10
+[2025-03-21 10:59:34] 9 rows retrieved starting from 1 in 16 ms (execution: 3 ms, fetching: 13 ms)
+```
+
+![img_6.png](img_6.png)
+
+Polecenie równowążne z wykorzystaniem pozdapytania
+```sql
+select p.productid, p.ProductName, p.unitprice,
+	   (select avg(unitprice) from products pp where pp.productid < 10) as avgprice
+from products p
+where productid < 10;
+```
+
+![img_7.png](img_7.png)
+
+Różnica między wykorzystaniem podzapytania i funkcji okna polega na tym, że funkcja okna stosuje się do danych już zawężonych przez warunek WHERE, a podzapytanie stosuje się do wszystkich danych wybranych w podzapytaniu, a następnie wybiera odpowiednie dane na podstawie warunku.
+Stąd, aby zrobić do pierwszego polecenia odpowiadające mu z wykorzystaniem funkcji okna, należy zastosować funkcję okna do wszystkich danych następnie posortować po productid i wziąć 9 pierwszysch elementów.
+Aby zrobić drugie zapytanie za pomocą podzapytania, należy zawęzić dane warunkiem where w podzapytaniu.
 
 # Zadanie 3
 
