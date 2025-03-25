@@ -1,0 +1,40 @@
+StmtText,StmtId,NodeId,Parent,PhysicalOp,LogicalOp,Argument,DefinedValues,EstimateRows,EstimateIO,EstimateCPU,AvgRowSize,TotalSubtreeCost,OutputList,Warnings,Type,Parallel,EstimateExecutions
+"select
+    id,
+    pp.productid,
+    productname,
+    pp.categoryid,
+    unitprice,
+    avgpricecategory,
+    sumpricecategory,
+    avgpriceproduct,
+    sumpriceproduct
+from producthistory as pp
+join (
+    select
+        categoryid,
+        avg(unitprice) as avgpricecategory,
+        sum(value) as sumpricecategory
+    from producthistory
+    group by categoryid
+) as ct
+on pp.categoryid = ct.categoryid
+join (
+    select
+        productid,
+        avg(unitprice) as avgpriceproduct,
+        sum(value) as sumpriceproduct
+    from producthistory
+    group by productid
+) as pt
+on pp.productid = pt.productid",1,1,0,,,1,,2310000,,,,67.49598,,,SELECT,false,
+  |--Parallelism(Gather Streams),1,2,1,Parallelism,Gather Streams,,,2310000,0,7.725131,121,67.49598,"[pp].[id], [pp].[productid], [pp].[productname], [pp].[categoryid], [pp].[unitprice], [Expr1003], [Expr1004], [Expr1007], [Expr1008]",,PLAN_ROW,true,1
+"       |--Hash Match(Inner Join, HASH:([northwind].[dbo].[producthistory].[productid])=([pp].[productid]), RESIDUAL:([northwind].[dbo].[producthistory].[productid]=[northwind].[dbo].[producthistory].[productid] as [pp].[productid]))",1,3,2,Hash Match,Inner Join,"HASH:([northwind].[dbo].[producthistory].[productid])=([pp].[productid]), RESIDUAL:([northwind].[dbo].[producthistory].[productid]=[northwind].[dbo].[producthistory].[productid] as [pp].[productid])",,2310000,0,0.44297498,121,59.765648,"[pp].[id], [pp].[productid], [pp].[productname], [pp].[categoryid], [pp].[unitprice], [Expr1003], [Expr1004], [Expr1007], [Expr1008]",,PLAN_ROW,true,1
+"            |--Compute Scalar(DEFINE:([Expr1007]=CASE WHEN [Expr1028]=(0) THEN NULL ELSE [Expr1029]/CONVERT_IMPLICIT(decimal(19,0),[Expr1028],0) END, [Expr1008]=CASE WHEN [Expr1030]=(0) THEN NULL ELSE [Expr1031] END))",1,4,3,Compute Scalar,Compute Scalar,"DEFINE:([Expr1007]=CASE WHEN [Expr1028]=(0) THEN NULL ELSE [Expr1029]/CONVERT_IMPLICIT(decimal(19,0),[Expr1028],0) END, [Expr1008]=CASE WHEN [Expr1030]=(0) THEN NULL ELSE [Expr1031] END)","[Expr1007]=CASE WHEN [Expr1028]=(0) THEN NULL ELSE [Expr1029]/CONVERT_IMPLICIT(decimal(19,0),[Expr1028],0) END, [Expr1008]=CASE WHEN [Expr1030]=(0) THEN NULL ELSE [Expr1031] END",77,0,0,45,19.76402,"[northwind].[dbo].[producthistory].[productid], [Expr1007], [Expr1008]",,PLAN_ROW,true,1
+"            |    |--Hash Match(Aggregate, HASH:([northwind].[dbo].[producthistory].[productid]), RESIDUAL:([northwind].[dbo].[producthistory].[productid] = [northwind].[dbo].[producthistory].[productid]) DEFINE:([Expr1028]=COUNT_BIG([northwind].[dbo].[producthistory].[unitprice]), [Expr1029]=SUM([northwind].[dbo].[producthistory].[unitprice]), [Expr1030]=COUNT_BIG([northwind].[dbo].[producthistory].[value]), [Expr1031]=SUM([northwind].[dbo].[producthistory].[value])))",1,5,4,Hash Match,Aggregate,"HASH:([northwind].[dbo].[producthistory].[productid]), RESIDUAL:([northwind].[dbo].[producthistory].[productid] = [northwind].[dbo].[producthistory].[productid])","[Expr1028]=COUNT_BIG([northwind].[dbo].[producthistory].[unitprice]), [Expr1029]=SUM([northwind].[dbo].[producthistory].[unitprice]), [Expr1030]=COUNT_BIG([northwind].[dbo].[producthistory].[value]), [Expr1031]=SUM([northwind].[dbo].[producthistory].[value])",77,0,0.4122736,45,19.76402,"[northwind].[dbo].[producthistory].[productid], [Expr1028], [Expr1029], [Expr1030], [Expr1031]",,PLAN_ROW,true,1
+            |         |--Clustered Index Scan(OBJECT:([northwind].[dbo].[producthistory].[pk_product_history])),1,6,5,Clustered Index Scan,Clustered Index Scan,OBJECT:([northwind].[dbo].[producthistory].[pk_product_history]),"[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[value]",2310000,18.71646,0.63528925,29,19.351748,"[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[value]",,PLAN_ROW,true,1
+"            |--Hash Match(Inner Join, HASH:([northwind].[dbo].[producthistory].[categoryid])=([pp].[categoryid]), RESIDUAL:([northwind].[dbo].[producthistory].[categoryid]=[northwind].[dbo].[producthistory].[categoryid] as [pp].[categoryid]))",1,7,3,Hash Match,Inner Join,"HASH:([northwind].[dbo].[producthistory].[categoryid])=([pp].[categoryid]), RESIDUAL:([northwind].[dbo].[producthistory].[categoryid]=[northwind].[dbo].[producthistory].[categoryid] as [pp].[categoryid])",,2310000,0,0.44293222,86,39.55865,"[pp].[id], [pp].[productid], [pp].[productname], [pp].[categoryid], [pp].[unitprice], [Expr1003], [Expr1004]",,PLAN_ROW,true,1
+"                 |--Compute Scalar(DEFINE:([Expr1003]=CASE WHEN [Expr1032]=(0) THEN NULL ELSE [Expr1033]/CONVERT_IMPLICIT(decimal(19,0),[Expr1032],0) END, [Expr1004]=CASE WHEN [Expr1034]=(0) THEN NULL ELSE [Expr1035] END))",1,8,7,Compute Scalar,Compute Scalar,"DEFINE:([Expr1003]=CASE WHEN [Expr1032]=(0) THEN NULL ELSE [Expr1033]/CONVERT_IMPLICIT(decimal(19,0),[Expr1032],0) END, [Expr1004]=CASE WHEN [Expr1034]=(0) THEN NULL ELSE [Expr1035] END)","[Expr1003]=CASE WHEN [Expr1032]=(0) THEN NULL ELSE [Expr1033]/CONVERT_IMPLICIT(decimal(19,0),[Expr1032],0) END, [Expr1004]=CASE WHEN [Expr1034]=(0) THEN NULL ELSE [Expr1035] END",8,0,0,45,19.763966,"[northwind].[dbo].[producthistory].[categoryid], [Expr1003], [Expr1004]",,PLAN_ROW,true,1
+"                 |    |--Hash Match(Aggregate, HASH:([northwind].[dbo].[producthistory].[categoryid]), RESIDUAL:([northwind].[dbo].[producthistory].[categoryid] = [northwind].[dbo].[producthistory].[categoryid]) DEFINE:([Expr1032]=COUNT_BIG([northwind].[dbo].[producthistory].[unitprice]), [Expr1033]=SUM([northwind].[dbo].[producthistory].[unitprice]), [Expr1034]=COUNT_BIG([northwind].[dbo].[producthistory].[value]), [Expr1035]=SUM([northwind].[dbo].[producthistory].[value])))",1,9,8,Hash Match,Aggregate,"HASH:([northwind].[dbo].[producthistory].[categoryid]), RESIDUAL:([northwind].[dbo].[producthistory].[categoryid] = [northwind].[dbo].[producthistory].[categoryid])","[Expr1032]=COUNT_BIG([northwind].[dbo].[producthistory].[unitprice]), [Expr1033]=SUM([northwind].[dbo].[producthistory].[unitprice]), [Expr1034]=COUNT_BIG([northwind].[dbo].[producthistory].[value]), [Expr1035]=SUM([northwind].[dbo].[producthistory].[value])",8,0,0.41221884,45,19.763966,"[northwind].[dbo].[producthistory].[categoryid], [Expr1032], [Expr1033], [Expr1034], [Expr1035]",,PLAN_ROW,true,1
+                 |         |--Clustered Index Scan(OBJECT:([northwind].[dbo].[producthistory].[pk_product_history])),1,10,9,Clustered Index Scan,Clustered Index Scan,OBJECT:([northwind].[dbo].[producthistory].[pk_product_history]),"[northwind].[dbo].[producthistory].[categoryid], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[value]",2310000,18.71646,0.63528925,29,19.351748,"[northwind].[dbo].[producthistory].[categoryid], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[value]",,PLAN_ROW,true,1
+                 |--Clustered Index Scan(OBJECT:([northwind].[dbo].[producthistory].[pk_product_history] AS [pp])),1,11,7,Clustered Index Scan,Clustered Index Scan,OBJECT:([northwind].[dbo].[producthistory].[pk_product_history] AS [pp]),"[pp].[id], [pp].[productid], [pp].[productname], [pp].[categoryid], [pp].[unitprice]",2310000,18.71646,0.63528925,52,19.351748,"[pp].[id], [pp].[productid], [pp].[productname], [pp].[categoryid], [pp].[unitprice]",,PLAN_ROW,true,1

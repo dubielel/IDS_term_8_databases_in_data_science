@@ -1,6 +1,6 @@
  -- WINDOW FUNCTION
 
-EXPLAIN ANALYSE
+ -- explain query plan
 select
     id,
     productid,
@@ -19,7 +19,7 @@ window
 
  -- JOIN
 
-EXPLAIN ANALYSE
+ -- explain query plan
 select
     id,
     pp.productid,
@@ -53,12 +53,12 @@ on pp.productid = pt.productid;
 
  -- SUBQUERY
 
-EXPLAIN ANALYSE
-with limited_data as (
-    select *
-    from producthistory
-    order by id
-    limit 10000
+ -- explain query plan
+WITH limited_data AS (
+    SELECT *
+    FROM producthistory
+    ORDER BY id
+    LIMIT 10000
 )
 
 select

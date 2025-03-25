@@ -1,0 +1,8 @@
+id,parent,notused,detail
+4,0,0,CO-ROUTINE (subquery-2)
+8,4,0,CO-ROUTINE (subquery-3)
+11,8,0,SCAN producthistory
+25,8,0,USE TEMP B-TREE FOR ORDER BY
+48,4,0,SCAN (subquery-3)
+122,4,0,USE TEMP B-TREE FOR ORDER BY
+145,0,0,SCAN (subquery-2)

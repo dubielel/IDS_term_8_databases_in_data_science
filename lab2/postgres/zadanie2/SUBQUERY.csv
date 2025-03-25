@@ -1,17 +1,30 @@
-CTE Scan on limited_data  (cost=631.74..2252231.74 rows=3333 width=126) (actual time=147.345..7768.488 rows=3372 loops=1)
-  Filter: (unitprice > (SubPlan 2))
-  Rows Removed by Filter: 6628
+CTE Scan on limited_data  (cost=631.74..9006331.74 rows=10000 width=254) (actual time=234.297..26363.823 rows=10000 loops=1)
   CTE limited_data
-    ->  Limit  (cost=0.43..631.74 rows=10000 width=68) (actual time=135.910..142.668 rows=10000 loops=1)
-          ->  Index Scan using pkproduct_history on producthistory  (cost=0.43..145026.68 rows=2297232 width=68) (actual time=1.792..7.788 rows=10000 loops=1)
+    ->  Limit  (cost=0.43..631.74 rows=10000 width=68) (actual time=228.639..230.991 rows=10000 loops=1)
+          ->  Index Scan using pkproduct_history on producthistory  (cost=0.43..145026.68 rows=2297232 width=68) (actual time=0.024..1.607 rows=10000 loops=1)
   SubPlan 2
-    ->  Aggregate  (cost=225.13..225.14 rows=1 width=32) (actual time=0.763..0.763 rows=1 loops=10000)
-          ->  CTE Scan on limited_data t  (cost=0.00..225.00 rows=50 width=16) (actual time=0.001..0.612 rows=1368 loops=10000)
+    ->  Aggregate  (cost=225.13..225.14 rows=1 width=32) (actual time=0.755..0.755 rows=1 loops=10000)
+          ->  CTE Scan on limited_data t  (cost=0.00..225.00 rows=50 width=16) (actual time=0.001..0.604 rows=1368 loops=10000)
                 Filter: (categoryid = limited_data.categoryid)
                 Rows Removed by Filter: 8632
-Planning Time: 3.176 ms
+  SubPlan 3
+    ->  Aggregate  (cost=225.13..225.14 rows=1 width=32) (actual time=0.757..0.757 rows=1 loops=10000)
+          ->  CTE Scan on limited_data t_1  (cost=0.00..225.00 rows=50 width=16) (actual time=0.001..0.602 rows=1368 loops=10000)
+                Filter: (categoryid = limited_data.categoryid)
+                Rows Removed by Filter: 8632
+  SubPlan 4
+    ->  Aggregate  (cost=225.13..225.14 rows=1 width=32) (actual time=0.550..0.550 rows=1 loops=10000)
+          ->  CTE Scan on limited_data t_2  (cost=0.00..225.00 rows=50 width=16) (actual time=0.002..0.533 rows=130 loops=10000)
+                Filter: (productid = limited_data.productid)
+                Rows Removed by Filter: 9870
+  SubPlan 5
+    ->  Aggregate  (cost=225.13..225.14 rows=1 width=32) (actual time=0.550..0.551 rows=1 loops=10000)
+          ->  CTE Scan on limited_data t_3  (cost=0.00..225.00 rows=50 width=16) (actual time=0.002..0.534 rows=130 loops=10000)
+                Filter: (productid = limited_data.productid)
+                Rows Removed by Filter: 9870
+Planning Time: 0.160 ms
 JIT:
-  Functions: 12
+  Functions: 31
 "  Options: Inlining true, Optimization true, Expressions true, Deforming true"
-"  Timing: Generation 4.253 ms, Inlining 19.660 ms, Optimization 66.187 ms, Emission 48.285 ms, Total 138.384 ms"
-Execution Time: 7773.405 ms
+"  Timing: Generation 2.156 ms, Inlining 12.493 ms, Optimization 124.736 ms, Emission 91.407 ms, Total 230.792 ms"
+Execution Time: 26366.794 ms

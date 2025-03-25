@@ -272,8 +272,20 @@ from products;
 > Wyniki: 
 
 ```sql
---  ...
+[2025-03-25 19:37:09] Connected
+northwind.public> select productid, productname, unitprice, categoryid,
+						 row_number() over(partition by categoryid order by unitprice desc) as rowno,
+						  rank() over(partition by categoryid order by unitprice desc) as rankprice,
+						  dense_rank() over(partition by categoryid order by unitprice desc) as denserankprice
+				  from products
+[2025-03-25 19:37:09] 77 rows retrieved starting from 1 in 55 ms (execution: 12 ms, fetching: 43 ms)
 ```
+
+![img.png](img.png)
+
+ * `row_number()` - nadaje unikalny numer dla każdego wiersza w grupie
+ * `rank()` - nadaje numer dla każdego wiersza w grupie, ale w przypadku równych wartości, nadaje ten sam numer i "dziury" w numeracji (np. 1, 2, 2, 4)
+ * `dense_rank()` - nadaje numer dla każdego wiersza w grupie. W przypadku równych wartości nadaje ten sam numer, ale nie ma "dziur" w numeracji (np. 1, 2, 2, 3)
 
 ---
 
@@ -284,10 +296,71 @@ Spróbuj uzyskać ten sam wynik bez użycia funkcji okna
 ---
 > Wyniki: 
 
+**ROW_NUMBER()**
+
 ```sql
---  ...
+SELECT
+	p1.productid,
+	p1.productname,
+	p1.unitprice,
+	p1.categoryid,
+	(
+		SELECT COUNT(*)
+		FROM products p2
+		WHERE p2.categoryid = p1.categoryid
+		  AND (
+			p2.unitprice > p1.unitprice
+				OR (
+				p2.unitprice = p1.unitprice
+					AND p2.productid < p1.productid
+				)
+			)
+	) + 1 AS rowno
+FROM products p1
+ORDER BY categoryid, rowno;
 ```
 
+![img_1.png](img_1.png)
+
+**RANK()**
+
+```sql
+SELECT
+	p1.productid,
+	p1.productname,
+	p1.unitprice,
+	p1.categoryid,
+	(
+		SELECT COUNT(*)
+		FROM products p2
+		WHERE p2.categoryid = p1.categoryid
+		  AND p2.unitprice > p1.unitprice
+	) + 1 AS rankprice
+FROM products p1
+ORDER BY categoryid, rankprice;
+```
+
+![img_2.png](img_2.png)
+
+**DENSE_RANK()**
+
+```sql
+SELECT
+	p1.productid,
+	p1.productname,
+	p1.unitprice,
+	p1.categoryid,
+	(
+		SELECT COUNT(DISTINCT p2.unitprice)
+		FROM products p2
+		WHERE p2.categoryid = p1.categoryid
+		  AND p2.unitprice > p1.unitprice
+	) + 1 AS denserankprice
+FROM products p1
+ORDER BY categoryid, denserankprice;
+```
+
+![img_3.png](img_3.png)
 
 ---
 # Zadanie 4

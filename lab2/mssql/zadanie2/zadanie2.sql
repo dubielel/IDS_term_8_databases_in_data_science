@@ -1,25 +1,21 @@
  -- WINDOW FUNCTION
 
-EXPLAIN ANALYSE
 select
     id,
     productid,
     productname,
     categoryid,
     unitprice,
-    avg(unitprice) over category_window as avgpricecategory,
-    sum(value) over category_window as sumpricecategory,
-    avg(unitprice) over product_window as avgpriceproduct,
-    sum(value) over product_window as sumpriceproduct
-from producthistory
-window
-    category_window as (partition by categoryid),
-    product_window as (partition by productid);
--- order by id;
+    avg(unitprice) over (partition by categoryid) as avgpricecategory,
+    sum(value) over (partition by categoryid) as sumpricecategory,
+    avg(unitprice) over (partition by productid) as avgpriceproduct,
+    sum(value) over (partition by productid) as sumpriceproduct
+from producthistory;
+
+-- z jakiegoś powodu nie działa mi window :((
 
  -- JOIN
 
-EXPLAIN ANALYSE
 select
     id,
     pp.productid,
@@ -49,18 +45,10 @@ join (
     group by productid
 ) as pt
 on pp.productid = pt.productid;
--- order by id;
 
  -- SUBQUERY
 
-EXPLAIN ANALYSE
-with limited_data as (
-    select *
-    from producthistory
-    order by id
-    limit 10000
-)
-
+SET SHOWPLAN_ALL ON;
 select
     id,
     productid,
@@ -69,25 +57,25 @@ select
     unitprice,
     (
         select avg(unitprice)
-        from limited_data as t
-        where t.categoryid = limited_data.categoryid
+        from producthistory as t
+        where t.categoryid = producthistory.categoryid
     ) as avgpricecategory,
     (
         select sum(unitprice)
-        from limited_data as t
-        where t.categoryid = limited_data.categoryid
+        from producthistory as t
+        where t.categoryid = producthistory.categoryid
     ) as sumpricecategory,
     (
         select avg(unitprice)
-        from limited_data as t
-        where t.productid = limited_data.productid
+        from producthistory as t
+        where t.productid = producthistory.productid
     ) as avgpriceproduct,
     (
         select sum(unitprice)
-        from limited_data as t
-        where t.productid = limited_data.productid
+        from producthistory as t
+        where t.productid = producthistory.productid
     ) as sumpriceproduct
-from limited_data;
+from producthistory;
 
 
 

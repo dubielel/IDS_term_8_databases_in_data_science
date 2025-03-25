@@ -1,0 +1,21 @@
+Incremental Sort  (cost=195456.63..591902.44 rows=2297232 width=47) (actual time=2257.495..3040.334 rows=25564 loops=1)
+"  Sort Key: (date_part('year'::text, (producthistory.date)::timestamp without time zone)), producthistory.productid, (row_number() OVER (?))"
+"  Presorted Key: (date_part('year'::text, (producthistory.date)::timestamp without time zone)), producthistory.productid"
+  Full-sort Groups: 799  Sort Method: quicksort  Average Memory: 27kB  Peak Memory: 27kB
+  ->  WindowAgg  (cost=195455.05..520436.37 rows=2297232 width=47) (actual time=2256.386..3032.823 rows=25564 loops=1)
+        Run Condition: (row_number() OVER (?) < 5)
+        ->  Gather Merge  (cost=195455.05..463005.57 rows=2297232 width=39) (actual time=2256.346..2913.752 rows=2310000 loops=1)
+              Workers Planned: 2
+              Workers Launched: 2
+              ->  Sort  (cost=194455.02..196847.97 rows=957180 width=39) (actual time=2166.622..2240.112 rows=770000 loops=3)
+"                    Sort Key: (date_part('year'::text, (producthistory.date)::timestamp without time zone)), producthistory.productid, producthistory.unitprice DESC"
+                    Sort Method: external merge  Disk: 41864kB
+                    Worker 0:  Sort Method: external merge  Disk: 38184kB
+                    Worker 1:  Sort Method: external merge  Disk: 38184kB
+                    ->  Parallel Seq Scan on producthistory  (cost=0.00..73193.70 rows=957180 width=39) (actual time=136.658..608.109 rows=770000 loops=3)
+Planning Time: 1.131 ms
+JIT:
+  Functions: 11
+"  Options: Inlining true, Optimization true, Expressions true, Deforming true"
+"  Timing: Generation 10.800 ms, Inlining 184.933 ms, Optimization 90.255 ms, Emission 76.523 ms, Total 362.511 ms"
+Execution Time: 3066.751 ms
