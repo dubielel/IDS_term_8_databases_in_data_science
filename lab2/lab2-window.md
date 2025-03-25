@@ -181,7 +181,9 @@ Wykonaj polecenia: `select count(*) from product_history`,  potwierdzające wyko
 > Wyniki: 
 
 ```sql
---  ...
+sqlite> select count(*) from producthistory
+   ...> ;
+2310000
 ```
 
 ---

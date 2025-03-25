@@ -1,0 +1,49 @@
+Hash Join  (cost=148415.34..245810.62 rows=2297232 width=163) (actual time=972.466..2099.941 rows=2310000 loops=1)
+  Hash Cond: (pp.productid = pt.productid)
+  ->  Hash Join  (cost=74196.23..165229.37 rows=2297232 width=99) (actual time=530.935..1283.644 rows=2310000 loops=1)
+        Hash Cond: (pp.categoryid = ct.categoryid)
+        ->  Seq Scan on producthistory pp  (cost=0.00..81808.32 rows=2297232 width=35) (actual time=0.048..268.190 rows=2310000 loops=1)
+        ->  Hash  (cost=74196.13..74196.13 rows=8 width=68) (actual time=530.864..530.974 rows=8 loops=1)
+              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+              ->  Subquery Scan on ct  (cost=74193.94..74196.13 rows=8 width=68) (actual time=530.843..530.967 rows=8 loops=1)
+                    ->  Finalize GroupAggregate  (cost=74193.94..74196.05 rows=8 width=68) (actual time=530.841..530.964 rows=8 loops=1)
+                          Group Key: producthistory.categoryid
+                          ->  Gather Merge  (cost=74193.94..74195.81 rows=16 width=68) (actual time=530.816..530.929 rows=24 loops=1)
+                                Workers Planned: 2
+                                Workers Launched: 2
+                                ->  Sort  (cost=73193.92..73193.94 rows=8 width=68) (actual time=495.418..495.420 rows=8 loops=3)
+                                      Sort Key: producthistory.categoryid
+                                      Sort Method: quicksort  Memory: 26kB
+                                      Worker 0:  Sort Method: quicksort  Memory: 26kB
+                                      Worker 1:  Sort Method: quicksort  Memory: 26kB
+                                      ->  Partial HashAggregate  (cost=73193.70..73193.80 rows=8 width=68) (actual time=495.389..495.393 rows=8 loops=3)
+                                            Group Key: producthistory.categoryid
+                                            Batches: 1  Memory Usage: 24kB
+                                            Worker 0:  Batches: 1  Memory Usage: 24kB
+                                            Worker 1:  Batches: 1  Memory Usage: 24kB
+                                            ->  Parallel Seq Scan on producthistory  (cost=0.00..68407.80 rows=957180 width=10) (actual time=12.396..295.346 rows=770000 loops=3)
+  ->  Hash  (cost=74218.15..74218.15 rows=77 width=68) (actual time=441.514..441.545 rows=77 loops=1)
+        Buckets: 1024  Batches: 1  Memory Usage: 13kB
+        ->  Subquery Scan on pt  (cost=74197.10..74218.15 rows=77 width=68) (actual time=441.338..441.528 rows=77 loops=1)
+              ->  Finalize GroupAggregate  (cost=74197.10..74217.38 rows=77 width=68) (actual time=441.335..441.517 rows=77 loops=1)
+                    Group Key: producthistory_1.productid
+                    ->  Gather Merge  (cost=74197.10..74215.07 rows=154 width=68) (actual time=441.313..441.397 rows=231 loops=1)
+                          Workers Planned: 2
+                          Workers Launched: 2
+                          ->  Sort  (cost=73197.08..73197.27 rows=77 width=68) (actual time=428.654..428.659 rows=77 loops=3)
+                                Sort Key: producthistory_1.productid
+                                Sort Method: quicksort  Memory: 37kB
+                                Worker 0:  Sort Method: quicksort  Memory: 37kB
+                                Worker 1:  Sort Method: quicksort  Memory: 37kB
+                                ->  Partial HashAggregate  (cost=73193.70..73194.66 rows=77 width=68) (actual time=428.569..428.599 rows=77 loops=3)
+                                      Group Key: producthistory_1.productid
+                                      Batches: 1  Memory Usage: 48kB
+                                      Worker 0:  Batches: 1  Memory Usage: 56kB
+                                      Worker 1:  Batches: 1  Memory Usage: 56kB
+                                      ->  Parallel Seq Scan on producthistory producthistory_1  (cost=0.00..68407.80 rows=957180 width=10) (actual time=8.703..242.175 rows=770000 loops=3)
+Planning Time: 0.729 ms
+JIT:
+  Functions: 59
+"  Options: Inlining false, Optimization false, Expressions true, Deforming true"
+"  Timing: Generation 6.275 ms, Inlining 0.000 ms, Optimization 4.177 ms, Emission 50.879 ms, Total 61.331 ms"
+Execution Time: 2191.858 ms

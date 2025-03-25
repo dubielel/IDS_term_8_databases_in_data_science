@@ -1,0 +1,29 @@
+Hash Join  (cost=74196.13..163338.84 rows=765744 width=35) (actual time=676.373..1199.850 rows=772880 loops=1)
+  Hash Cond: (pp.categoryid = producthistory.categoryid)
+  Join Filter: (pp.unitprice > (avg(producthistory.unitprice)))
+  Rows Removed by Join Filter: 1537120
+  ->  Seq Scan on producthistory pp  (cost=0.00..81808.32 rows=2297232 width=35) (actual time=0.057..163.719 rows=2310000 loops=1)
+  ->  Hash  (cost=74196.03..74196.03 rows=8 width=36) (actual time=670.676..670.747 rows=8 loops=1)
+        Buckets: 1024  Batches: 1  Memory Usage: 9kB
+        ->  Finalize GroupAggregate  (cost=74193.94..74196.03 rows=8 width=36) (actual time=670.661..670.741 rows=8 loops=1)
+              Group Key: producthistory.categoryid
+              ->  Gather Merge  (cost=74193.94..74195.81 rows=16 width=36) (actual time=670.612..670.685 rows=24 loops=1)
+                    Workers Planned: 2
+                    Workers Launched: 2
+                    ->  Sort  (cost=73193.92..73193.94 rows=8 width=36) (actual time=636.357..636.358 rows=8 loops=3)
+                          Sort Key: producthistory.categoryid
+                          Sort Method: quicksort  Memory: 25kB
+                          Worker 0:  Sort Method: quicksort  Memory: 25kB
+                          Worker 1:  Sort Method: quicksort  Memory: 25kB
+                          ->  Partial HashAggregate  (cost=73193.70..73193.80 rows=8 width=36) (actual time=636.325..636.327 rows=8 loops=3)
+                                Group Key: producthistory.categoryid
+                                Batches: 1  Memory Usage: 24kB
+                                Worker 0:  Batches: 1  Memory Usage: 24kB
+                                Worker 1:  Batches: 1  Memory Usage: 24kB
+                                ->  Parallel Seq Scan on producthistory  (cost=0.00..68407.80 rows=957180 width=10) (actual time=10.204..486.921 rows=770000 loops=3)
+Planning Time: 0.358 ms
+JIT:
+  Functions: 32
+"  Options: Inlining false, Optimization false, Expressions true, Deforming true"
+"  Timing: Generation 6.966 ms, Inlining 0.000 ms, Optimization 3.136 ms, Emission 32.335 ms, Total 42.437 ms"
+Execution Time: 1219.414 ms
