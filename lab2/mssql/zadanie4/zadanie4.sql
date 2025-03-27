@@ -1,55 +1,54 @@
- -- WINDOW FUNCTION
-
-with t as (
-    select
-        datepart(year, date) as year,
+-- WINDOW FUNCTION
+WITH t AS (
+    SELECT datepart(YEAR, DATE) AS YEAR,
         productid,
         productname,
         unitprice,
-        date,
-        row_number() over (partition by datepart(year, date), productid order by unitprice desc) as ranking
-    from producthistory
+        DATE,
+        row_number() over (
+            PARTITION BY datepart(YEAR, DATE),
+            productid
+            ORDER BY unitprice DESC
+        ) AS ranking
+    FROM producthistory
 )
+SELECT *
+FROM t
+WHERE ranking < 5
+ORDER BY YEAR,
+    productid,
+    ranking;
 
-select * from t
-where ranking < 5
-order by year, productid, ranking;
-
-
- -- SUBQUERY
-
-with limited_data as (
-    select *
-    from producthistory
-    where datepart(year, date) = 1940
+-- SUBQUERY
+WITH limited_data AS (
+    SELECT *
+    FROM producthistory
+    WHERE datepart(YEAR, DATE) = 1940
 ),
-
-t as (
-    select
-        datepart(year, date) as year,
+t AS (
+    SELECT datepart(YEAR, DATE) AS YEAR,
         ph.productid,
         productname,
         ph.unitprice,
-        date,
+        DATE,
         (
-            select count(*)
-            from limited_data as ph2
-            where datepart(year, ph2.date) = datepart(year, ph.date)
-            and ph2.productid = ph.productid
-            and (
-                ph2.unitprice > ph.unitprice
-                or (
-                    ph2.unitprice = ph.unitprice
-                    and ph2.date < ph.date
+            SELECT COUNT(*)
+            FROM limited_data AS ph2
+            WHERE datepart(YEAR, ph2.date) = datepart(YEAR, ph.date)
+                AND ph2.productid = ph.productid
+                AND (
+                    ph2.unitprice > ph.unitprice
+                    OR (
+                        ph2.unitprice = ph.unitprice
+                        AND ph2.date < ph.date
+                    )
                 )
-            )
-        ) + 1 as ranking
-    from limited_data as ph
+        ) + 1 AS ranking
+    FROM limited_data AS ph
 )
-
-select * from t
-where ranking < 5
-order by year, productid, ranking;
-
-
-SET SHOWPLAN_ALL ON;
+SELECT *
+FROM t
+WHERE ranking < 5
+ORDER BY YEAR,
+    productid,
+    ranking;

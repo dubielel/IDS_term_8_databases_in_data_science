@@ -1,23 +1,18 @@
- -- WINDOW FUNCTION
-
-select
-    id,
+-- WINDOW FUNCTION
+-- z jakiegoś powodu nie działa mi window :((
+SELECT id,
     productid,
     productname,
     categoryid,
     unitprice,
-    avg(unitprice) over (partition by categoryid) as avgpricecategory,
-    sum(value) over (partition by categoryid) as sumpricecategory,
-    avg(unitprice) over (partition by productid) as avgpriceproduct,
-    sum(value) over (partition by productid) as sumpriceproduct
-from producthistory;
+    AVG(unitprice) over (PARTITION BY categoryid) AS avgpricecategory,
+    SUM(VALUE) over (PARTITION BY categoryid) AS sumpricecategory,
+    AVG(unitprice) over (PARTITION BY productid) AS avgpriceproduct,
+    SUM(VALUE) over (PARTITION BY productid) AS sumpriceproduct
+FROM producthistory;
 
--- z jakiegoś powodu nie działa mi window :((
-
- -- JOIN
-
-select
-    id,
+-- JOIN
+SELECT id,
     pp.productid,
     productname,
     pp.categoryid,
@@ -26,60 +21,46 @@ select
     sumpricecategory,
     avgpriceproduct,
     sumpriceproduct
-from producthistory as pp
-join (
-    select
-        categoryid,
-        avg(unitprice) as avgpricecategory,
-        sum(value) as sumpricecategory
-    from producthistory
-    group by categoryid
-) as ct
-on pp.categoryid = ct.categoryid
-join (
-    select
-        productid,
-        avg(unitprice) as avgpriceproduct,
-        sum(value) as sumpriceproduct
-    from producthistory
-    group by productid
-) as pt
-on pp.productid = pt.productid;
+FROM producthistory AS pp
+    JOIN (
+        SELECT categoryid,
+            AVG(unitprice) AS avgpricecategory,
+            SUM(VALUE) AS sumpricecategory
+        FROM producthistory
+        GROUP BY categoryid
+    ) AS ct ON pp.categoryid = ct.categoryid
+    JOIN (
+        SELECT productid,
+            AVG(unitprice) AS avgpriceproduct,
+            SUM(VALUE) AS sumpriceproduct
+        FROM producthistory
+        GROUP BY productid
+    ) AS pt ON pp.productid = pt.productid;
 
- -- SUBQUERY
-
-SET SHOWPLAN_ALL ON;
-select
-    id,
+-- SUBQUERY
+SELECT id,
     productid,
     productname,
     categoryid,
     unitprice,
     (
-        select avg(unitprice)
-        from producthistory as t
-        where t.categoryid = producthistory.categoryid
-    ) as avgpricecategory,
+        SELECT AVG(unitprice)
+        FROM producthistory AS t
+        WHERE t.categoryid = producthistory.categoryid
+    ) AS avgpricecategory,
     (
-        select sum(unitprice)
-        from producthistory as t
-        where t.categoryid = producthistory.categoryid
-    ) as sumpricecategory,
+        SELECT SUM(unitprice)
+        FROM producthistory AS t
+        WHERE t.categoryid = producthistory.categoryid
+    ) AS sumpricecategory,
     (
-        select avg(unitprice)
-        from producthistory as t
-        where t.productid = producthistory.productid
-    ) as avgpriceproduct,
+        SELECT AVG(unitprice)
+        FROM producthistory AS t
+        WHERE t.productid = producthistory.productid
+    ) AS avgpriceproduct,
     (
-        select sum(unitprice)
-        from producthistory as t
-        where t.productid = producthistory.productid
-    ) as sumpriceproduct
-from producthistory;
-
-
-
-
-
-
-
+        SELECT SUM(unitprice)
+        FROM producthistory AS t
+        WHERE t.productid = producthistory.productid
+    ) AS sumpriceproduct
+FROM producthistory;

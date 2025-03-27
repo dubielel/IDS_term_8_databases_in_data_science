@@ -1,61 +1,47 @@
- -- WINDOW FUNCTION
-
-with t as (
- select
-     id,
-     productid,
-     productname,
-     categoryid,
-     unitprice,
-     avg(unitprice) over (PARTITION BY categoryid) as avgprice
- from producthistory
-)
-
-select * from t
-where t.unitprice > t.avgprice;
- -- JOIN
-
-select id,
-       productid,
-       productname,
-       pp.categoryid,
-       unitprice
-from producthistory as pp
-join (
-    select
+-- WINDOW FUNCTION
+WITH t AS (
+    SELECT id,
+        productid,
+        productname,
         categoryid,
-        avg(unitprice) as avgprice
-    from producthistory
-    group by categoryid
-) as t
-on pp.categoryid = t.categoryid
-where pp.unitprice > t.avgprice;
+        unitprice,
+        AVG(unitprice) over (PARTITION BY categoryid) AS avgprice
+    FROM producthistory
+)
+SELECT *
+FROM t
+WHERE t.unitprice > t.avgprice;
 
- -- SUBQUERY
+-- JOIN
+SELECT id,
+    productid,
+    productname,
+    pp.categoryid,
+    unitprice
+FROM producthistory AS pp
+    JOIN (
+        SELECT categoryid,
+            AVG(unitprice) AS avgprice
+        FROM producthistory
+        GROUP BY categoryid
+    ) AS t ON pp.categoryid = t.categoryid
+WHERE pp.unitprice > t.avgprice;
 
+-- SUBQUERY
 WITH limited_data AS (
     SELECT *
     FROM producthistory
     ORDER BY id
     LIMIT 100000
 )
-
-select id,
-       productid,
-       productname,
-       categoryid,
-       unitprice
-from limited_data
-where unitprice > (
-    select avg(unitprice)
-    from limited_data as t
-    where t.categoryid = limited_data.categoryid
-);
-
-
-
-
-
-
-
-
+SELECT id,
+    productid,
+    productname,
+    categoryid,
+    unitprice
+FROM limited_data
+WHERE unitprice > (
+        SELECT AVG(unitprice)
+        FROM limited_data AS t
+        WHERE t.categoryid = limited_data.categoryid
+    );

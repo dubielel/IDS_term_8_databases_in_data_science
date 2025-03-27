@@ -1,56 +1,61 @@
- -- WINDOW FUNCTION
-
-EXPLAIN ANALYSE
-with t as (
-    select
-        date_part('year', date) as year,
+-- WINDOW FUNCTION
+WITH t AS (
+    SELECT date_part('year', DATE) AS YEAR,
         productid,
         productname,
         unitprice,
-        date,
-        row_number() over (partition by date_part('year', date), productid order by unitprice desc) as ranking
-    from producthistory
-    order by year, productid, ranking
+        DATE,
+        row_number() over (
+            PARTITION BY date_part('year', DATE),
+            productid
+            ORDER BY unitprice DESC
+        ) AS ranking
+    FROM producthistory
+    ORDER BY YEAR,
+        productid,
+        ranking
 )
+SELECT *
+FROM t
+WHERE ranking < 5
+ORDER BY YEAR,
+    productid,
+    ranking;
 
-select * from t
-where ranking < 5
-order by year, productid, ranking;
-
-
- -- SUBQUERY
-
- EXPLAIN ANALYSE
-with limited_data as (
-    select *
-    from producthistory
-    where date_part('year', date) = 1940
-    order by date
+-- SUBQUERY
+WITH limited_data AS (
+    SELECT *
+    FROM producthistory
+    WHERE date_part('year', DATE) = 1940
+    ORDER BY DATE
 ),
-t as (
-    select
-        date_part('year', date) as year,
+t AS (
+    SELECT date_part('year', DATE) AS YEAR,
         ph.productid,
         productname,
         ph.unitprice,
-        date,
+        DATE,
         (
-            select count(*)
-            from limited_data as ph2
-            where date_part('year', ph2.date) = date_part('year', ph.date)
-            and ph2.productid = ph.productid
-            and (
-                ph2.unitprice > ph.unitprice
-                or (
-                    ph2.unitprice = ph.unitprice
-                    and ph2.date < ph.date
+            SELECT COUNT(*)
+            FROM limited_data AS ph2
+            WHERE date_part('year', ph2.date) = date_part('year', ph.date)
+                AND ph2.productid = ph.productid
+                AND (
+                    ph2.unitprice > ph.unitprice
+                    OR (
+                        ph2.unitprice = ph.unitprice
+                        AND ph2.date < ph.date
+                    )
                 )
-            )
-        ) + 1 as ranking
-    from limited_data as ph
-    order by year, productid, ranking
+        ) + 1 AS ranking
+    FROM limited_data AS ph
+    ORDER BY YEAR,
+        productid,
+        ranking
 )
-
-select * from t
-where ranking < 5
-order by year, productid, ranking;
+SELECT *
+FROM t
+WHERE ranking < 5
+ORDER BY YEAR,
+    productid,
+    ranking;

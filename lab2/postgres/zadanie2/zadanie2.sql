@@ -1,27 +1,18 @@
- -- WINDOW FUNCTION
-
-EXPLAIN ANALYSE
-select
-    id,
+-- WINDOW FUNCTION
+SELECT id,
     productid,
     productname,
     categoryid,
     unitprice,
-    avg(unitprice) over category_window as avgpricecategory,
-    sum(value) over category_window as sumpricecategory,
-    avg(unitprice) over product_window as avgpriceproduct,
-    sum(value) over product_window as sumpriceproduct
-from producthistory
-window
-    category_window as (partition by categoryid),
-    product_window as (partition by productid);
--- order by id;
+    AVG(unitprice) over category_window AS avgpricecategory,
+    SUM(VALUE) over category_window AS sumpricecategory,
+    AVG(unitprice) over product_window AS avgpriceproduct,
+    SUM(VALUE) over product_window AS sumpriceproduct
+FROM producthistory window category_window AS (PARTITION BY categoryid),
+    product_window AS (PARTITION BY productid);
 
- -- JOIN
-
-EXPLAIN ANALYSE
-select
-    id,
+-- JOIN
+SELECT id,
     pp.productid,
     productname,
     pp.categoryid,
@@ -30,68 +21,52 @@ select
     sumpricecategory,
     avgpriceproduct,
     sumpriceproduct
-from producthistory as pp
-join (
-    select
-        categoryid,
-        avg(unitprice) as avgpricecategory,
-        sum(value) as sumpricecategory
-    from producthistory
-    group by categoryid
-) as ct
-on pp.categoryid = ct.categoryid
-join (
-    select
-        productid,
-        avg(unitprice) as avgpriceproduct,
-        sum(value) as sumpriceproduct
-    from producthistory
-    group by productid
-) as pt
-on pp.productid = pt.productid;
--- order by id;
+FROM producthistory AS pp
+    JOIN (
+        SELECT categoryid,
+            AVG(unitprice) AS avgpricecategory,
+            SUM(VALUE) AS sumpricecategory
+        FROM producthistory
+        GROUP BY categoryid
+    ) AS ct ON pp.categoryid = ct.categoryid
+    JOIN (
+        SELECT productid,
+            AVG(unitprice) AS avgpriceproduct,
+            SUM(VALUE) AS sumpriceproduct
+        FROM producthistory
+        GROUP BY productid
+    ) AS pt ON pp.productid = pt.productid;
 
- -- SUBQUERY
-
-EXPLAIN ANALYSE
-with limited_data as (
-    select *
-    from producthistory
-    order by id
-    limit 10000
+-- SUBQUERY
+WITH limited_data AS (
+    SELECT *
+    FROM producthistory
+    ORDER BY id
+    LIMIT 10000
 )
-
-select
-    id,
+SELECT id,
     productid,
     productname,
     categoryid,
     unitprice,
     (
-        select avg(unitprice)
-        from limited_data as t
-        where t.categoryid = limited_data.categoryid
-    ) as avgpricecategory,
+        SELECT AVG(unitprice)
+        FROM limited_data AS t
+        WHERE t.categoryid = limited_data.categoryid
+    ) AS avgpricecategory,
     (
-        select sum(unitprice)
-        from limited_data as t
-        where t.categoryid = limited_data.categoryid
-    ) as sumpricecategory,
+        SELECT SUM(unitprice)
+        FROM limited_data AS t
+        WHERE t.categoryid = limited_data.categoryid
+    ) AS sumpricecategory,
     (
-        select avg(unitprice)
-        from limited_data as t
-        where t.productid = limited_data.productid
-    ) as avgpriceproduct,
+        SELECT AVG(unitprice)
+        FROM limited_data AS t
+        WHERE t.productid = limited_data.productid
+    ) AS avgpriceproduct,
     (
-        select sum(unitprice)
-        from limited_data as t
-        where t.productid = limited_data.productid
-    ) as sumpriceproduct
-from limited_data;
-
-
-
-
-
-
-
+        SELECT SUM(unitprice)
+        FROM limited_data AS t
+        WHERE t.productid = limited_data.productid
+    ) AS sumpriceproduct
+FROM limited_data;
