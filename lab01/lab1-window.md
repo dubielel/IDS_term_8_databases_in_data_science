@@ -240,6 +240,16 @@ W DataGrip użyj opcji Explain Plan/Explain Analyze
 --  ...
 ```
 
+**MSSQL**
+
+![alt text](image.png)
+
+**PostgreSQL**
+
+![alt text](image-1.png)
+
+**SQLite**
+![alt text](image-2.png)
 ---
 
 
