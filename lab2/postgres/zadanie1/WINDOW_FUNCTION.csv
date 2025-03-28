@@ -1,0 +1,19 @@
+Subquery Scan on t  (cost=190669.15..521393.55 rows=765744 width=67) (actual time=1653.303..3382.178 rows=772880 loops=1)
+  Filter: (t.unitprice > t.avgprice)
+  Rows Removed by Filter: 1537120
+  ->  WindowAgg  (cost=190669.15..492678.15 rows=2297232 width=67) (actual time=1653.213..3250.808 rows=2310000 loops=1)
+        ->  Gather Merge  (cost=190669.15..458219.67 rows=2297232 width=35) (actual time=1387.813..1633.914 rows=2310000 loops=1)
+              Workers Planned: 2
+              Workers Launched: 2
+              ->  Sort  (cost=189669.12..192062.07 rows=957180 width=35) (actual time=1301.246..1353.708 rows=770000 loops=3)
+                    Sort Key: producthistory.categoryid
+                    Sort Method: external merge  Disk: 31400kB
+                    Worker 0:  Sort Method: external merge  Disk: 32552kB
+                    Worker 1:  Sort Method: external merge  Disk: 41680kB
+                    ->  Parallel Seq Scan on producthistory  (cost=0.00..68407.80 rows=957180 width=35) (actual time=99.643..672.341 rows=770000 loops=3)
+Planning Time: 0.474 ms
+JIT:
+  Functions: 12
+"  Options: Inlining true, Optimization true, Expressions true, Deforming true"
+"  Timing: Generation 3.126 ms, Inlining 161.147 ms, Optimization 70.808 ms, Emission 39.541 ms, Total 274.622 ms"
+Execution Time: 3410.434 ms

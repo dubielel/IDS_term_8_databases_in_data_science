@@ -1,0 +1,15 @@
+WindowAgg  (cost=1021494.74..1067439.38 rows=2297232 width=163) (actual time=6702.642..9850.820 rows=2310000 loops=1)
+  ->  Sort  (cost=1021494.74..1027237.82 rows=2297232 width=105) (actual time=6173.535..6407.574 rows=2310000 loops=1)
+        Sort Key: categoryid
+        Sort Method: external merge  Disk: 168448kB
+        ->  WindowAgg  (cost=465864.71..511809.35 rows=2297232 width=105) (actual time=2487.612..3768.087 rows=2310000 loops=1)
+              ->  Sort  (cost=465864.71..471607.79 rows=2297232 width=41) (actual time=2478.577..2703.205 rows=2310000 loops=1)
+                    Sort Key: productid
+                    Sort Method: external merge  Disk: 121160kB
+                    ->  Seq Scan on producthistory  (cost=0.00..81808.32 rows=2297232 width=41) (actual time=156.997..506.603 rows=2310000 loops=1)
+Planning Time: 0.134 ms
+JIT:
+  Functions: 16
+"  Options: Inlining true, Optimization true, Expressions true, Deforming true"
+"  Timing: Generation 2.035 ms, Inlining 5.719 ms, Optimization 86.884 ms, Emission 64.525 ms, Total 159.163 ms"
+Execution Time: 10013.723 ms

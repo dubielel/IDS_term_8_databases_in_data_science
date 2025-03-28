@@ -1,0 +1,34 @@
+Sort  (cost=5192724.51..5192732.49 rows=3191 width=138) (actual time=49815.559..49815.836 rows=308 loops=1)
+"  Sort Key: (date_part('year'::text, (ph.date)::timestamp without time zone)), ph.productid, (((SubPlan 2) + 1))"
+  Sort Method: quicksort  Memory: 47kB
+  CTE limited_data
+    ->  Gather Merge  (cost=76879.21..77996.02 rows=9572 width=68) (actual time=685.332..692.106 rows=28105 loops=1)
+          Workers Planned: 2
+          Workers Launched: 2
+          ->  Sort  (cost=75879.18..75891.15 rows=4786 width=68) (actual time=627.912..628.436 rows=9368 loops=3)
+                Sort Key: producthistory.date
+                Sort Method: quicksort  Memory: 1510kB
+                Worker 0:  Sort Method: quicksort  Memory: 1304kB
+                Worker 1:  Sort Method: quicksort  Memory: 925kB
+                ->  Parallel Seq Scan on producthistory  (cost=0.00..75586.65 rows=4786 width=68) (actual time=344.874..625.798 rows=9368 loops=3)
+"                      Filter: (date_part('year'::text, (date)::timestamp without time zone) = '1940'::double precision)"
+                      Rows Removed by Filter: 760632
+  ->  CTE Scan on limited_data ph  (cost=0.00..5192538.80 rows=3191 width=138) (actual time=748.156..49814.871 rows=308 loops=1)
+        Filter: (((SubPlan 3) + 1) < 5)
+        Rows Removed by Filter: 27797
+        SubPlan 2
+          ->  Aggregate  (cost=406.81..406.82 rows=1 width=8) (actual time=1.704..1.704 rows=1 loops=308)
+                ->  CTE Scan on limited_data ph2  (cost=0.00..406.81 rows=1 width=0) (actual time=0.866..1.702 rows=2 loops=308)
+"                      Filter: ((productid = ph.productid) AND ((unitprice > ph.unitprice) OR ((unitprice = ph.unitprice) AND (date < ph.date))) AND (date_part('year'::text, (date)::timestamp without time zone) = date_part('year'::text, (ph.date)::timestamp without time zone)))"
+                      Rows Removed by Filter: 28104
+        SubPlan 3
+          ->  Aggregate  (cost=406.81..406.82 rows=1 width=8) (actual time=1.729..1.729 rows=1 loops=28105)
+                ->  CTE Scan on limited_data ph2_1  (cost=0.00..406.81 rows=1 width=0) (actual time=0.028..1.719 rows=182 loops=28105)
+"                      Filter: ((productid = ph.productid) AND ((unitprice > ph.unitprice) OR ((unitprice = ph.unitprice) AND (date < ph.date))) AND (date_part('year'::text, (date)::timestamp without time zone) = date_part('year'::text, (ph.date)::timestamp without time zone)))"
+                      Rows Removed by Filter: 27923
+Planning Time: 1.298 ms
+JIT:
+  Functions: 30
+"  Options: Inlining true, Optimization true, Expressions true, Deforming true"
+"  Timing: Generation 8.088 ms, Inlining 166.395 ms, Optimization 221.694 ms, Emission 181.763 ms, Total 577.940 ms"
+Execution Time: 49824.205 ms

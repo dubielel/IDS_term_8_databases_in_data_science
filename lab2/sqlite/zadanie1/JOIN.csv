@@ -1,0 +1,7 @@
+id,parent,notused,detail
+2,0,0,CO-ROUTINE t
+8,2,0,SCAN producthistory
+10,2,0,USE TEMP B-TREE FOR GROUP BY
+50,0,0,SCAN pp
+54,0,0,BLOOM FILTER ON t (categoryid=?)
+66,0,0,SEARCH t USING AUTOMATIC COVERING INDEX (categoryid=?)

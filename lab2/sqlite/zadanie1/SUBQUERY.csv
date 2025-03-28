@@ -1,0 +1,4 @@
+id,parent,notused,detail
+2,0,0,SCAN producthistory
+10,0,0,CORRELATED SCALAR SUBQUERY 1
+15,10,0,SCAN t

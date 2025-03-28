@@ -1,0 +1,45 @@
+StmtText,StmtId,NodeId,Parent,PhysicalOp,LogicalOp,Argument,DefinedValues,EstimateRows,EstimateIO,EstimateCPU,AvgRowSize,TotalSubtreeCost,OutputList,Warnings,Type,Parallel,EstimateExecutions
+"with limited_data as (
+    select *
+    from producthistory
+    where datepart(year, date) = 1940
+),
+
+t as (
+    select
+        datepart(year, date) as year,
+        ph.productid,
+        productname,
+        ph.unitprice,
+        date,
+        (
+            select count(*)
+            from limited_data as ph2
+            where datepart(year, ph2.date) = datepart(year, ph.date)
+            and ph2.productid = ph.productid
+            and (
+                ph2.unitprice > ph.unitprice
+                or (
+                    ph2.unitprice = ph.unitprice
+                    and ph2.date < ph.date
+                )
+            )
+        ) + 1 as ranking
+    from limited_data as ph
+)
+
+select * from t
+where ranking < 5
+order by year, productid, ranking",1,1,0,,,1,,1,,,,4731.243,,,SELECT,false,
+"  |--Sort(ORDER BY:([northwind].[dbo].[producthistory].[productid] ASC, [Expr1007] ASC))",1,2,1,Sort,Sort,"ORDER BY:([northwind].[dbo].[producthistory].[productid] ASC, [Expr1007] ASC)",,1,0.011261261,0.000100055,55,4731.243,"[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[productname], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date], [Expr1002], [Expr1007]",,PLAN_ROW,false,1
+       |--Compute Scalar(DEFINE:([Expr1007]=[Expr1005]+(1))),1,3,2,Compute Scalar,Compute Scalar,DEFINE:([Expr1007]=[Expr1005]+(1)),[Expr1007]=[Expr1005]+(1),1,0,0.0000001,55,4731.232,"[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[productname], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date], [Expr1002], [Expr1007]",,PLAN_ROW,false,1
+            |--Parallelism(Gather Streams),1,4,3,Parallelism,Gather Streams,,,1,0,0.028507324,55,4731.232,"[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[productname], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date], [Expr1002], [Expr1005]",,PLAN_ROW,true,1
+                 |--Filter(WHERE:(([Expr1005]+(1))<(5))),1,5,4,Filter,Filter,WHERE:(([Expr1005]+(1))<(5)),,1,0,0.0058980067,55,4731.203,"[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[productname], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date], [Expr1002], [Expr1005]",,PLAN_ROW,true,1
+"                      |--Nested Loops(Inner Join, OUTER REFERENCES:([northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date]))",1,6,5,Nested Loops,Inner Join,"OUTER REFERENCES:([northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date])",,34694.156,0,0.036255393,55,4731.1973,"[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[productname], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date], [Expr1002], [Expr1005]",,PLAN_ROW,true,1
+"                           |--Compute Scalar(DEFINE:([Expr1002]=datepart(year,[northwind].[dbo].[producthistory].[date])))",1,7,6,Compute Scalar,Compute Scalar,"DEFINE:([Expr1002]=datepart(year,[northwind].[dbo].[producthistory].[date]))","[Expr1002]=datepart(year,[northwind].[dbo].[producthistory].[date])",34694.156,0,0.05775,51,19.409498,"[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[productname], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date], [Expr1002]",,PLAN_ROW,true,1
+"                           |    |--Clustered Index Scan(OBJECT:([northwind].[dbo].[producthistory].[pk_product_history]), WHERE:(datepart(year,[northwind].[dbo].[producthistory].[date])=(1940)))",1,8,7,Clustered Index Scan,Clustered Index Scan,"OBJECT:([northwind].[dbo].[producthistory].[pk_product_history]), WHERE:(datepart(year,[northwind].[dbo].[producthistory].[date])=(1940))","[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[productname], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date]",34694.156,18.71646,0.63528925,47,19.351748,"[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[productname], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date]",,PLAN_ROW,true,1
+"                           |--Compute Scalar(DEFINE:([Expr1005]=CONVERT_IMPLICIT(int,[Expr1011],0)))",1,9,6,Compute Scalar,Compute Scalar,"DEFINE:([Expr1005]=CONVERT_IMPLICIT(int,[Expr1011],0))","[Expr1005]=CONVERT_IMPLICIT(int,[Expr1011],0)",1,0,0,11,4711.4746,[Expr1005],,PLAN_ROW,true,34694.156
+                                |--Stream Aggregate(DEFINE:([Expr1011]=Count(*))),1,10,9,Stream Aggregate,Aggregate,,[Expr1011]=Count(*),1,0,0.0005736194,11,4711.4746,[Expr1011],,PLAN_ROW,true,34694.156
+"                                     |--Filter(WHERE:(datepart(year,[northwind].[dbo].[producthistory].[date])=datepart(year,[northwind].[dbo].[producthistory].[date]) AND ([northwind].[dbo].[producthistory].[unitprice]>[northwind].[dbo].[producthistory].[unitprice] OR [northwind].[dbo].[producthistory].[unitprice]=[northwind].[dbo].[producthistory].[unitprice] AND [northwind].[dbo].[producthistory].[date]<[northwind].[dbo].[producthistory].[date]) AND datepart(year,[northwind].[dbo].[producthistory].[date])=(1940)))",1,11,10,Filter,Filter,"WHERE:(datepart(year,[northwind].[dbo].[producthistory].[date])=datepart(year,[northwind].[dbo].[producthistory].[date]) AND ([northwind].[dbo].[producthistory].[unitprice]>[northwind].[dbo].[producthistory].[unitprice] OR [northwind].[dbo].[producthistory].[unitprice]=[northwind].[dbo].[producthistory].[unitprice] AND [northwind].[dbo].[producthistory].[date]<[northwind].[dbo].[producthistory].[date]) AND datepart(year,[northwind].[dbo].[producthistory].[date])=(1940))",,955.199,0,0.0774,9,4691.573,,,PLAN_ROW,true,34694.156
+                                          |--Index Spool(SEEK:([northwind].[dbo].[producthistory].[productid]=[northwind].[dbo].[producthistory].[productid])),1,12,11,Index Spool,Eager Spool,SEEK:([northwind].[dbo].[producthistory].[productid]=[northwind].[dbo].[producthistory].[productid]),,30000,60.125336,2.343257,19,2006.2455,"[northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date]",,PLAN_ROW,true,34694.156
+                                               |--Clustered Index Scan(OBJECT:([northwind].[dbo].[producthistory].[pk_product_history])),1,13,12,Clustered Index Scan,Clustered Index Scan,OBJECT:([northwind].[dbo].[producthistory].[pk_product_history]),"[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date]",2310000,18.71646,2.541157,23,21.257616,"[northwind].[dbo].[producthistory].[productid], [northwind].[dbo].[producthistory].[unitprice], [northwind].[dbo].[producthistory].[date]",,PLAN_ROW,true,1
