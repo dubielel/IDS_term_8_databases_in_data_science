@@ -3,3 +3,6 @@
 sqlite/*.sqlite
 
 .DS_Store
+
+**/*.temp
+**/*.log
