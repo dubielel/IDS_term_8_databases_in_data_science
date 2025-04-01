@@ -506,9 +506,9 @@ Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 ---
 > Wyniki: 
 
-**MSSQL**
+## MSSQL
 
-* podzapytanie
+### Podzapytanie
 
 ```sql
 SELECT id,
@@ -539,15 +539,15 @@ SELECT id,
 FROM producthistory;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-mssql-podzapytanie-qp](./mssql/zadanie2/subquery-plan.png)
 
-Czas wykonania: 743 \[ms\]
+#### Czas wykonania: 743 \[ms\]
 
-Koszt: 121.366
+#### Koszt: 121.366
 
-* join
+### Join
 
 ```sql
 SELECT id,
@@ -576,15 +576,15 @@ FROM producthistory AS pp
     ) AS pt ON pp.productid = pt.productid;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-mssql-join-qp](./mssql/zadanie2/join-plan.png)
 
-Czas wykonania: 767 \[ms\]
+#### Czas wykonania: 767 \[ms\]
 
-Koszt: 78.3871
+#### Koszt: 78.3871
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 SELECT id,
@@ -599,17 +599,21 @@ SELECT id,
 FROM producthistory;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-mssql-window-qp](./mssql/zadanie2/window-plan.png)
 
-Czas wykonania: 926 \[ms\]
+#### Czas wykonania: 926 \[ms\]
 
-Koszt: 156.65
+#### Koszt: 156.65
 
-**PostgreSQL**
+### Porównanie wyników
 
-* podzapytanie
+<!-- TODO -->
+
+## PostgreSQL
+
+### Podzapytanie
 
 ```sql
 WITH limited_data AS (
@@ -646,15 +650,15 @@ SELECT id,
 FROM limited_data;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-postgres-podzapytanie-qp](./postgres/zadanie2/subquery-plan.png)
 
-Czas wykonania: 12130.597 \[ms\]
+#### Czas wykonania: 12130.597 \[ms\]
 
-Koszt: 9006328.45
+#### Koszt: 9006328.45
 
-* join
+### Join
 
 ```sql
 SELECT id,
@@ -683,15 +687,15 @@ FROM producthistory AS pp
     ) AS pt ON pp.productid = pt.productid;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-postgres-join-qp](./postgres/zadanie2/join-plan.png)
 
-Czas wykonania: 1778.622 \[ms\]
+#### Czas wykonania: 1778.622 \[ms\]
 
-Koszt: 250998.1
+#### Koszt: 250998.1
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 SELECT id,
@@ -707,17 +711,21 @@ FROM producthistory window category_window AS (PARTITION BY categoryid),
     product_window AS (PARTITION BY productid);
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-postgres-window-qp](./postgres/zadanie2/window-plan.png)
 
-Czas wykonania: 5436.37 \[ms\]
+#### Czas wykonania: 5436.37 \[ms\]
 
-Koszt: 1073228.56
+#### Koszt: 1073228.56
 
-**SQLite**
+### Porównanie wyników
 
-* podzapytanie
+<!-- TODO -->
+
+## SQLite
+
+### <<QUERY TYPE>>
 
 ```sql
 WITH limited_data AS (
@@ -726,101 +734,112 @@ WITH limited_data AS (
     ORDER BY id
     LIMIT 10000
 )
+
 SELECT id,
-    productid,
-    productname,
-    categoryid,
-    unitprice,
-    (
-        SELECT AVG(unitprice)
-        FROM limited_data AS t
-        WHERE t.categoryid = limited_data.categoryid
-    ) AS avgpricecategory,
-    (
-        SELECT SUM(unitprice)
-        FROM limited_data AS t
-        WHERE t.categoryid = limited_data.categoryid
-    ) AS sumpricecategory,
-    (
-        SELECT AVG(unitprice)
-        FROM limited_data AS t
-        WHERE t.productid = limited_data.productid
-    ) AS avgpriceproduct,
-    (
-        SELECT SUM(unitprice)
-        FROM limited_data AS t
-        WHERE t.productid = limited_data.productid
-    ) AS sumpriceproduct
+       productid,
+       productname,
+       categoryid,
+       unitprice,
+       (
+           SELECT AVG(unitprice)
+           FROM limited_data AS t
+           WHERE t.categoryid = limited_data.categoryid
+       ) AS avgpricecategory,
+       (
+           SELECT SUM(unitprice)
+           FROM limited_data AS t
+           WHERE t.categoryid = limited_data.categoryid
+       ) AS sumpricecategory,
+       (
+           SELECT AVG(unitprice)
+           FROM limited_data AS t
+           WHERE t.productid = limited_data.productid
+       ) AS avgpriceproduct,
+       (
+           SELECT SUM(unitprice)
+           FROM limited_data AS t
+           WHERE t.productid = limited_data.productid
+       ) AS sumpriceproduct
 FROM limited_data;
 ```
-Query plan:
+
+#### Plan zapytania:
 
 ![zadanie2-sqlite-podzapytanie-qp](./sqlite/zadanie2/subquery-plan.png)
 
-Czas wykonania: 12514 \[ms\] (Nie ufam temu, to było mierzone sqlite3 CLI)
+#### Czas wykonania: 12514 \[ms\]
 
-Koszt: --
+#### Koszt: --
 
-* join
+### <<QUERY TYPE>>
 
 ```sql
 SELECT id,
-    pp.productid,
-    productname,
-    pp.categoryid,
-    unitprice,
-    avgpricecategory,
-    sumpricecategory,
-    avgpriceproduct,
-    sumpriceproduct
+       pp.productid,
+       productname,
+       pp.categoryid,
+       unitprice,
+       avgpricecategory,
+       sumpricecategory,
+       avgpriceproduct,
+       sumpriceproduct
 FROM producthistory AS pp
-    JOIN (
-        SELECT categoryid,
-            AVG(unitprice) AS avgpricecategory,
-            SUM(VALUE) AS sumpricecategory
-        FROM producthistory
-        GROUP BY categoryid
-    ) AS ct ON pp.categoryid = ct.categoryid
-    JOIN (
-        SELECT productid,
-            AVG(unitprice) AS avgpriceproduct,
-            SUM(VALUE) AS sumpriceproduct
-        FROM producthistory
-        GROUP BY productid
-    ) AS pt ON pp.productid = pt.productid;
+JOIN (
+    SELECT categoryid,
+           AVG(unitprice) AS avgpricecategory,
+           SUM(VALUE) AS sumpricecategory
+    FROM producthistory
+    GROUP BY categoryid
+) AS ct ON pp.categoryid = ct.categoryid
+JOIN (
+    SELECT productid,
+           AVG(unitprice) AS avgpriceproduct,
+           SUM(VALUE) AS sumpriceproduct
+    FROM producthistory
+    GROUP BY productid
+) AS pt ON pp.productid = pt.productid;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-sqlite-join-qp](./sqlite/zadanie2/join-plan.png)
 
-Czas wykonania: 6373 \[ms\]
+#### Czas wykonania: 6373 \[ms\]
 
-Koszt: --
+#### Koszt: --
 
-* funkcja okna
+### <<QUERY TYPE>>
 
 ```sql
 SELECT id,
-    productid,
-    productname,
-    categoryid,
-    unitprice,
-    AVG(unitprice) over category_window AS avgpricecategory,
-    SUM(VALUE) over category_window AS sumpricecategory,
-    AVG(unitprice) over product_window AS avgpriceproduct,
-    SUM(VALUE) over product_window AS sumpriceproduct
+       productid,
+       productname,
+       categoryid,
+       unitprice,
+       AVG(unitprice) over category_window AS avgpricecategory,
+       SUM(VALUE) over category_window AS sumpricecategory,
+       AVG(unitprice) over product_window AS avgpriceproduct,
+       SUM(VALUE) over product_window AS sumpriceproduct
 FROM producthistory window category_window AS (PARTITION BY categoryid),
     product_window AS (PARTITION BY productid);
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-sqlite-window-qp](./sqlite/zadanie2/window-plan.png)
 
-Czas wykonania: 6957 \[ms\]
+#### Czas wykonania: 6957 \[ms\]
 
-Koszt: --
+#### Koszt: --
+
+### Porównanie wyników
+
+<!-- TODO -->
+Nie ufam czasom wykonania – były mierzone sqlite3 CLI
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
 
 ---
 
