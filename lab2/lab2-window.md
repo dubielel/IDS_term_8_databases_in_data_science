@@ -861,17 +861,94 @@ from products;
 ---
 > Wyniki: 
 
+## MSSQL
+
 ```sql
-[2025-03-25 19:37:09] Connected
-northwind.public> select productid, productname, unitprice, categoryid,
-						 row_number() over(partition by categoryid order by unitprice desc) as rowno,
-						  rank() over(partition by categoryid order by unitprice desc) as rankprice,
-						  dense_rank() over(partition by categoryid order by unitprice desc) as denserankprice
-				  from products
-[2025-03-25 19:37:09] 77 rows retrieved starting from 1 in 55 ms (execution: 12 ms, fetching: 43 ms)
+SELECT productid,
+       productname,
+       unitprice,
+       categoryid,
+       row_number() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rowno,
+       rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rankprice,
+       dense_rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS denserankprice
+FROM products;
 ```
 
-![img.png](img.png)
+#### Plan zapytania:
+
+![zadanie3-qp](./mssql/zadanie3/zadanie3-qp.png)
+
+#### Czas wykonania: 0.0 \[ms\]
+
+#### Koszt: 0.0162292
+
+## PostgreSQL
+
+```sql
+SELECT productid,
+       productname,
+       unitprice,
+       categoryid,
+       row_number() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rowno,
+       rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rankprice,
+       dense_rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS denserankprice
+FROM products;
+```
+
+#### Plan zapytania:
+
+![zadanie3-qp](./postgres/zadanie3/zadanie3-qp.png)
+
+#### Czas wykonania: 6.11 \[ms\]
+
+#### Koszt: 0.052
+
+## SQLite
+
+```sql
+SELECT productid,
+       productname,
+       unitprice,
+       categoryid,
+       row_number() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rowno,
+       rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rankprice,
+       dense_rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS denserankprice
+FROM products;
+```
+
+#### Plan zapytania:
+
+![zadanie3-qp](./sqlite/zadanie3/zadanie3-qp.png)
+
+#### Czas wykonania: 4 \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
+
+## Skrócony rezultat zapytań (z MSSQL, TOP 15)
+
+| productid | productname                | unitprice | categoryid | rowno | rankprice | denserankprice |
+| :-------- | :------------------------- | :-------- | :--------- | :---- | :-------- | :------------- |
+| 38        | Côte de Blaye              | 263.5000  | 1          | 1     | 1         | 1              |
+| 43        | Ipoh Coffee                | 46.0000   | 1          | 2     | 2         | 2              |
+| 2         | Chang                      | 19.0000   | 1          | 3     | 3         | 3              |
+| 1         | Chai                       | 18.0000   | 1          | 4     | 4         | 4              |
+| 39        | Chartreuse verte           | 18.0000   | 1          | 5     | 4         | 4              |
+| 35        | Steeleye Stout             | 18.0000   | 1          | 6     | 4         | 4              |
+| 76        | Lakkalikööri               | 18.0000   | 1          | 7     | 4         | 4              |
+| 70        | Outback Lager              | 15.0000   | 1          | 8     | 8         | 5              |
+| 67        | Laughing Lumberjack Lager  | 14.0000   | 1          | 9     | 9         | 6              |
+| 34        | Sasquatch Ale              | 14.0000   | 1          | 10    | 9         | 6              |
+| 75        | Rhönbräu Klosterbier       | 7.7500    | 1          | 11    | 11        | 7              |
+| 24        | Guaraná Fantástica         | 4.5000    | 1          | 12    | 12        | 8              |
+| 63        | Vegie-spread               | 43.9000   | 2          | 1     | 1         | 1              |
+| 8         | Northwoods Cranberry Sauce | 40.0000   | 2          | 2     | 2         | 2              |
+| 61        | Sirop d'érable             | 28.5000   | 2          | 3     | 3         | 3              |
+
+## Porównanie funkcji
 
  * `row_number()` - nadaje unikalny numer dla każdego wiersza w grupie
  * `rank()` - nadaje numer dla każdego wiersza w grupie, ale w przypadku równych wartości, nadaje ten sam numer i "dziury" w numeracji (np. 1, 2, 2, 4)
@@ -886,71 +963,187 @@ Spróbuj uzyskać ten sam wynik bez użycia funkcji okna
 ---
 > Wyniki: 
 
-**ROW_NUMBER()**
+Najpierw przedstawmy zapytania równoważne dla każdej z użytych powyżej funkcji:
+
+### row_number()
 
 ```sql
-SELECT
-	p1.productid,
-	p1.productname,
-	p1.unitprice,
-	p1.categoryid,
-	(
-		SELECT COUNT(*)
-		FROM products p2
-		WHERE p2.categoryid = p1.categoryid
-		  AND (
-			p2.unitprice > p1.unitprice
-				OR (
-				p2.unitprice = p1.unitprice
-					AND p2.productid < p1.productid
-				)
-			)
-	) + 1 AS rowno
+SELECT (
+    SELECT COUNT(*)
+    FROM products p2
+    WHERE p2.categoryid = p1.categoryid
+      AND (
+        p2.unitprice > p1.unitprice
+            OR (
+            p2.unitprice = p1.unitprice
+                AND p2.productid < p1.productid
+            )
+        )
+) + 1 AS rowno
 FROM products p1
 ORDER BY categoryid, rowno;
 ```
 
-![img_1.png](img_1.png)
-
-**RANK()**
+### rank()
 
 ```sql
-SELECT
-	p1.productid,
-	p1.productname,
-	p1.unitprice,
-	p1.categoryid,
-	(
-		SELECT COUNT(*)
-		FROM products p2
-		WHERE p2.categoryid = p1.categoryid
-		  AND p2.unitprice > p1.unitprice
-	) + 1 AS rankprice
+SELECT (
+    SELECT COUNT(*)
+    FROM products p2
+    WHERE p2.categoryid = p1.categoryid
+      AND p2.unitprice > p1.unitprice
+) + 1 AS rankprice
 FROM products p1
 ORDER BY categoryid, rankprice;
 ```
 
-![img_2.png](img_2.png)
-
-**DENSE_RANK()**
+### dense_rank()
 
 ```sql
-SELECT
-	p1.productid,
-	p1.productname,
-	p1.unitprice,
-	p1.categoryid,
-	(
-		SELECT COUNT(DISTINCT p2.unitprice)
-		FROM products p2
-		WHERE p2.categoryid = p1.categoryid
-		  AND p2.unitprice > p1.unitprice
-	) + 1 AS denserankprice
+SELECT (
+    SELECT COUNT(DISTINCT p2.unitprice)
+    FROM products p2
+    WHERE p2.categoryid = p1.categoryid
+      AND p2.unitprice > p1.unitprice
+) + 1 AS denserankprice
 FROM products p1
 ORDER BY categoryid, denserankprice;
 ```
 
-![img_3.png](img_3.png)
+Teraz dokonajmy porównania wyników pomiędzy różnymi SZBD:
+
+## MSSQL
+
+```sql
+SELECT p1.productid,
+       p1.productname,
+       p1.unitprice,
+       p1.categoryid,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND (
+                   p2.unitprice > p1.unitprice
+                   OR (
+                       p2.unitprice = p1.unitprice
+                       AND p2.productid < p1.productid
+                   )
+               )
+       ) + 1 AS rowno,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND p2.unitprice > p1.unitprice
+       ) + 1 AS rankprice,
+       (
+           SELECT COUNT(DISTINCT p2.unitprice)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND p2.unitprice > p1.unitprice
+       ) + 1 AS denserankprice
+FROM products p1
+ORDER BY categoryid, rowno;
+```
+
+#### Plan zapytania:
+
+![zadanie3-bez-window-qp](./mssql/zadanie3/zadanie3-bez-window-qp.png)
+
+#### Czas wykonania: 3 \[ms\]
+
+#### Koszt: 0.964302
+
+## PostgreSQL
+
+```sql
+SELECT p1.productid,
+       p1.productname,
+       p1.unitprice,
+       p1.categoryid,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND (
+                   p2.unitprice > p1.unitprice
+                   OR (
+                       p2.unitprice = p1.unitprice
+                       AND p2.productid < p1.productid
+                   )
+               )
+       ) + 1 AS rowno,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND p2.unitprice > p1.unitprice
+       ) + 1 AS rankprice,
+       (
+           SELECT COUNT(DISTINCT p2.unitprice)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND p2.unitprice > p1.unitprice
+       ) + 1 AS denserankprice
+FROM products p1
+ORDER BY categoryid, rowno;
+```
+
+#### Plan zapytania:
+
+![zadanie3-bez-window-qp](./postgres/zadanie3/zadanie3-bez-window-qp.png)
+
+#### Czas wykonania: 1.134 \[ms\]
+
+#### Koszt: 538.85
+
+## SQLite
+
+```sql
+SELECT p1.productid,
+       p1.productname,
+       p1.unitprice,
+       p1.categoryid,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+             AND (
+               p2.unitprice > p1.unitprice
+                   OR (
+                   p2.unitprice = p1.unitprice
+                       AND p2.productid < p1.productid
+                   )
+               )
+       ) + 1 AS rowno,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+             AND p2.unitprice > p1.unitprice
+       ) + 1 AS rankprice,
+       (
+           SELECT COUNT(DISTINCT p2.unitprice)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+             AND p2.unitprice > p1.unitprice
+       ) + 1 AS denserankprice
+FROM products p1
+ORDER BY categoryid, rowno;
+```
+
+#### Plan zapytania:
+
+![zadanie3-bez-window-qp](./sqlite/zadanie3/zadanie3-bez-window-qp.png)
+
+#### Czas wykonania: 5 \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
 
 ---
 # Zadanie 4
