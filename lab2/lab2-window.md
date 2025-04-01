@@ -1165,26 +1165,26 @@ Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czas
 ---
 > Wyniki: 
 
-**MSSQL**
+## MSSQL
 
-* podzapytanie
+### Podzapytanie
 
 ```sql
 WITH limited_data AS (
     SELECT *
     FROM producthistory
-    WHERE datepart(YEAR, DATE) = 1940
+    WHERE datepart(year, date) = 1940
 ),
      t AS (
-         SELECT datepart(YEAR, DATE) AS YEAR,
+         SELECT datepart(year, date) AS year,
                 ph.productid,
                 productname,
                 ph.unitprice,
-                DATE,
+                date,
                 (
                     SELECT COUNT(*)
                     FROM limited_data AS ph2
-                    WHERE datepart(YEAR, ph2.date) = datepart(YEAR, ph.date)
+                    WHERE datepart(year, ph2.date) = datepart(year, ph.date)
                       AND ph2.productid = ph.productid
                       AND (
                         ph2.unitprice > ph.unitprice
@@ -1199,30 +1199,28 @@ WITH limited_data AS (
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-         productid,
-         ranking;
+ORDER BY year, productid, ranking;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie4-mssql-podzapytanie-qp](./mssql/zadanie4/subquery-plan.png)
 
-Czas wykonania: 242902 \[ms\]
+#### Czas wykonania: 242902 \[ms\]
 
-Koszt: 4915.65
+#### Koszt: 4915.65
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 WITH t AS (
-    SELECT datepart(YEAR, DATE) AS YEAR,
+    SELECT datepart(year, date) AS year,
            productid,
            productname,
            unitprice,
-           DATE,
+           date,
            row_number() over (
-               PARTITION BY datepart(YEAR, DATE),
+               PARTITION BY datepart(year, date),
                productid
                ORDER BY unitprice DESC
                ) AS ranking
@@ -1231,36 +1229,38 @@ WITH t AS (
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-         productid,
-         ranking;
+ORDER BY year, productid, ranking;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie4-mssql-window-qp](./mssql/zadanie4/window-plan.png)
 
-Czas wykonania: 462 \[ms\]
+#### Czas wykonania: 462 \[ms\]
 
-Koszt: 75.3262
+#### Koszt: 75.3262
 
-**PostgreSQL**
+### Porównanie wyników
 
-* podzapytanie
+<!-- TODO -->
+
+## PostgreSQL
+
+### Podzapytanie
 
 ```sql
 WITH limited_data AS (
     SELECT *
     FROM producthistory
-    WHERE date_part('year', DATE) = 1940
-    ORDER BY DATE
+    WHERE date_part('year', date) = 1940
+    ORDER BY date
 ),
      t AS (
-         SELECT date_part('year', DATE) AS YEAR,
+         SELECT date_part('year', date) AS year,
                 ph.productid,
                 productname,
                 ph.unitprice,
-                DATE,
+                date,
                 (
                     SELECT COUNT(*)
                     FROM limited_data AS ph2
@@ -1275,78 +1275,76 @@ WITH limited_data AS (
                         )
                 ) + 1 AS ranking
          FROM limited_data AS ph
-         ORDER BY YEAR,
-                  productid,
-                  ranking
+         ORDER BY year, productid, ranking
      )
+
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-         productid,
-         ranking;
+ORDER BY year, productid, ranking;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie4-postgres-podzapytanie-qp](./postgres/zadanie4/subquery-plan.png)
 
-Czas wykonania: 24446.791 \[ms\]
+#### Czas wykonania: 24446.791 \[ms\]
 
-Koszt: 5249164.55
+#### Koszt: 5249164.55
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 WITH t AS (
-    SELECT date_part('year', DATE) AS YEAR,
+    SELECT date_part('year', date) AS year,
         productid,
         productname,
         unitprice,
-        DATE,
+        date,
         row_number() over (
-            PARTITION BY date_part('year', DATE),
+            PARTITION BY date_part('year', date),
             productid
             ORDER BY unitprice DESC
         ) AS ranking
     FROM producthistory
-    ORDER BY YEAR,
-        productid,
-        ranking
+    ORDER BY year, productid, ranking
 )
+
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-    productid,
-    ranking;
+ORDER BY year, productid, ranking;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie4-postgres-window-qp](./postgres/zadanie4/window-plan.png)
 
-Czas wykonania: 1876.405 \[ms\]
+#### Czas wykonania: 1876.405 \[ms\]
 
-Koszt: 594899.67
+#### Koszt: 594899.67
 
-**SQLite**
+### Porównanie wyników
 
-* podzapytanie
+<!-- TODO -->
+
+## SQLite
+
+### Podzapytanie
 
 ```sql
 WITH limited_data AS (
     SELECT *
     FROM producthistory
-    WHERE strftime('%Y', DATE) = '1940'
-    ORDER BY DATE
+    WHERE strftime('%Y', date) = '1940'
+    ORDER BY date
 ),
 t AS (
-    SELECT strftime('%Y', DATE) AS YEAR,
+    SELECT strftime('%Y', date) AS year,
         ph.productid,
         productname,
         ph.unitprice,
-        DATE,
+        date,
         (
             SELECT COUNT(*)
             FROM limited_data AS ph2
@@ -1361,59 +1359,62 @@ t AS (
                 )
         ) + 1 AS ranking
     FROM limited_data AS ph
-    ORDER BY YEAR,
-        productid,
-        ranking
+    ORDER BY year, productid, ranking
 )
+
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-    productid,
-    ranking;
+ORDER BY year, productid, ranking;
 ```
-Query plan:
+
+#### Plan zapytania:
 
 ![zadanie4-sqlite-podzapytanie-qp](./sqlite/zadanie4/subquery-plan.png)
 
-Czas wykonania: 3370 \[ms\] (Nie ufam temu, to było mierzone sqlite3 CLI)
+#### Czas wykonania: 3370 \[ms\]
 
-Koszt: --
+#### Koszt: --
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 WITH t AS (
-    SELECT strftime('%Y', DATE) AS YEAR,
-        productid,
-        productname,
-        unitprice,
-        DATE,
-        row_number() over (
-            PARTITION BY strftime('%Y', DATE),
-            productid
-            ORDER BY unitprice DESC
-        ) AS ranking
+    SELECT strftime('%Y', date) AS year,
+           productid,
+           productname,
+           unitprice,
+           date,
+           row_number() over (
+               PARTITION BY strftime('%Y', date),
+               productid
+               ORDER BY unitprice DESC
+           ) AS ranking
     FROM producthistory
-    ORDER BY YEAR,
-        productid,
-        ranking
+    ORDER BY year, productid, ranking
 )
+
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-    productid,
-    ranking;
+ORDER BY year, productid, ranking;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie4-sqlite-window-qp](./sqlite/zadanie4/window-plan.png)
 
-Czas wykonania: 2953 \[ms\]
+#### Czas wykonania: 2953 \[ms\]
 
-Koszt: --
+#### Koszt: --
+
+### Porównanie wyników
+
+<!-- TODO -->
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
 
 ---
 
