@@ -1452,53 +1452,63 @@ order by date;
 ---
 > Wyniki: 
 
-**MSSQL**
+## MSSQL
 
-* podzapytanie
-
-```sql
-
-```
-
-Query plan:
-
-![zadanie4-mssql-podzapytanie-qp](./mssql/zadanie4/subquery-plan.png)
-
-Czas wykonania:  \[ms\]
-
-Koszt:
-
-* join
+### Funkcja okna
 
 ```sql
-
+SELECT productid,
+       productname,
+       categoryid,
+       date,
+       unitprice,
+       lag(unitprice) OVER (PARTITION BY productid ORDER BY date) AS previousprodprice,
+       lead(unitprice) OVER (PARTITION BY productid ORDER BY date) AS nextprodprice
+FROM producthistory
+WHERE productid = 1
+  AND year(date) = 2022
+ORDER BY date;
 ```
 
-Query plan:
+#### Plan zapytania:
 
-![zadanie4-mssql-join-qp](./mssql/zadanie4/join-plan.png)
+![zadanie5-qp](./mssql/zadanie5/zadanie5-qp.png)
 
-Czas wykonania: \[ms\]
+#### Czas wykonania: 41.0 \[ms\]
 
-Koszt:
+#### Koszt: 21.1745
 
-* funkcja okna
+### Funkcja okna w podzapytaniu
 
 ```sql
-
+WITH t AS (
+    SELECT productid,
+           productname,
+           categoryid,
+           date,
+           unitprice,
+           lag(unitprice) over (PARTITION BY productid ORDER BY date) AS previousprodprice,
+           lead(unitprice) over (PARTITION BY productid ORDER BY date) AS nextprodprice
+    FROM producthistory
+)
+SELECT *
+FROM t
+WHERE productid = 1
+  AND year(date) = 2022
+ORDER BY date;
 ```
 
-Query plan:
+#### Plan zapytania:
 
-![zadanie4-mssql-window-qp](./mssql/zadanie4/window-plan.png)
+![zadanie5-qp](./mssql/zadanie5/zadanie5-subq-qp.png)
 
-Czas wykonania:  \[ms\]
+#### Czas wykonania: 179.0 \[ms\]
 
-Koszt: 
+#### Koszt: 22.3768
 
-**PostgreSQL**
+## PostgreSQL
 
-* podstawowa funkcja okna
+### Funkcja okna
 
 ```sql
 SELECT productid,
@@ -1514,26 +1524,26 @@ WHERE productid = 1
 ORDER BY date;
 ```
 
-Query plan:
+#### Plan zapytania:
 
-![zadanie4-postgres-podzapytanie-qp](./postgres/zadanie4/subquery-plan.png)
+![zadanie5-qp](./postgres/zadanie5/zadanie5-qp.png)
 
-Czas wykonania:  \[ms\]
+#### Czas wykonania: 218.408 \[ms\]
 
-Koszt: 
+#### Koszt: 79107.89
 
-* funkcja okna w podzapytaniu
+### Funkcja okna w podzapytaniu
 
 ```sql
 WITH t AS (
-  SELECT productid,
-         productname,
-         categoryid,
-         date,
-         unitprice,
-         lag(unitprice) over (PARTITION BY productid ORDER BY date) AS previousprodprice,
-         lead(unitprice) over (PARTITION BY productid ORDER BY date) AS nextprodprice
-  FROM product_history
+    SELECT productid,
+           productname,
+           categoryid,
+           date,
+           unitprice,
+           lag(unitprice) over (PARTITION BY productid ORDER BY date) AS previousprodprice,
+           lead(unitprice) over (PARTITION BY productid ORDER BY date) AS nextprodprice
+    FROM producthistory
 )
 SELECT *
 FROM t
@@ -1542,56 +1552,134 @@ WHERE productid = 1
 ORDER BY date;
 ```
 
-Query plan:
+#### Plan zapytania:
 
-![zadanie4-postgres-window-qp](./postgres/zadanie4/window-plan.png)
+![zadanie5-qp](./postgres/zadanie5/zadanie5-subq-qp.png)
 
-Czas wykonania:  \[ms\]
+#### Czas wykonania: 221.036 \[ms\]
 
-Koszt: 
+#### Koszt: 77242.56
 
-**SQLite**
+## SQLite
 
-* podzapytanie
-
-```sql
-
-```
-Query plan:
-
-![zadanie4-sqlite-podzapytanie-qp](./sqlite/zadanie4/subquery-plan.png)
-
-Czas wykonania:  \[ms\] (Nie ufam temu, to było mierzone sqlite3 CLI)
-
-Koszt: --
-
-* join
+### Funkcja okna
 
 ```sql
-
+SELECT productid,
+       productname,
+       categoryid,
+       date,
+       unitprice,
+       lag(unitprice) OVER (PARTITION BY productid ORDER BY date) AS previousprodprice,
+       lead(unitprice) OVER (PARTITION BY productid ORDER BY date) AS nextprodprice
+FROM producthistory
+WHERE productid = 1
+  AND strftime('%Y', date) = '2022'
+ORDER BY date;
 ```
 
-Query plan:
+#### Plan zapytania:
 
-![zadanie4-sqlite-join-qp](./sqlite/zadanie4/join-plan.png)
+![zadanie5-qp](./sqlite/zadanie5/zadanie5-qp.png)
 
-Czas wykonania:  \[ms\]
+#### Czas wykonania: 90 \[ms\]
 
-Koszt: --
+#### Koszt: --
 
-* funkcja okna
+### Funkcja okna w podzapytaniu
 
 ```sql
-
+WITH t AS (
+    SELECT productid,
+           productname,
+           categoryid,
+           date,
+           unitprice,
+           lag(unitprice) over (PARTITION BY productid ORDER BY date) AS previousprodprice,
+           lead(unitprice) over (PARTITION BY productid ORDER BY date) AS nextprodprice
+    FROM producthistory
+)
+SELECT *
+FROM t
+WHERE productid = 1
+  AND strftime('%Y', date) = '2022'
+ORDER BY date;
 ```
 
-Query plan:
+#### Plan zapytania:
 
-![zadanie4-sqlite-window-qp](./sqlite/zadanie4/window-plan.png)
+![zadanie5-qp](./sqlite/zadanie5/zadanie5-subq-qp.png)
 
-Czas wykonania:  \[ms\]
+#### Czas wykonania: 128 \[ms\]
 
-Koszt: --
+#### Koszt: 
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
+
+## Skrócony rezultat zapytań (z MSSQL, pierwsze 10 wierszy i ostatnie 10 wierszy)
+
+<!-- TODO table -->
+### Funkcja okna
+
+| productid | productname | categoryid | date       | unitprice | previousprodprice | nextprodprice |
+| :-------- | :---------- | :--------- | :--------- | :-------- | :---------------- | :------------ |
+| 1         | Chai        | 1          | 2022-01-01 | 20.64     | null              | 17.60         |
+| 1         | Chai        | 1          | 2022-01-02 | 17.60     | 20.64             | 17.83         |
+| 1         | Chai        | 1          | 2022-01-03 | 17.83     | 17.60             | 27.77         |
+| 1         | Chai        | 1          | 2022-01-04 | 27.77     | 17.83             | 10.02         |
+| 1         | Chai        | 1          | 2022-01-05 | 10.02     | 27.77             | 24.61         |
+| 1         | Chai        | 1          | 2022-01-06 | 24.61     | 10.02             | 21.71         |
+| 1         | Chai        | 1          | 2022-01-07 | 21.71     | 24.61             | 21.31         |
+| 1         | Chai        | 1          | 2022-01-08 | 21.31     | 21.71             | 26.80         |
+| 1         | Chai        | 1          | 2022-01-09 | 26.80     | 21.31             | 27.13         |
+| 1         | Chai        | 1          | 2022-01-10 | 27.13     | 26.80             | 11.15         |
+| ...       | ...         | ...        | ...        | ...       | ...               | ...           |
+| 1         | Chai        | 1          | 2022-02-10 | 17.10     | 21.63             | 15.29         |
+| 1         | Chai        | 1          | 2022-02-11 | 15.29     | 17.10             | 23.44         |
+| 1         | Chai        | 1          | 2022-02-12 | 23.44     | 15.29             | 27.39         |
+| 1         | Chai        | 1          | 2022-02-13 | 27.39     | 23.44             | 19.21         |
+| 1         | Chai        | 1          | 2022-02-14 | 19.21     | 27.39             | 17.01         |
+| 1         | Chai        | 1          | 2022-02-15 | 17.01     | 19.21             | 17.70         |
+| 1         | Chai        | 1          | 2022-02-16 | 17.70     | 17.01             | 15.76         |
+| 1         | Chai        | 1          | 2022-02-17 | 15.76     | 17.70             | 15.89         |
+| 1         | Chai        | 1          | 2022-02-18 | 15.89     | 15.76             | 20.01         |
+| 1         | Chai        | 1          | 2022-02-19 | 20.01     | 15.89             | null          |
+
+
+### Funkcja okna w podzapytaniu
+
+| productid | productname | categoryid | date       | unitprice | previousprodprice | nextprodprice |
+| :-------- | :---------- | :--------- | :--------- | :-------- | :---------------- | :------------ |
+| 1         | Chai        | 1          | 2022-01-01 | 20.64     | 13.33             | 17.60         |
+| 1         | Chai        | 1          | 2022-01-02 | 17.60     | 20.64             | 17.83         |
+| 1         | Chai        | 1          | 2022-01-03 | 17.83     | 17.60             | 27.77         |
+| 1         | Chai        | 1          | 2022-01-04 | 27.77     | 17.83             | 10.02         |
+| 1         | Chai        | 1          | 2022-01-05 | 10.02     | 27.77             | 24.61         |
+| 1         | Chai        | 1          | 2022-01-06 | 24.61     | 10.02             | 21.71         |
+| 1         | Chai        | 1          | 2022-01-07 | 21.71     | 24.61             | 21.31         |
+| 1         | Chai        | 1          | 2022-01-08 | 21.31     | 21.71             | 26.80         |
+| 1         | Chai        | 1          | 2022-01-09 | 26.80     | 21.31             | 27.13         |
+| 1         | Chai        | 1          | 2022-01-10 | 27.13     | 26.80             | 11.15         |
+| ...       | ...         | ...        | ...        | ...       | ...               | ...           |
+| 1         | Chai        | 1          | 2022-02-10 | 17.10     | 21.63             | 15.29         |
+| 1         | Chai        | 1          | 2022-02-11 | 15.29     | 17.10             | 23.44         |
+| 1         | Chai        | 1          | 2022-02-12 | 23.44     | 15.29             | 27.39         |
+| 1         | Chai        | 1          | 2022-02-13 | 27.39     | 23.44             | 19.21         |
+| 1         | Chai        | 1          | 2022-02-14 | 19.21     | 27.39             | 17.01         |
+| 1         | Chai        | 1          | 2022-02-15 | 17.01     | 19.21             | 17.70         |
+| 1         | Chai        | 1          | 2022-02-16 | 17.70     | 17.01             | 15.76         |
+| 1         | Chai        | 1          | 2022-02-17 | 15.76     | 17.70             | 15.89         |
+| 1         | Chai        | 1          | 2022-02-18 | 15.89     | 15.76             | 20.01         |
+| 1         | Chai        | 1          | 2022-02-19 | 20.01     | 15.89             | null          |
+
+
+**Warto zaznaczyć różnicę w pierwszym wierszu w kolumnie _previousprodprice_**
+
+## Porównanie funkcji
+
+<!-- TODO lag lead comparison -->
 
 ---
 
@@ -1601,6 +1689,134 @@ Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czas
 
 ---
 > Wyniki: 
+
+Najpierw przedstawmy zapytania równoważne dla każdej z użytych powyżej funkcji:
+
+### lag()
+
+```sql
+SELECT (
+    SELECT ph2.unitprice
+    FROM producthistory AS ph2
+    WHERE ph2.productid = ph1.productid
+      AND DATE_PART('year', ph2.date) = 2022
+      AND ph2.date < ph1.date
+    ORDER BY ph2.date DESC
+    LIMIT 1
+) AS previousprodprice
+FROM producthistory ph1
+WHERE productid = 1
+  AND DATE_PART('year', date) = 2022
+ORDER BY date;
+```
+
+### lead()
+
+```sql
+SELECT (
+    SELECT ph3.unitprice
+    FROM producthistory AS ph3
+    WHERE ph3.productid = ph1.productid
+      AND DATE_PART('year', ph3.date) = 2022
+      AND ph3.date > ph1.date
+    ORDER BY ph3.date ASC
+    LIMIT 1
+) AS nextprodprice
+FROM producthistory ph1
+WHERE productid = 1
+  AND DATE_PART('year', date) = 2022
+ORDER BY date;
+```
+
+Teraz dokonajmy porównania wyników pomiędzy różnymi SZBD:
+
+## MSSQL
+
+### Podzapytanie
+
+```sql
+SELECT productid,
+       productname,
+       categoryid,
+       date,
+       ph1.unitprice,
+       (
+           SELECT TOP 1 ph2.unitprice
+           FROM producthistory AS ph2
+           WHERE ph2.productid = ph1.productid
+             AND year(date) = 2022
+             AND ph2.date < ph1.date
+           ORDER BY ph2.date DESC
+       ) AS previousprodprice,
+       (
+           SELECT TOP 1 ph3.unitprice
+           FROM producthistory AS ph3
+           WHERE ph3.productid = ph1.productid
+             AND year(date) = 2022
+             AND ph3.date > ph1.date
+           ORDER BY ph3.date ASC
+       ) AS nextprodprice
+FROM producthistory ph1
+WHERE productid = 1
+  AND year(date) = 2022
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./mssql/zadanie5/zadanie5-bez-window-qp.png)
+
+#### Czas wykonania: 4256.0 \[ms\]
+
+#### Koszt: 181.9
+
+### Podzapytanie w podzapytaniu
+
+```sql
+-- NOTE:
+-- To keep the same result as when using lag() and lead(), we need to skip the check for the year in the subsubqueries
+WITH t AS (
+    SELECT ph1.productid,
+           ph1.productname,
+           ph1.categoryid,
+           ph1.date,
+           ph1.unitprice,
+           (
+               SELECT TOP 1 ph2.unitprice
+               FROM producthistory AS ph2
+               WHERE ph2.productid = ph1.productid
+                 -- AND year(date) = 2022
+                 AND ph2.date < ph1.date
+               ORDER BY ph2.date DESC
+           ) AS previousprodprice,
+           (
+               SELECT TOP 1 ph3.unitprice
+               FROM producthistory AS ph3
+               WHERE ph3.productid = ph1.productid
+                 -- AND year(date) = 2022
+                 AND ph3.date > ph1.date
+               ORDER BY ph3.date ASC
+           ) AS nextprodprice
+    FROM producthistory ph1
+)
+SELECT *
+FROM t
+WHERE productid = 1
+  AND year(date) = 2022
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./mssql/zadanie5/zadanie5-subq-bez-window-qp.png)
+
+#### Czas wykonania: 2589.0 \[ms\]
+
+#### Koszt: 184.612
+
+## PostgreSQL
+
+### Podzapytanie
 
 ```sql
 SELECT productid,
@@ -1631,6 +1847,153 @@ WHERE productid = 1
   AND DATE_PART('year', date) = 2022
 ORDER BY date;
 ```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./postgres/zadanie5/zadanie5-bez-window-qp.png)
+
+#### Czas wykonania: 10835.893 \[ms\]
+
+#### Koszt: 32657613.19
+
+### Podzapytanie w podzapytaniu
+
+```sql
+-- NOTE:
+-- To keep the same result as when using lag() and lead(), we need to skip the check for the year in the subsubqueries
+WITH t AS (
+    SELECT ph1.productid,
+           ph1.productname,
+           ph1.categoryid,
+           ph1.date,
+           ph1.unitprice,
+           (
+               SELECT ph2.unitprice
+               FROM producthistory AS ph2
+               WHERE ph2.productid = ph1.productid
+                 -- AND DATE_PART('year', ph2.date) = 2022
+                 AND ph2.date < ph1.date
+               ORDER BY ph2.date DESC
+               LIMIT 1
+           ) AS previousprodprice,
+           (
+               SELECT ph3.unitprice
+               FROM producthistory AS ph3
+               WHERE ph3.productid = ph1.productid
+                 -- AND DATE_PART('year', ph3.date) = 2022
+                 AND ph3.date > ph1.date
+               ORDER BY ph3.date ASC
+               LIMIT 1
+           ) AS nextprodprice
+    FROM producthistory ph1
+)
+SELECT *
+FROM t
+WHERE productid = 1
+  AND DATE_PART('year', date) = 2022
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./postgres/zadanie5/zadanie5-subq-bez-window-qp.png)
+
+#### Czas wykonania: 10685.629 \[ms\]
+
+#### Koszt: 27578689.69
+
+## SQLite
+
+### Podzapytanie
+
+```sql
+SELECT productid,
+       productname,
+       categoryid,
+       date,
+       ph1.unitprice,
+       (
+           SELECT ph2.unitprice
+           FROM producthistory AS ph2
+           WHERE ph2.productid = ph1.productid
+             AND strftime('%Y', date) = '2022'
+             AND ph2.date < ph1.date
+           ORDER BY ph2.date DESC
+           LIMIT 1
+       ) AS previousprodprice,
+       (
+           SELECT ph3.unitprice
+           FROM producthistory AS ph3
+           WHERE ph3.productid = ph1.productid
+             AND strftime('%Y', date) = '2022'
+             AND ph3.date > ph1.date
+           ORDER BY ph3.date ASC
+           LIMIT 1
+       ) AS nextprodprice
+FROM producthistory ph1
+WHERE productid = 1
+  AND strftime('%Y', date) = '2022'
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./sqlite/zadanie5/zadanie5-bez-window-qp.png)
+
+#### Czas wykonania: 9509 \[ms\]
+
+#### Koszt: --
+
+### Podzapytanie w podzapytaniu
+
+```sql
+-- NOTE:
+-- To keep the same result as when using lag() and lead(), we need to skip the check for the year in the subsubqueries
+WITH t AS (
+    SELECT ph1.productid,
+           ph1.productname,
+           ph1.categoryid,
+           ph1.date,
+           ph1.unitprice,
+           (
+               SELECT ph2.unitprice
+               FROM producthistory AS ph2
+               WHERE ph2.productid = ph1.productid
+                 -- AND strftime('%Y', date) = '2022'
+                 AND ph2.date < ph1.date
+               ORDER BY ph2.date DESC
+               LIMIT 1
+           ) AS previousprodprice,
+           (
+               SELECT ph3.unitprice
+               FROM producthistory AS ph3
+               WHERE ph3.productid = ph1.productid
+                 -- AND strftime('%Y', date) = '2022'
+                 AND ph3.date > ph1.date
+               ORDER BY ph3.date ASC
+               LIMIT 1
+           ) AS nextprodprice
+    FROM producthistory ph1
+)
+SELECT *
+FROM t
+WHERE productid = 1
+  AND strftime('%Y', date) = '2022'
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./sqlite/zadanie5/zadanie5-subq-bez-window-qp.png)
+
+#### Czas wykonania: 9522 \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
+Patrząc po planach wykonań zapytań _Podzapytanie_ oraz _Podzapytanie w podzapytaniu_, to te zapytania są równoważne.
 
 ---
 
