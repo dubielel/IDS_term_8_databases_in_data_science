@@ -1620,7 +1620,6 @@ ORDER BY date;
 
 ## Skrócony rezultat zapytań (z MSSQL, pierwsze 10 wierszy i ostatnie 10 wierszy)
 
-<!-- TODO table -->
 ### Funkcja okna
 
 | productid | productname | categoryid | date       | unitprice | previousprodprice | nextprodprice |
@@ -1679,7 +1678,8 @@ ORDER BY date;
 
 ## Porównanie funkcji
 
-<!-- TODO lag lead comparison -->
+* `lag()` – <!-- TODO -->
+* `lead()` – <!-- TODO -->
 
 ---
 
