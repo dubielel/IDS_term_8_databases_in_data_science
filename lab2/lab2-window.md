@@ -213,14 +213,13 @@ Napisz polecenie z wykorzystaniem podzapytania, join'a oraz funkcji okna. Porów
 
 Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
-
-
 ---
-> Wyniki: 
 
-**MSSQL**
+> Wyniki:
 
-* podzapytanie
+## MSSQL
+
+### Podzapytanie
 
 ```sql
 SELECT id,
@@ -235,16 +234,16 @@ WHERE unitprice > (
     WHERE t.categoryid = producthistory.categoryid
 )
 ```
-Query plan:
+
+#### Plan zapytania:
 
 ![zadanie1-mssql-podzapytanie-qp](./mssql/zadanie1/subquery-plan.png)
 
-Czas wykonania: 182 \[ms\]
+#### Czas wykonania: 182 \[ms\]
 
-Koszt: 49.168
+#### Koszt: 49.168
 
-
-* join
+### Join
 
 ```sql
 SELECT id,
@@ -253,24 +252,24 @@ SELECT id,
     pp.categoryid,
     unitprice
 FROM producthistory AS pp
-    JOIN (
-        SELECT categoryid,
-            AVG(unitprice) AS avgprice
-        FROM producthistory
-        GROUP BY categoryid
-    ) AS t ON pp.categoryid = t.categoryid
+JOIN (
+    SELECT categoryid,
+        AVG(unitprice) AS avgprice
+    FROM producthistory
+    GROUP BY categoryid
+) AS t ON pp.categoryid = t.categoryid
 WHERE pp.unitprice > t.avgprice;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie1-mssql-join-qp](./mssql/zadanie1/join-plan.png)
 
-Czas wykonania: 198 \[ms\]
+#### Czas wykonania: 198 \[ms\]
 
-Koszt: 49.168
+#### Koszt: 49.168
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 WITH t AS (
@@ -282,23 +281,28 @@ WITH t AS (
         AVG(unitprice) OVER (PARTITION BY categoryid) AS avgprice
     FROM producthistory
 )
+
 SELECT *
 FROM t
 WHERE t.unitprice > t.avgprice;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie1-mssql-window-qp](./mssql/zadanie1/window-plan.png)
 
-Czas wykonania: 230 \[ms\]
+#### Czas wykonania: 230 \[ms\]
 
-Koszt: 69.7459
+#### Koszt: 69.7459
 
-**PostgreSQL**
+### Porównanie wyników
+
+<!-- TODO -->
+
+## PostgreSQL
 <!-- TODO we can also check the version with WHERE id <= 10_000 -->
 
-* podzapytanie
+### Podzapytanie
 
 ```sql
 WITH limited_data AS (
@@ -314,21 +318,21 @@ SELECT id,
     unitprice
 FROM limited_data
 WHERE unitprice > (
-        SELECT AVG(unitprice)
-        FROM limited_data AS t
-        WHERE t.categoryid = limited_data.categoryid
-    );
+    SELECT AVG(unitprice)
+    FROM limited_data AS t
+    WHERE t.categoryid = limited_data.categoryid
+);
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie1-postgres-podzapytanie-qp](./postgres/zadanie1/subquery-plan.png)
 
-Czas wykonania: 3151.958 \[ms\]
+#### Czas wykonania: 3151.958 \[ms\]
 
-Koszt: 2252228.45
+#### Koszt: 2252228.45
 
-* join
+### Join
 
 ```sql
 SELECT id,
@@ -337,7 +341,7 @@ SELECT id,
        pp.categoryid,
        unitprice
 FROM producthistory AS pp
-         JOIN (
+JOIN (
     SELECT categoryid,
            AVG(unitprice) AS avgprice
     FROM producthistory
@@ -346,15 +350,15 @@ FROM producthistory AS pp
 WHERE pp.unitprice > t.avgprice;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie1-postgres-join-qp](./postgres/zadanie1/join-plan.png)
 
-Czas wykonania: 1174.49 \[ms\]
+#### Czas wykonania: 1174.49 \[ms\]
 
-Koszt: 163587.09
+#### Koszt: 163587.09
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 WITH t AS (
@@ -366,22 +370,27 @@ WITH t AS (
         AVG(unitprice) over (PARTITION BY categoryid) AS avgprice
     FROM producthistory
 )
+
 SELECT *
 FROM t
 WHERE t.unitprice > t.avgprice;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie1-postgres-window-qp](./postgres/zadanie1/window-plan.png)
 
-Czas wykonania: 2522.537 \[ms\]
+#### Czas wykonania: 2522.537 \[ms\]
 
-Koszt: 523998.9
+#### Koszt: 523998.9
 
-**SQLite**
+### Porównanie wyników
 
-* podzapytanie
+<!-- TODO -->
+
+## SQLite
+
+### Podzapytanie
 
 ```sql
 WITH limited_data AS (
@@ -397,20 +406,20 @@ SELECT id,
     unitprice
 FROM limited_data
 WHERE unitprice > (
-        SELECT AVG(unitprice)
-        FROM limited_data AS t
-        WHERE t.categoryid = limited_data.categoryid
-    );
+    SELECT AVG(unitprice)
+    FROM limited_data AS t
+    WHERE t.categoryid = limited_data.categoryid
+);
 ```
-Query plan:
+#### Plan zapytania:
 
 ![zadanie1-sqlite-podzapytanie-qp](./sqlite/zadanie1/subquery-plan.png)
 
-Czas wykonania: 161229 \[ms\] (Nie ufam temu, to było mierzone sqlite3 CLI)
+#### Czas wykonania: 161229 \[ms\] (Nie ufam temu, to było mierzone sqlite3 CLI)
 
-Koszt: --
+#### Koszt: --
 
-* join
+### Join
 
 ```sql
 SELECT id,
@@ -419,24 +428,24 @@ SELECT id,
     pp.categoryid,
     unitprice
 FROM producthistory AS pp
-    JOIN (
-        SELECT categoryid,
-            AVG(unitprice) AS avgprice
-        FROM producthistory
-        GROUP BY categoryid
-    ) AS t ON pp.categoryid = t.categoryid
+JOIN (
+    SELECT categoryid,
+        AVG(unitprice) AS avgprice
+    FROM producthistory
+    GROUP BY categoryid
+) AS t ON pp.categoryid = t.categoryid
 WHERE pp.unitprice > t.avgprice;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie1-sqlite-join-qp](./sqlite/zadanie1/join-plan.png)
 
-Czas wykonania: 1462 \[ms\]
+#### Czas wykonania: 1462 \[ms\]
 
-Koszt: --
+#### Koszt: --
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 WITH t AS (
@@ -448,18 +457,27 @@ WITH t AS (
         AVG(unitprice) over (PARTITION BY categoryid) AS avgprice
     FROM producthistory
 )
+
 SELECT *
 FROM t
 WHERE t.unitprice > t.avgprice;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie1-sqlite-window-qp](./sqlite/zadanie1/window-plan.png)
 
-Czas wykonania: 2602 \[ms\]
+#### Czas wykonania: 2602 \[ms\]
 
-Koszt: --
+#### Koszt: --
+
+### Porównanie wyników
+
+<!-- TODO -->
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
 
 ---
 
@@ -488,9 +506,9 @@ Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 ---
 > Wyniki: 
 
-**MSSQL**
+## MSSQL
 
-* podzapytanie
+### Podzapytanie
 
 ```sql
 SELECT id,
@@ -521,15 +539,15 @@ SELECT id,
 FROM producthistory;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-mssql-podzapytanie-qp](./mssql/zadanie2/subquery-plan.png)
 
-Czas wykonania: 743 \[ms\]
+#### Czas wykonania: 743 \[ms\]
 
-Koszt: 121.366
+#### Koszt: 121.366
 
-* join
+### Join
 
 ```sql
 SELECT id,
@@ -558,15 +576,15 @@ FROM producthistory AS pp
     ) AS pt ON pp.productid = pt.productid;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-mssql-join-qp](./mssql/zadanie2/join-plan.png)
 
-Czas wykonania: 767 \[ms\]
+#### Czas wykonania: 767 \[ms\]
 
-Koszt: 78.3871
+#### Koszt: 78.3871
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 SELECT id,
@@ -581,17 +599,21 @@ SELECT id,
 FROM producthistory;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-mssql-window-qp](./mssql/zadanie2/window-plan.png)
 
-Czas wykonania: 926 \[ms\]
+#### Czas wykonania: 926 \[ms\]
 
-Koszt: 156.65
+#### Koszt: 156.65
 
-**PostgreSQL**
+### Porównanie wyników
 
-* podzapytanie
+<!-- TODO -->
+
+## PostgreSQL
+
+### Podzapytanie
 
 ```sql
 WITH limited_data AS (
@@ -628,15 +650,15 @@ SELECT id,
 FROM limited_data;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-postgres-podzapytanie-qp](./postgres/zadanie2/subquery-plan.png)
 
-Czas wykonania: 12130.597 \[ms\]
+#### Czas wykonania: 12130.597 \[ms\]
 
-Koszt: 9006328.45
+#### Koszt: 9006328.45
 
-* join
+### Join
 
 ```sql
 SELECT id,
@@ -665,15 +687,15 @@ FROM producthistory AS pp
     ) AS pt ON pp.productid = pt.productid;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-postgres-join-qp](./postgres/zadanie2/join-plan.png)
 
-Czas wykonania: 1778.622 \[ms\]
+#### Czas wykonania: 1778.622 \[ms\]
 
-Koszt: 250998.1
+#### Koszt: 250998.1
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 SELECT id,
@@ -689,17 +711,21 @@ FROM producthistory window category_window AS (PARTITION BY categoryid),
     product_window AS (PARTITION BY productid);
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-postgres-window-qp](./postgres/zadanie2/window-plan.png)
 
-Czas wykonania: 5436.37 \[ms\]
+#### Czas wykonania: 5436.37 \[ms\]
 
-Koszt: 1073228.56
+#### Koszt: 1073228.56
 
-**SQLite**
+### Porównanie wyników
 
-* podzapytanie
+<!-- TODO -->
+
+## SQLite
+
+### <<QUERY TYPE>>
 
 ```sql
 WITH limited_data AS (
@@ -708,101 +734,112 @@ WITH limited_data AS (
     ORDER BY id
     LIMIT 10000
 )
+
 SELECT id,
-    productid,
-    productname,
-    categoryid,
-    unitprice,
-    (
-        SELECT AVG(unitprice)
-        FROM limited_data AS t
-        WHERE t.categoryid = limited_data.categoryid
-    ) AS avgpricecategory,
-    (
-        SELECT SUM(unitprice)
-        FROM limited_data AS t
-        WHERE t.categoryid = limited_data.categoryid
-    ) AS sumpricecategory,
-    (
-        SELECT AVG(unitprice)
-        FROM limited_data AS t
-        WHERE t.productid = limited_data.productid
-    ) AS avgpriceproduct,
-    (
-        SELECT SUM(unitprice)
-        FROM limited_data AS t
-        WHERE t.productid = limited_data.productid
-    ) AS sumpriceproduct
+       productid,
+       productname,
+       categoryid,
+       unitprice,
+       (
+           SELECT AVG(unitprice)
+           FROM limited_data AS t
+           WHERE t.categoryid = limited_data.categoryid
+       ) AS avgpricecategory,
+       (
+           SELECT SUM(unitprice)
+           FROM limited_data AS t
+           WHERE t.categoryid = limited_data.categoryid
+       ) AS sumpricecategory,
+       (
+           SELECT AVG(unitprice)
+           FROM limited_data AS t
+           WHERE t.productid = limited_data.productid
+       ) AS avgpriceproduct,
+       (
+           SELECT SUM(unitprice)
+           FROM limited_data AS t
+           WHERE t.productid = limited_data.productid
+       ) AS sumpriceproduct
 FROM limited_data;
 ```
-Query plan:
+
+#### Plan zapytania:
 
 ![zadanie2-sqlite-podzapytanie-qp](./sqlite/zadanie2/subquery-plan.png)
 
-Czas wykonania: 12514 \[ms\] (Nie ufam temu, to było mierzone sqlite3 CLI)
+#### Czas wykonania: 12514 \[ms\]
 
-Koszt: --
+#### Koszt: --
 
-* join
+### <<QUERY TYPE>>
 
 ```sql
 SELECT id,
-    pp.productid,
-    productname,
-    pp.categoryid,
-    unitprice,
-    avgpricecategory,
-    sumpricecategory,
-    avgpriceproduct,
-    sumpriceproduct
+       pp.productid,
+       productname,
+       pp.categoryid,
+       unitprice,
+       avgpricecategory,
+       sumpricecategory,
+       avgpriceproduct,
+       sumpriceproduct
 FROM producthistory AS pp
-    JOIN (
-        SELECT categoryid,
-            AVG(unitprice) AS avgpricecategory,
-            SUM(VALUE) AS sumpricecategory
-        FROM producthistory
-        GROUP BY categoryid
-    ) AS ct ON pp.categoryid = ct.categoryid
-    JOIN (
-        SELECT productid,
-            AVG(unitprice) AS avgpriceproduct,
-            SUM(VALUE) AS sumpriceproduct
-        FROM producthistory
-        GROUP BY productid
-    ) AS pt ON pp.productid = pt.productid;
+JOIN (
+    SELECT categoryid,
+           AVG(unitprice) AS avgpricecategory,
+           SUM(VALUE) AS sumpricecategory
+    FROM producthistory
+    GROUP BY categoryid
+) AS ct ON pp.categoryid = ct.categoryid
+JOIN (
+    SELECT productid,
+           AVG(unitprice) AS avgpriceproduct,
+           SUM(VALUE) AS sumpriceproduct
+    FROM producthistory
+    GROUP BY productid
+) AS pt ON pp.productid = pt.productid;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-sqlite-join-qp](./sqlite/zadanie2/join-plan.png)
 
-Czas wykonania: 6373 \[ms\]
+#### Czas wykonania: 6373 \[ms\]
 
-Koszt: --
+#### Koszt: --
 
-* funkcja okna
+### <<QUERY TYPE>>
 
 ```sql
 SELECT id,
-    productid,
-    productname,
-    categoryid,
-    unitprice,
-    AVG(unitprice) over category_window AS avgpricecategory,
-    SUM(VALUE) over category_window AS sumpricecategory,
-    AVG(unitprice) over product_window AS avgpriceproduct,
-    SUM(VALUE) over product_window AS sumpriceproduct
+       productid,
+       productname,
+       categoryid,
+       unitprice,
+       AVG(unitprice) over category_window AS avgpricecategory,
+       SUM(VALUE) over category_window AS sumpricecategory,
+       AVG(unitprice) over product_window AS avgpriceproduct,
+       SUM(VALUE) over product_window AS sumpriceproduct
 FROM producthistory window category_window AS (PARTITION BY categoryid),
     product_window AS (PARTITION BY productid);
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie2-sqlite-window-qp](./sqlite/zadanie2/window-plan.png)
 
-Czas wykonania: 6957 \[ms\]
+#### Czas wykonania: 6957 \[ms\]
 
-Koszt: --
+#### Koszt: --
+
+### Porównanie wyników
+
+<!-- TODO -->
+Nie ufam czasom wykonania – były mierzone sqlite3 CLI
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
 
 ---
 
@@ -824,17 +861,94 @@ from products;
 ---
 > Wyniki: 
 
+## MSSQL
+
 ```sql
-[2025-03-25 19:37:09] Connected
-northwind.public> select productid, productname, unitprice, categoryid,
-						 row_number() over(partition by categoryid order by unitprice desc) as rowno,
-						  rank() over(partition by categoryid order by unitprice desc) as rankprice,
-						  dense_rank() over(partition by categoryid order by unitprice desc) as denserankprice
-				  from products
-[2025-03-25 19:37:09] 77 rows retrieved starting from 1 in 55 ms (execution: 12 ms, fetching: 43 ms)
+SELECT productid,
+       productname,
+       unitprice,
+       categoryid,
+       row_number() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rowno,
+       rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rankprice,
+       dense_rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS denserankprice
+FROM products;
 ```
 
-![img.png](img.png)
+#### Plan zapytania:
+
+![zadanie3-qp](./mssql/zadanie3/zadanie3-qp.png)
+
+#### Czas wykonania: 0.0 \[ms\]
+
+#### Koszt: 0.0162292
+
+## PostgreSQL
+
+```sql
+SELECT productid,
+       productname,
+       unitprice,
+       categoryid,
+       row_number() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rowno,
+       rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rankprice,
+       dense_rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS denserankprice
+FROM products;
+```
+
+#### Plan zapytania:
+
+![zadanie3-qp](./postgres/zadanie3/zadanie3-qp.png)
+
+#### Czas wykonania: 6.11 \[ms\]
+
+#### Koszt: 0.052
+
+## SQLite
+
+```sql
+SELECT productid,
+       productname,
+       unitprice,
+       categoryid,
+       row_number() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rowno,
+       rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS rankprice,
+       dense_rank() over (PARTITION BY categoryid ORDER BY unitprice DESC) AS denserankprice
+FROM products;
+```
+
+#### Plan zapytania:
+
+![zadanie3-qp](./sqlite/zadanie3/zadanie3-qp.png)
+
+#### Czas wykonania: 4 \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
+
+## Skrócony rezultat zapytań (z MSSQL, TOP 15)
+
+| productid | productname                | unitprice | categoryid | rowno | rankprice | denserankprice |
+| :-------- | :------------------------- | :-------- | :--------- | :---- | :-------- | :------------- |
+| 38        | Côte de Blaye              | 263.5000  | 1          | 1     | 1         | 1              |
+| 43        | Ipoh Coffee                | 46.0000   | 1          | 2     | 2         | 2              |
+| 2         | Chang                      | 19.0000   | 1          | 3     | 3         | 3              |
+| 1         | Chai                       | 18.0000   | 1          | 4     | 4         | 4              |
+| 39        | Chartreuse verte           | 18.0000   | 1          | 5     | 4         | 4              |
+| 35        | Steeleye Stout             | 18.0000   | 1          | 6     | 4         | 4              |
+| 76        | Lakkalikööri               | 18.0000   | 1          | 7     | 4         | 4              |
+| 70        | Outback Lager              | 15.0000   | 1          | 8     | 8         | 5              |
+| 67        | Laughing Lumberjack Lager  | 14.0000   | 1          | 9     | 9         | 6              |
+| 34        | Sasquatch Ale              | 14.0000   | 1          | 10    | 9         | 6              |
+| 75        | Rhönbräu Klosterbier       | 7.7500    | 1          | 11    | 11        | 7              |
+| 24        | Guaraná Fantástica         | 4.5000    | 1          | 12    | 12        | 8              |
+| 63        | Vegie-spread               | 43.9000   | 2          | 1     | 1         | 1              |
+| 8         | Northwoods Cranberry Sauce | 40.0000   | 2          | 2     | 2         | 2              |
+| 61        | Sirop d'érable             | 28.5000   | 2          | 3     | 3         | 3              |
+
+## Porównanie funkcji
 
  * `row_number()` - nadaje unikalny numer dla każdego wiersza w grupie
  * `rank()` - nadaje numer dla każdego wiersza w grupie, ale w przypadku równych wartości, nadaje ten sam numer i "dziury" w numeracji (np. 1, 2, 2, 4)
@@ -849,71 +963,187 @@ Spróbuj uzyskać ten sam wynik bez użycia funkcji okna
 ---
 > Wyniki: 
 
-**ROW_NUMBER()**
+Najpierw przedstawmy zapytania równoważne dla każdej z użytych powyżej funkcji:
+
+### row_number()
 
 ```sql
-SELECT
-	p1.productid,
-	p1.productname,
-	p1.unitprice,
-	p1.categoryid,
-	(
-		SELECT COUNT(*)
-		FROM products p2
-		WHERE p2.categoryid = p1.categoryid
-		  AND (
-			p2.unitprice > p1.unitprice
-				OR (
-				p2.unitprice = p1.unitprice
-					AND p2.productid < p1.productid
-				)
-			)
-	) + 1 AS rowno
+SELECT (
+    SELECT COUNT(*)
+    FROM products p2
+    WHERE p2.categoryid = p1.categoryid
+      AND (
+        p2.unitprice > p1.unitprice
+            OR (
+            p2.unitprice = p1.unitprice
+                AND p2.productid < p1.productid
+            )
+        )
+) + 1 AS rowno
 FROM products p1
 ORDER BY categoryid, rowno;
 ```
 
-![img_1.png](img_1.png)
-
-**RANK()**
+### rank()
 
 ```sql
-SELECT
-	p1.productid,
-	p1.productname,
-	p1.unitprice,
-	p1.categoryid,
-	(
-		SELECT COUNT(*)
-		FROM products p2
-		WHERE p2.categoryid = p1.categoryid
-		  AND p2.unitprice > p1.unitprice
-	) + 1 AS rankprice
+SELECT (
+    SELECT COUNT(*)
+    FROM products p2
+    WHERE p2.categoryid = p1.categoryid
+      AND p2.unitprice > p1.unitprice
+) + 1 AS rankprice
 FROM products p1
 ORDER BY categoryid, rankprice;
 ```
 
-![img_2.png](img_2.png)
-
-**DENSE_RANK()**
+### dense_rank()
 
 ```sql
-SELECT
-	p1.productid,
-	p1.productname,
-	p1.unitprice,
-	p1.categoryid,
-	(
-		SELECT COUNT(DISTINCT p2.unitprice)
-		FROM products p2
-		WHERE p2.categoryid = p1.categoryid
-		  AND p2.unitprice > p1.unitprice
-	) + 1 AS denserankprice
+SELECT (
+    SELECT COUNT(DISTINCT p2.unitprice)
+    FROM products p2
+    WHERE p2.categoryid = p1.categoryid
+      AND p2.unitprice > p1.unitprice
+) + 1 AS denserankprice
 FROM products p1
 ORDER BY categoryid, denserankprice;
 ```
 
-![img_3.png](img_3.png)
+Teraz dokonajmy porównania wyników pomiędzy różnymi SZBD:
+
+## MSSQL
+
+```sql
+SELECT p1.productid,
+       p1.productname,
+       p1.unitprice,
+       p1.categoryid,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND (
+                   p2.unitprice > p1.unitprice
+                   OR (
+                       p2.unitprice = p1.unitprice
+                       AND p2.productid < p1.productid
+                   )
+               )
+       ) + 1 AS rowno,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND p2.unitprice > p1.unitprice
+       ) + 1 AS rankprice,
+       (
+           SELECT COUNT(DISTINCT p2.unitprice)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND p2.unitprice > p1.unitprice
+       ) + 1 AS denserankprice
+FROM products p1
+ORDER BY categoryid, rowno;
+```
+
+#### Plan zapytania:
+
+![zadanie3-bez-window-qp](./mssql/zadanie3/zadanie3-bez-window-qp.png)
+
+#### Czas wykonania: 3 \[ms\]
+
+#### Koszt: 0.964302
+
+## PostgreSQL
+
+```sql
+SELECT p1.productid,
+       p1.productname,
+       p1.unitprice,
+       p1.categoryid,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND (
+                   p2.unitprice > p1.unitprice
+                   OR (
+                       p2.unitprice = p1.unitprice
+                       AND p2.productid < p1.productid
+                   )
+               )
+       ) + 1 AS rowno,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND p2.unitprice > p1.unitprice
+       ) + 1 AS rankprice,
+       (
+           SELECT COUNT(DISTINCT p2.unitprice)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+               AND p2.unitprice > p1.unitprice
+       ) + 1 AS denserankprice
+FROM products p1
+ORDER BY categoryid, rowno;
+```
+
+#### Plan zapytania:
+
+![zadanie3-bez-window-qp](./postgres/zadanie3/zadanie3-bez-window-qp.png)
+
+#### Czas wykonania: 1.134 \[ms\]
+
+#### Koszt: 538.85
+
+## SQLite
+
+```sql
+SELECT p1.productid,
+       p1.productname,
+       p1.unitprice,
+       p1.categoryid,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+             AND (
+               p2.unitprice > p1.unitprice
+                   OR (
+                   p2.unitprice = p1.unitprice
+                       AND p2.productid < p1.productid
+                   )
+               )
+       ) + 1 AS rowno,
+       (
+           SELECT COUNT(*)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+             AND p2.unitprice > p1.unitprice
+       ) + 1 AS rankprice,
+       (
+           SELECT COUNT(DISTINCT p2.unitprice)
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+             AND p2.unitprice > p1.unitprice
+       ) + 1 AS denserankprice
+FROM products p1
+ORDER BY categoryid, rowno;
+```
+
+#### Plan zapytania:
+
+![zadanie3-bez-window-qp](./sqlite/zadanie3/zadanie3-bez-window-qp.png)
+
+#### Czas wykonania: 5 \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
 
 ---
 # Zadanie 4
@@ -935,26 +1165,26 @@ Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czas
 ---
 > Wyniki: 
 
-**MSSQL**
+## MSSQL
 
-* podzapytanie
+### Podzapytanie
 
 ```sql
 WITH limited_data AS (
     SELECT *
     FROM producthistory
-    WHERE datepart(YEAR, DATE) = 1940
+    WHERE datepart(year, date) = 1940
 ),
      t AS (
-         SELECT datepart(YEAR, DATE) AS YEAR,
+         SELECT datepart(year, date) AS year,
                 ph.productid,
                 productname,
                 ph.unitprice,
-                DATE,
+                date,
                 (
                     SELECT COUNT(*)
                     FROM limited_data AS ph2
-                    WHERE datepart(YEAR, ph2.date) = datepart(YEAR, ph.date)
+                    WHERE datepart(year, ph2.date) = datepart(year, ph.date)
                       AND ph2.productid = ph.productid
                       AND (
                         ph2.unitprice > ph.unitprice
@@ -969,30 +1199,28 @@ WITH limited_data AS (
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-         productid,
-         ranking;
+ORDER BY year, productid, ranking;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie4-mssql-podzapytanie-qp](./mssql/zadanie4/subquery-plan.png)
 
-Czas wykonania: 242902 \[ms\]
+#### Czas wykonania: 242902 \[ms\]
 
-Koszt: 4915.65
+#### Koszt: 4915.65
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 WITH t AS (
-    SELECT datepart(YEAR, DATE) AS YEAR,
+    SELECT datepart(year, date) AS year,
            productid,
            productname,
            unitprice,
-           DATE,
+           date,
            row_number() over (
-               PARTITION BY datepart(YEAR, DATE),
+               PARTITION BY datepart(year, date),
                productid
                ORDER BY unitprice DESC
                ) AS ranking
@@ -1001,36 +1229,38 @@ WITH t AS (
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-         productid,
-         ranking;
+ORDER BY year, productid, ranking;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie4-mssql-window-qp](./mssql/zadanie4/window-plan.png)
 
-Czas wykonania: 462 \[ms\]
+#### Czas wykonania: 462 \[ms\]
 
-Koszt: 75.3262
+#### Koszt: 75.3262
 
-**PostgreSQL**
+### Porównanie wyników
 
-* podzapytanie
+<!-- TODO -->
+
+## PostgreSQL
+
+### Podzapytanie
 
 ```sql
 WITH limited_data AS (
     SELECT *
     FROM producthistory
-    WHERE date_part('year', DATE) = 1940
-    ORDER BY DATE
+    WHERE date_part('year', date) = 1940
+    ORDER BY date
 ),
      t AS (
-         SELECT date_part('year', DATE) AS YEAR,
+         SELECT date_part('year', date) AS year,
                 ph.productid,
                 productname,
                 ph.unitprice,
-                DATE,
+                date,
                 (
                     SELECT COUNT(*)
                     FROM limited_data AS ph2
@@ -1045,78 +1275,76 @@ WITH limited_data AS (
                         )
                 ) + 1 AS ranking
          FROM limited_data AS ph
-         ORDER BY YEAR,
-                  productid,
-                  ranking
+         ORDER BY year, productid, ranking
      )
+
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-         productid,
-         ranking;
+ORDER BY year, productid, ranking;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie4-postgres-podzapytanie-qp](./postgres/zadanie4/subquery-plan.png)
 
-Czas wykonania: 24446.791 \[ms\]
+#### Czas wykonania: 24446.791 \[ms\]
 
-Koszt: 5249164.55
+#### Koszt: 5249164.55
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 WITH t AS (
-    SELECT date_part('year', DATE) AS YEAR,
+    SELECT date_part('year', date) AS year,
         productid,
         productname,
         unitprice,
-        DATE,
+        date,
         row_number() over (
-            PARTITION BY date_part('year', DATE),
+            PARTITION BY date_part('year', date),
             productid
             ORDER BY unitprice DESC
         ) AS ranking
     FROM producthistory
-    ORDER BY YEAR,
-        productid,
-        ranking
+    ORDER BY year, productid, ranking
 )
+
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-    productid,
-    ranking;
+ORDER BY year, productid, ranking;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie4-postgres-window-qp](./postgres/zadanie4/window-plan.png)
 
-Czas wykonania: 1876.405 \[ms\]
+#### Czas wykonania: 1876.405 \[ms\]
 
-Koszt: 594899.67
+#### Koszt: 594899.67
 
-**SQLite**
+### Porównanie wyników
 
-* podzapytanie
+<!-- TODO -->
+
+## SQLite
+
+### Podzapytanie
 
 ```sql
 WITH limited_data AS (
     SELECT *
     FROM producthistory
-    WHERE strftime('%Y', DATE) = '1940'
-    ORDER BY DATE
+    WHERE strftime('%Y', date) = '1940'
+    ORDER BY date
 ),
 t AS (
-    SELECT strftime('%Y', DATE) AS YEAR,
+    SELECT strftime('%Y', date) AS year,
         ph.productid,
         productname,
         ph.unitprice,
-        DATE,
+        date,
         (
             SELECT COUNT(*)
             FROM limited_data AS ph2
@@ -1131,59 +1359,62 @@ t AS (
                 )
         ) + 1 AS ranking
     FROM limited_data AS ph
-    ORDER BY YEAR,
-        productid,
-        ranking
+    ORDER BY year, productid, ranking
 )
+
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-    productid,
-    ranking;
+ORDER BY year, productid, ranking;
 ```
-Query plan:
+
+#### Plan zapytania:
 
 ![zadanie4-sqlite-podzapytanie-qp](./sqlite/zadanie4/subquery-plan.png)
 
-Czas wykonania: 3370 \[ms\] (Nie ufam temu, to było mierzone sqlite3 CLI)
+#### Czas wykonania: 3370 \[ms\]
 
-Koszt: --
+#### Koszt: --
 
-* funkcja okna
+### Funkcja okna
 
 ```sql
 WITH t AS (
-    SELECT strftime('%Y', DATE) AS YEAR,
-        productid,
-        productname,
-        unitprice,
-        DATE,
-        row_number() over (
-            PARTITION BY strftime('%Y', DATE),
-            productid
-            ORDER BY unitprice DESC
-        ) AS ranking
+    SELECT strftime('%Y', date) AS year,
+           productid,
+           productname,
+           unitprice,
+           date,
+           row_number() over (
+               PARTITION BY strftime('%Y', date),
+               productid
+               ORDER BY unitprice DESC
+           ) AS ranking
     FROM producthistory
-    ORDER BY YEAR,
-        productid,
-        ranking
+    ORDER BY year, productid, ranking
 )
+
 SELECT *
 FROM t
 WHERE ranking < 5
-ORDER BY YEAR,
-    productid,
-    ranking;
+ORDER BY year, productid, ranking;
 ```
 
-Query plan:
+#### Plan zapytania:
 
 ![zadanie4-sqlite-window-qp](./sqlite/zadanie4/window-plan.png)
 
-Czas wykonania: 2953 \[ms\]
+#### Czas wykonania: 2953 \[ms\]
 
-Koszt: --
+#### Koszt: --
+
+### Porównanie wyników
+
+<!-- TODO -->
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
 
 ---
 
@@ -1203,7 +1434,9 @@ as nextprodprice
 from product_history  
 where productid = 1 and year(date) = 2022  
 order by date;  
-  
+```
+
+```sql
 with t as (select productid, productname, categoryid, date, unitprice,  
                   lag(unitprice) over (partition by productid   
 order by date) as previousprodprice,  
@@ -1219,9 +1452,234 @@ order by date;
 ---
 > Wyniki: 
 
+## MSSQL
+
+### Funkcja okna
+
 ```sql
---  ...
+SELECT productid,
+       productname,
+       categoryid,
+       date,
+       unitprice,
+       lag(unitprice) OVER (PARTITION BY productid ORDER BY date) AS previousprodprice,
+       lead(unitprice) OVER (PARTITION BY productid ORDER BY date) AS nextprodprice
+FROM producthistory
+WHERE productid = 1
+  AND year(date) = 2022
+ORDER BY date;
 ```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./mssql/zadanie5/zadanie5-qp.png)
+
+#### Czas wykonania: 41.0 \[ms\]
+
+#### Koszt: 21.1745
+
+### Funkcja okna w podzapytaniu
+
+```sql
+WITH t AS (
+    SELECT productid,
+           productname,
+           categoryid,
+           date,
+           unitprice,
+           lag(unitprice) over (PARTITION BY productid ORDER BY date) AS previousprodprice,
+           lead(unitprice) over (PARTITION BY productid ORDER BY date) AS nextprodprice
+    FROM producthistory
+)
+SELECT *
+FROM t
+WHERE productid = 1
+  AND year(date) = 2022
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./mssql/zadanie5/zadanie5-subq-qp.png)
+
+#### Czas wykonania: 179.0 \[ms\]
+
+#### Koszt: 22.3768
+
+## PostgreSQL
+
+### Funkcja okna
+
+```sql
+SELECT productid,
+       productname,
+       categoryid,
+       date,
+       unitprice,
+       lag(unitprice) OVER (PARTITION BY productid ORDER BY date) AS previousprodprice,
+       lead(unitprice) OVER (PARTITION BY productid ORDER BY date) AS nextprodprice
+FROM producthistory
+WHERE productid = 1
+  AND DATE_PART('year', date) = 2022
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./postgres/zadanie5/zadanie5-qp.png)
+
+#### Czas wykonania: 218.408 \[ms\]
+
+#### Koszt: 79107.89
+
+### Funkcja okna w podzapytaniu
+
+```sql
+WITH t AS (
+    SELECT productid,
+           productname,
+           categoryid,
+           date,
+           unitprice,
+           lag(unitprice) over (PARTITION BY productid ORDER BY date) AS previousprodprice,
+           lead(unitprice) over (PARTITION BY productid ORDER BY date) AS nextprodprice
+    FROM producthistory
+)
+SELECT *
+FROM t
+WHERE productid = 1
+  AND DATE_PART('year', date) = 2022
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./postgres/zadanie5/zadanie5-subq-qp.png)
+
+#### Czas wykonania: 221.036 \[ms\]
+
+#### Koszt: 77242.56
+
+## SQLite
+
+### Funkcja okna
+
+```sql
+SELECT productid,
+       productname,
+       categoryid,
+       date,
+       unitprice,
+       lag(unitprice) OVER (PARTITION BY productid ORDER BY date) AS previousprodprice,
+       lead(unitprice) OVER (PARTITION BY productid ORDER BY date) AS nextprodprice
+FROM producthistory
+WHERE productid = 1
+  AND strftime('%Y', date) = '2022'
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./sqlite/zadanie5/zadanie5-qp.png)
+
+#### Czas wykonania: 90 \[ms\]
+
+#### Koszt: --
+
+### Funkcja okna w podzapytaniu
+
+```sql
+WITH t AS (
+    SELECT productid,
+           productname,
+           categoryid,
+           date,
+           unitprice,
+           lag(unitprice) over (PARTITION BY productid ORDER BY date) AS previousprodprice,
+           lead(unitprice) over (PARTITION BY productid ORDER BY date) AS nextprodprice
+    FROM producthistory
+)
+SELECT *
+FROM t
+WHERE productid = 1
+  AND strftime('%Y', date) = '2022'
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./sqlite/zadanie5/zadanie5-subq-qp.png)
+
+#### Czas wykonania: 128 \[ms\]
+
+#### Koszt: 
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
+
+## Skrócony rezultat zapytań (z MSSQL, pierwsze 10 wierszy i ostatnie 10 wierszy)
+
+### Funkcja okna
+
+| productid | productname | categoryid | date       | unitprice | previousprodprice | nextprodprice |
+| :-------- | :---------- | :--------- | :--------- | :-------- | :---------------- | :------------ |
+| 1         | Chai        | 1          | 2022-01-01 | 20.64     | null              | 17.60         |
+| 1         | Chai        | 1          | 2022-01-02 | 17.60     | 20.64             | 17.83         |
+| 1         | Chai        | 1          | 2022-01-03 | 17.83     | 17.60             | 27.77         |
+| 1         | Chai        | 1          | 2022-01-04 | 27.77     | 17.83             | 10.02         |
+| 1         | Chai        | 1          | 2022-01-05 | 10.02     | 27.77             | 24.61         |
+| 1         | Chai        | 1          | 2022-01-06 | 24.61     | 10.02             | 21.71         |
+| 1         | Chai        | 1          | 2022-01-07 | 21.71     | 24.61             | 21.31         |
+| 1         | Chai        | 1          | 2022-01-08 | 21.31     | 21.71             | 26.80         |
+| 1         | Chai        | 1          | 2022-01-09 | 26.80     | 21.31             | 27.13         |
+| 1         | Chai        | 1          | 2022-01-10 | 27.13     | 26.80             | 11.15         |
+| ...       | ...         | ...        | ...        | ...       | ...               | ...           |
+| 1         | Chai        | 1          | 2022-02-10 | 17.10     | 21.63             | 15.29         |
+| 1         | Chai        | 1          | 2022-02-11 | 15.29     | 17.10             | 23.44         |
+| 1         | Chai        | 1          | 2022-02-12 | 23.44     | 15.29             | 27.39         |
+| 1         | Chai        | 1          | 2022-02-13 | 27.39     | 23.44             | 19.21         |
+| 1         | Chai        | 1          | 2022-02-14 | 19.21     | 27.39             | 17.01         |
+| 1         | Chai        | 1          | 2022-02-15 | 17.01     | 19.21             | 17.70         |
+| 1         | Chai        | 1          | 2022-02-16 | 17.70     | 17.01             | 15.76         |
+| 1         | Chai        | 1          | 2022-02-17 | 15.76     | 17.70             | 15.89         |
+| 1         | Chai        | 1          | 2022-02-18 | 15.89     | 15.76             | 20.01         |
+| 1         | Chai        | 1          | 2022-02-19 | 20.01     | 15.89             | null          |
+
+
+### Funkcja okna w podzapytaniu
+
+| productid | productname | categoryid | date       | unitprice | previousprodprice | nextprodprice |
+| :-------- | :---------- | :--------- | :--------- | :-------- | :---------------- | :------------ |
+| 1         | Chai        | 1          | 2022-01-01 | 20.64     | 13.33             | 17.60         |
+| 1         | Chai        | 1          | 2022-01-02 | 17.60     | 20.64             | 17.83         |
+| 1         | Chai        | 1          | 2022-01-03 | 17.83     | 17.60             | 27.77         |
+| 1         | Chai        | 1          | 2022-01-04 | 27.77     | 17.83             | 10.02         |
+| 1         | Chai        | 1          | 2022-01-05 | 10.02     | 27.77             | 24.61         |
+| 1         | Chai        | 1          | 2022-01-06 | 24.61     | 10.02             | 21.71         |
+| 1         | Chai        | 1          | 2022-01-07 | 21.71     | 24.61             | 21.31         |
+| 1         | Chai        | 1          | 2022-01-08 | 21.31     | 21.71             | 26.80         |
+| 1         | Chai        | 1          | 2022-01-09 | 26.80     | 21.31             | 27.13         |
+| 1         | Chai        | 1          | 2022-01-10 | 27.13     | 26.80             | 11.15         |
+| ...       | ...         | ...        | ...        | ...       | ...               | ...           |
+| 1         | Chai        | 1          | 2022-02-10 | 17.10     | 21.63             | 15.29         |
+| 1         | Chai        | 1          | 2022-02-11 | 15.29     | 17.10             | 23.44         |
+| 1         | Chai        | 1          | 2022-02-12 | 23.44     | 15.29             | 27.39         |
+| 1         | Chai        | 1          | 2022-02-13 | 27.39     | 23.44             | 19.21         |
+| 1         | Chai        | 1          | 2022-02-14 | 19.21     | 27.39             | 17.01         |
+| 1         | Chai        | 1          | 2022-02-15 | 17.01     | 19.21             | 17.70         |
+| 1         | Chai        | 1          | 2022-02-16 | 17.70     | 17.01             | 15.76         |
+| 1         | Chai        | 1          | 2022-02-17 | 15.76     | 17.70             | 15.89         |
+| 1         | Chai        | 1          | 2022-02-18 | 15.89     | 15.76             | 20.01         |
+| 1         | Chai        | 1          | 2022-02-19 | 20.01     | 15.89             | null          |
+
+
+**Warto zaznaczyć różnicę w pierwszym wierszu w kolumnie _previousprodprice_**
+
+## Porównanie funkcji
+
+* `lag()` – <!-- TODO -->
+* `lead()` – <!-- TODO -->
 
 ---
 
@@ -1232,9 +1690,310 @@ Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czas
 ---
 > Wyniki: 
 
+Najpierw przedstawmy zapytania równoważne dla każdej z użytych powyżej funkcji:
+
+### lag()
+
 ```sql
---  ...
+SELECT (
+    SELECT ph2.unitprice
+    FROM producthistory AS ph2
+    WHERE ph2.productid = ph1.productid
+      AND DATE_PART('year', ph2.date) = 2022
+      AND ph2.date < ph1.date
+    ORDER BY ph2.date DESC
+    LIMIT 1
+) AS previousprodprice
+FROM producthistory ph1
+WHERE productid = 1
+  AND DATE_PART('year', date) = 2022
+ORDER BY date;
 ```
+
+### lead()
+
+```sql
+SELECT (
+    SELECT ph3.unitprice
+    FROM producthistory AS ph3
+    WHERE ph3.productid = ph1.productid
+      AND DATE_PART('year', ph3.date) = 2022
+      AND ph3.date > ph1.date
+    ORDER BY ph3.date ASC
+    LIMIT 1
+) AS nextprodprice
+FROM producthistory ph1
+WHERE productid = 1
+  AND DATE_PART('year', date) = 2022
+ORDER BY date;
+```
+
+Teraz dokonajmy porównania wyników pomiędzy różnymi SZBD:
+
+## MSSQL
+
+### Podzapytanie
+
+```sql
+SELECT productid,
+       productname,
+       categoryid,
+       date,
+       ph1.unitprice,
+       (
+           SELECT TOP 1 ph2.unitprice
+           FROM producthistory AS ph2
+           WHERE ph2.productid = ph1.productid
+             AND year(date) = 2022
+             AND ph2.date < ph1.date
+           ORDER BY ph2.date DESC
+       ) AS previousprodprice,
+       (
+           SELECT TOP 1 ph3.unitprice
+           FROM producthistory AS ph3
+           WHERE ph3.productid = ph1.productid
+             AND year(date) = 2022
+             AND ph3.date > ph1.date
+           ORDER BY ph3.date ASC
+       ) AS nextprodprice
+FROM producthistory ph1
+WHERE productid = 1
+  AND year(date) = 2022
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./mssql/zadanie5/zadanie5-bez-window-qp.png)
+
+#### Czas wykonania: 4256.0 \[ms\]
+
+#### Koszt: 181.9
+
+### Podzapytanie w podzapytaniu
+
+```sql
+-- NOTE:
+-- To keep the same result as when using lag() and lead(), we need to skip the check for the year in the subsubqueries
+WITH t AS (
+    SELECT ph1.productid,
+           ph1.productname,
+           ph1.categoryid,
+           ph1.date,
+           ph1.unitprice,
+           (
+               SELECT TOP 1 ph2.unitprice
+               FROM producthistory AS ph2
+               WHERE ph2.productid = ph1.productid
+                 -- AND year(date) = 2022
+                 AND ph2.date < ph1.date
+               ORDER BY ph2.date DESC
+           ) AS previousprodprice,
+           (
+               SELECT TOP 1 ph3.unitprice
+               FROM producthistory AS ph3
+               WHERE ph3.productid = ph1.productid
+                 -- AND year(date) = 2022
+                 AND ph3.date > ph1.date
+               ORDER BY ph3.date ASC
+           ) AS nextprodprice
+    FROM producthistory ph1
+)
+SELECT *
+FROM t
+WHERE productid = 1
+  AND year(date) = 2022
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./mssql/zadanie5/zadanie5-subq-bez-window-qp.png)
+
+#### Czas wykonania: 2589.0 \[ms\]
+
+#### Koszt: 184.612
+
+## PostgreSQL
+
+### Podzapytanie
+
+```sql
+SELECT productid,
+  productname,
+  categoryid,
+  date,
+  ph1.unitprice,
+  (
+    SELECT ph2.unitprice
+    FROM producthistory AS ph2
+    WHERE ph2.productid = ph1.productid
+      AND DATE_PART('year', ph2.date) = 2022
+      AND ph2.date < ph1.date
+    ORDER BY ph2.date DESC
+    LIMIT 1
+  ) AS previousprodprice,
+  (
+    SELECT ph3.unitprice
+    FROM producthistory AS ph3
+    WHERE ph3.productid = ph1.productid
+      AND DATE_PART('year', ph3.date) = 2022
+      AND ph3.date > ph1.date
+    ORDER BY ph3.date ASC
+    LIMIT 1
+  ) AS nextprodprice
+FROM producthistory ph1
+WHERE productid = 1
+  AND DATE_PART('year', date) = 2022
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./postgres/zadanie5/zadanie5-bez-window-qp.png)
+
+#### Czas wykonania: 10835.893 \[ms\]
+
+#### Koszt: 32657613.19
+
+### Podzapytanie w podzapytaniu
+
+```sql
+-- NOTE:
+-- To keep the same result as when using lag() and lead(), we need to skip the check for the year in the subsubqueries
+WITH t AS (
+    SELECT ph1.productid,
+           ph1.productname,
+           ph1.categoryid,
+           ph1.date,
+           ph1.unitprice,
+           (
+               SELECT ph2.unitprice
+               FROM producthistory AS ph2
+               WHERE ph2.productid = ph1.productid
+                 -- AND DATE_PART('year', ph2.date) = 2022
+                 AND ph2.date < ph1.date
+               ORDER BY ph2.date DESC
+               LIMIT 1
+           ) AS previousprodprice,
+           (
+               SELECT ph3.unitprice
+               FROM producthistory AS ph3
+               WHERE ph3.productid = ph1.productid
+                 -- AND DATE_PART('year', ph3.date) = 2022
+                 AND ph3.date > ph1.date
+               ORDER BY ph3.date ASC
+               LIMIT 1
+           ) AS nextprodprice
+    FROM producthistory ph1
+)
+SELECT *
+FROM t
+WHERE productid = 1
+  AND DATE_PART('year', date) = 2022
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./postgres/zadanie5/zadanie5-subq-bez-window-qp.png)
+
+#### Czas wykonania: 10685.629 \[ms\]
+
+#### Koszt: 27578689.69
+
+## SQLite
+
+### Podzapytanie
+
+```sql
+SELECT productid,
+       productname,
+       categoryid,
+       date,
+       ph1.unitprice,
+       (
+           SELECT ph2.unitprice
+           FROM producthistory AS ph2
+           WHERE ph2.productid = ph1.productid
+             AND strftime('%Y', date) = '2022'
+             AND ph2.date < ph1.date
+           ORDER BY ph2.date DESC
+           LIMIT 1
+       ) AS previousprodprice,
+       (
+           SELECT ph3.unitprice
+           FROM producthistory AS ph3
+           WHERE ph3.productid = ph1.productid
+             AND strftime('%Y', date) = '2022'
+             AND ph3.date > ph1.date
+           ORDER BY ph3.date ASC
+           LIMIT 1
+       ) AS nextprodprice
+FROM producthistory ph1
+WHERE productid = 1
+  AND strftime('%Y', date) = '2022'
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./sqlite/zadanie5/zadanie5-bez-window-qp.png)
+
+#### Czas wykonania: 9509 \[ms\]
+
+#### Koszt: --
+
+### Podzapytanie w podzapytaniu
+
+```sql
+-- NOTE:
+-- To keep the same result as when using lag() and lead(), we need to skip the check for the year in the subsubqueries
+WITH t AS (
+    SELECT ph1.productid,
+           ph1.productname,
+           ph1.categoryid,
+           ph1.date,
+           ph1.unitprice,
+           (
+               SELECT ph2.unitprice
+               FROM producthistory AS ph2
+               WHERE ph2.productid = ph1.productid
+                 -- AND strftime('%Y', date) = '2022'
+                 AND ph2.date < ph1.date
+               ORDER BY ph2.date DESC
+               LIMIT 1
+           ) AS previousprodprice,
+           (
+               SELECT ph3.unitprice
+               FROM producthistory AS ph3
+               WHERE ph3.productid = ph1.productid
+                 -- AND strftime('%Y', date) = '2022'
+                 AND ph3.date > ph1.date
+               ORDER BY ph3.date ASC
+               LIMIT 1
+           ) AS nextprodprice
+    FROM producthistory ph1
+)
+SELECT *
+FROM t
+WHERE productid = 1
+  AND strftime('%Y', date) = '2022'
+ORDER BY date;
+```
+
+#### Plan zapytania:
+
+![zadanie5-qp](./sqlite/zadanie5/zadanie5-subq-bez-window-qp.png)
+
+#### Czas wykonania: 9522 \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
+Patrząc po planach wykonań zapytań _Podzapytanie_ oraz _Podzapytanie w podzapytaniu_, to te zapytania są równoważne.
 
 ---
 
@@ -1256,9 +2015,114 @@ Zbiór wynikowy powinien zawierać:
 ---
 > Wyniki: 
 
+## MSSQL
+
+### Funkcje okna
+
 ```sql
---  ...
+SELECT c.contactname,
+       o.orderid,
+       o.orderdate,
+       o.freight + SUM(od.unitprice * od.quantity) AS order_value,
+       lag(o.orderid) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+       ) AS previous_orderid,
+       lag(o.orderdate) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+       ) AS previous_orderdate,
+       lag(o.freight + SUM(od.unitprice * od.quantity)) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+       ) AS previous_order_value
+FROM customers c
+JOIN orders o ON c.customerid = o.customerid
+JOIN orderdetails od ON o.orderid = od.orderid
+GROUP BY c.customerid, o.orderid, c.contactname, o.orderdate, o.freight;
 ```
+
+#### Plan zapytania:
+
+![zadanie6-window-qp](./mssql/zadanie6/zadanie6-window-qp.png)
+
+#### Czas wykonania: 16.0 \[ms\]
+
+#### Koszt: 0.200418
+
+## PostgreSQL
+
+### Funkcje okna
+
+```sql
+SELECT c.contactname,
+       o.orderid,
+       o.orderdate,
+       o.freight + SUM(od.unitprice * od.quantity) AS order_value,
+       lag(o.orderid) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_orderid,
+       lag(o.orderdate) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_orderdate,
+       lag(o.freight + SUM(od.unitprice * od.quantity)) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_order_value
+FROM customers c
+         JOIN orders o ON c.customerid = o.customerid
+         JOIN orderdetails od ON o.orderid = od.orderid
+GROUP BY c.customerid, o.orderid, c.contactname, o.orderdate, o.freight;
+```
+
+#### Plan zapytania:
+
+![zadanie6-window-qp](./postgres/zadanie6/zadanie6-window-qp.png)
+
+#### Czas wykonania: 3.243 \[ms\]
+
+#### Koszt: 314.34
+
+## SQLite
+
+### <<QUERY TYPE>>
+
+```sql
+SELECT c.contactname,
+       o.orderid,
+       o.orderdate,
+       o.freight + SUM(od.unitprice * od.quantity) AS order_value,
+       lag(o.orderid) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_orderid,
+       lag(o.orderdate) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_orderdate,
+       lag(o.freight + SUM(od.unitprice * od.quantity)) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_order_value
+FROM customers c
+         JOIN orders o ON c.customerid = o.customerid
+         JOIN "Order Details" od ON o.orderid = od.orderid
+GROUP BY c.customerid, o.orderid, c.contactname, o.orderdate, o.freight;
+```
+
+#### Plan zapytania:
+
+![zadanie6-window-qp](./sqlite/zadanie6/zadanie6-window-qp.png)
+
+#### Czas wykonania: 9 \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<<MANY SQL ENGINES RESULTS COMPARISON>>
 
 ---
 
