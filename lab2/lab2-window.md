@@ -2015,9 +2015,114 @@ Zbiór wynikowy powinien zawierać:
 ---
 > Wyniki: 
 
+## MSSQL
+
+### Funkcje okna
+
 ```sql
---  ...
+SELECT c.contactname,
+       o.orderid,
+       o.orderdate,
+       o.freight + SUM(od.unitprice * od.quantity) AS order_value,
+       lag(o.orderid) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+       ) AS previous_orderid,
+       lag(o.orderdate) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+       ) AS previous_orderdate,
+       lag(o.freight + SUM(od.unitprice * od.quantity)) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+       ) AS previous_order_value
+FROM customers c
+JOIN orders o ON c.customerid = o.customerid
+JOIN orderdetails od ON o.orderid = od.orderid
+GROUP BY c.customerid, o.orderid, c.contactname, o.orderdate, o.freight;
 ```
+
+#### Plan zapytania:
+
+![zadanie6-window-qp](./mssql/zadanie6/zadanie6-window-qp.png)
+
+#### Czas wykonania: 16.0 \[ms\]
+
+#### Koszt: 0.200418
+
+## PostgreSQL
+
+### Funkcje okna
+
+```sql
+SELECT c.contactname,
+       o.orderid,
+       o.orderdate,
+       o.freight + SUM(od.unitprice * od.quantity) AS order_value,
+       lag(o.orderid) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_orderid,
+       lag(o.orderdate) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_orderdate,
+       lag(o.freight + SUM(od.unitprice * od.quantity)) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_order_value
+FROM customers c
+         JOIN orders o ON c.customerid = o.customerid
+         JOIN orderdetails od ON o.orderid = od.orderid
+GROUP BY c.customerid, o.orderid, c.contactname, o.orderdate, o.freight;
+```
+
+#### Plan zapytania:
+
+![zadanie6-window-qp](./postgres/zadanie6/zadanie6-window-qp.png)
+
+#### Czas wykonania: 3.243 \[ms\]
+
+#### Koszt: 314.34
+
+## SQLite
+
+### <<QUERY TYPE>>
+
+```sql
+SELECT c.contactname,
+       o.orderid,
+       o.orderdate,
+       o.freight + SUM(od.unitprice * od.quantity) AS order_value,
+       lag(o.orderid) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_orderid,
+       lag(o.orderdate) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_orderdate,
+       lag(o.freight + SUM(od.unitprice * od.quantity)) over (
+           PARTITION BY c.customerid
+           ORDER BY o.orderdate
+           ) AS previous_order_value
+FROM customers c
+         JOIN orders o ON c.customerid = o.customerid
+         JOIN "Order Details" od ON o.orderid = od.orderid
+GROUP BY c.customerid, o.orderid, c.contactname, o.orderdate, o.freight;
+```
+
+#### Plan zapytania:
+
+![zadanie6-window-qp](./sqlite/zadanie6/zadanie6-window-qp.png)
+
+#### Czas wykonania: 9 \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<<MANY SQL ENGINES RESULTS COMPARISON>>
 
 ---
 
