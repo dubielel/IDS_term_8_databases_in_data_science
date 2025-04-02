@@ -2938,18 +2938,330 @@ Zbiór wynikowy powinien zawierać:
 
 W przypadku długiego czasu wykonania ogranicz zbiór wynikowy do kilkuset/kilku tysięcy wierszy
 
+---
+
+> Wyniki:
+
+## MSSQL
+
+### Funkcje okna
+
 ```sql
--- wyniki ...
+WITH t AS (
+    SELECT productid,
+        date,
+        value,
+        format(date, 'yyyy-MM') AS year_month
+    FROM producthistory
+)
+
+SELECT rank() over (
+        PARTITION BY productid,
+        year_month
+        ORDER BY date
+    ) AS positionid,
+    productid,
+    date,
+    value,
+    sum(value) over (
+        PARTITION BY productid,
+        year_month
+        ORDER BY date
+    ) AS cumulative_value
+FROM t
+GROUP BY productid,
+    year_month,
+    date,
+    value
+ORDER BY date,
+    productid;
 ```
+
+#### Plan zapytania:
+
+![zadanie9-window-milosz-qp](./mssql/zadanie9/zadanie9-window-milosz-qp.png)
+
+#### Czas wykonania: 1299.0 \[ms\]
+
+#### Koszt: 8857.74
+
+## PostgreSQL
+
+### Funkcje okna
+
+```sql
+WITH t AS (
+    SELECT productid,
+           date,
+           value,
+           to_char(date, 'YYYY-MM') AS year_month
+    FROM producthistory
+)
+
+SELECT rank() over (
+    PARTITION BY productid,
+        year_month
+    ORDER BY date
+    ) AS positionid,
+       productid,
+       date,
+       value,
+       sum(value) over (
+           PARTITION BY productid,
+               year_month
+           ORDER BY date
+           ) AS cumulative_value
+FROM t
+GROUP BY productid,
+         year_month,
+         date,
+         value
+ORDER BY date,
+         productid;
+```
+
+#### Plan zapytania:
+
+![zadanie9-window-milosz-qp](./postgres/zadanie9/zadanie9-window-milosz-qp.png)
+
+#### Czas wykonania: 7435.292 \[ms\]
+
+#### Koszt: 345405.77
+
+## SQLite
+
+### Funkcje okna
+
+```sql
+WITH t AS (
+    SELECT productid,
+           date,
+           value,
+           strftime('%Y-%m', date) AS year_month
+    FROM producthistory
+)
+
+SELECT rank() over (
+    PARTITION BY productid,
+        year_month
+    ORDER BY date
+    ) AS positionid,
+       productid,
+       date,
+       value,
+       sum(value) over (
+           PARTITION BY productid,
+               year_month
+           ORDER BY date
+           ) AS cumulative_value
+FROM t
+GROUP BY productid,
+         year_month,
+         date,
+         value
+ORDER BY date,
+         productid;
+```
+
+#### Plan zapytania:
+
+![zadanie9-window-milosz-qp](./sqlite/zadanie9/zadanie9-window-milosz-qp.png)
+
+#### Czas wykonania: 6044 \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
+
+---
 
 Spróbuj wykonać zadanie bez użycia funkcji okna. Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czasy i plany zapytań. Przetestuj działanie w różnych SZBD (MS SQL Server, PostgreSql, SQLite)
 
 ---
 > Wyniki: 
 
+## MSSQL
+
+### Podzapytania i join
+
 ```sql
---  ...
+WITH t AS (
+    SELECT productid,
+           date,
+           value,
+           format(date, 'yyyy-MM') AS year_month
+    FROM producthistory
+    WHERE date < '1941-01-01'
+),
+     ranked AS (
+         SELECT
+             p1.productid,
+             p1.date,
+             p1.value,
+             p1.year_month,
+             (SELECT COUNT(*)
+              FROM t p2
+              WHERE p2.productid = p1.productid
+                AND p2.year_month = p1.year_month
+                AND p2.date <= p1.date) AS positionid
+         FROM t p1
+     ),
+     cumsum AS (
+         SELECT
+             p1.productid,
+             p1.date,
+             p1.value,
+             p1.year_month,
+             (SELECT SUM(p2.value)
+              FROM t p2
+              WHERE p2.productid = p1.productid
+                AND p2.year_month = p1.year_month
+                AND p2.date <= p1.date) AS cumulative_value
+         FROM t p1
+     )
+SELECT
+    rp.positionid,
+    rp.productid,
+    rp.date,
+    rp.value,
+    cs.cumulative_value
+FROM ranked rp
+JOIN cumsum cs ON rp.productid = cs.productid
+ AND rp.date = cs.date
+ORDER BY rp.date, rp.productid;
 ```
+
+#### Plan zapytania:
+
+![zadanie9-join-subq-milosz-qp](./mssql/zadanie9/zadanie9-join-subq-milosz-qp.png)
+
+#### Czas wykonania: 49609.0 \[ms\]
+
+#### Koszt: 578.044
+
+## PostgreSQL
+
+### Podzapytania i join
+
+```sql
+WITH t AS (
+    SELECT productid,
+           date,
+           value,
+           to_char(date, 'YYYY-MM') AS year_month
+    FROM producthistory
+    WHERE date < '1941-01-01'
+),
+     ranked AS (
+         SELECT
+             p1.productid,
+             p1.date,
+             p1.value,
+             p1.year_month,
+             (SELECT COUNT(*)
+              FROM t p2
+              WHERE p2.productid = p1.productid
+                AND p2.year_month = p1.year_month
+                AND p2.date <= p1.date) AS positionid
+         FROM t p1
+     ),
+     cumsum AS (
+         SELECT
+             p1.productid,
+             p1.date,
+             p1.value,
+             p1.year_month,
+             (SELECT SUM(p2.value)
+              FROM t p2
+              WHERE p2.productid = p1.productid
+                AND p2.year_month = p1.year_month
+                AND p2.date <= p1.date) AS cumulative_value
+         FROM t p1
+     )
+SELECT
+    rp.positionid,
+    rp.productid,
+    rp.date,
+    rp.value,
+    cs.cumulative_value
+FROM ranked rp
+JOIN cumsum cs ON rp.productid = cs.productid
+ AND rp.date = cs.date
+ORDER BY rp.date, rp.productid;
+```
+
+#### Plan zapytania:
+
+![zadanie9-join-subq-milosz-qp](./postgres/zadanie9/zadanie9-join-subq-milosz-qp.png)
+
+#### Czas wykonania: 31944.748 \[ms\]
+
+#### Koszt: 30375811.48
+
+## SQLite
+
+### Podzapytania i join
+
+```sql
+WITH t AS (
+    SELECT productid,
+           date,
+           value,
+           strftime('%Y-%m', date) AS year_month
+    FROM producthistory
+    WHERE date < '1941-01-01'
+),
+     ranked AS (
+         SELECT
+             p1.productid,
+             p1.date,
+             p1.value,
+             p1.year_month,
+             (SELECT COUNT(*)
+              FROM t p2
+              WHERE p2.productid = p1.productid
+                AND p2.year_month = p1.year_month
+                AND p2.date <= p1.date) AS positionid
+         FROM t p1
+     ),
+     cumsum AS (
+         SELECT
+             p1.productid,
+             p1.date,
+             p1.value,
+             p1.year_month,
+             (SELECT SUM(p2.value)
+              FROM t p2
+              WHERE p2.productid = p1.productid
+                AND p2.year_month = p1.year_month
+                AND p2.date <= p1.date) AS cumulative_value
+         FROM t p1
+     )
+SELECT
+    rp.positionid,
+    rp.productid,
+    rp.date,
+    rp.value,
+    cs.cumulative_value
+FROM ranked rp
+JOIN cumsum cs ON rp.productid = cs.productid
+ AND rp.date = cs.date
+ORDER BY rp.date, rp.productid;
+```
+
+#### Plan zapytania:
+
+Brak - za długi czas wykonania
+
+#### Czas wykonania: -- \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
 
 ---
 
