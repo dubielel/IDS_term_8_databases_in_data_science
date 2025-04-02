@@ -2796,9 +2796,129 @@ Zbiór wynikowy powinien zawierać:
 ---
 > Wyniki: 
 
+## MSSQL
+
+### Funkcje okna i podzapytanie
+
 ```sql
---  ...
+WITH ordervalues AS (
+    SELECT
+        o.customerid,
+        o.orderid,
+        o.orderdate,
+        sum(od.quantity * od.unitprice * (1 - od.discount)) + o.freight AS totalordervalue,
+        format(o.orderdate, 'yyyy-MM') AS ordermonth
+    FROM orders o
+             JOIN orderdetails od ON o.orderid = od.orderid
+    GROUP BY o.customerid, o.orderid, o.orderdate, o.freight
+)
+
+SELECT
+    customerid,
+    orderid,
+    orderdate,
+    totalordervalue,
+    first_value(orderid) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue ASC) AS minorderid,
+    first_value(orderdate) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue ASC) AS minorderdate,
+    first_value(totalordervalue) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue ASC) AS minordervalue,
+    first_value(orderid) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue DESC) AS maxorderid,
+    first_value(orderdate) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue DESC) AS maxorderdate,
+    first_value(totalordervalue) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue DESC) AS maxordervalue
+FROM ordervalues
+ORDER BY orderid;
 ```
+
+#### Plan zapytania:
+
+![zadanie8-milosz-qp](./mssql/zadanie8/zadanie8-milosz-qp.png)
+
+#### Czas wykonania: 42.0 \[ms\]
+
+#### Koszt: 0.124089
+
+## PostgreSQL
+
+### Funkcje okna i podzapytanie
+
+```sql
+WITH ordervalues AS (
+    SELECT
+        o.customerid,
+        o.orderid,
+        o.orderdate,
+        sum(od.quantity * od.unitprice * (1 - od.discount)) + o.freight AS totalordervalue,
+        to_char(o.orderdate, 'YYYY-MM') AS ordermonth
+    FROM orders o
+    JOIN orderdetails od ON o.orderid = od.orderid
+    GROUP BY o.customerid, o.orderid, o.orderdate, ordermonth
+)
+
+SELECT
+    customerid,
+    orderid,
+    orderdate,
+    totalordervalue,
+    first_value(orderid) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue ASC) AS minorderid,
+    first_value(orderdate) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue ASC) AS minorderdate,
+    first_value(totalordervalue) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue ASC) AS minordervalue,
+    first_value(orderid) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue DESC) AS maxorderid,
+    first_value(orderdate) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue DESC) AS maxorderdate,
+    first_value(totalordervalue) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue DESC) AS maxordervalue
+FROM ordervalues
+ORDER BY orderid;
+```
+
+#### Plan zapytania:
+
+![zadanie8-milosz-qp](./postgres/zadanie8/zadanie8-milosz-qp.png)
+
+#### Czas wykonania: 9.04 \[ms\]
+
+#### Koszt: 283.96
+
+## SQLite
+
+### Funkcje okna i podzapytanie
+
+```sql
+WITH ordervalues AS (
+    SELECT
+        o.customerid,
+        o.orderid,
+        o.orderdate,
+        sum(od.quantity * od.unitprice * (1 - od.discount)) + o.freight AS totalordervalue,
+        substr(orderdate, -4) || '-' || substr(orderdate, 1, instr(orderdate, '/') -1) /* YYYY-M representation */ AS ordermonth
+    FROM orders o
+             JOIN "Order Details" od ON o.orderid = od.orderid
+    GROUP BY o.customerid, o.orderid, o.orderdate, ordermonth
+)
+
+SELECT
+    customerid,
+    orderid,
+    orderdate,
+    totalordervalue,
+    first_value(orderid) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue ASC) AS minorderid,
+    first_value(orderdate) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue ASC) AS minorderdate,
+    first_value(totalordervalue) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue ASC) AS minordervalue,
+    first_value(orderid) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue DESC) AS maxorderid,
+    first_value(orderdate) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue DESC) AS maxorderdate,
+    first_value(totalordervalue) OVER (PARTITION BY customerid, ordermonth ORDER BY totalordervalue DESC) AS maxordervalue
+FROM ordervalues
+ORDER BY orderid;
+```
+
+#### Plan zapytania:
+
+![zadanie8-milosz-qp](./sqlite/zadanie8/zadanie8-milosz-qp.png)
+
+#### Czas wykonania: 14 \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
 
 ---
 
