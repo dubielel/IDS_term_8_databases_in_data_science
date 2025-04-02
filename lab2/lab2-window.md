@@ -297,10 +297,12 @@ WHERE t.unitprice > t.avgprice;
 
 ### Porównanie wyników
 
-<!-- TODO -->
+Koszt operacji z użyciem JOIN i funkcji okna jest taki sam.
+Koszt wykonania zapytania z użyciem podzapytania jest większy,
+jednak nieznacznie większy w porównaniu do innych baz danych.
+Wynika to najprawdopodobniej z faktu, że MSSQL dobrze to zapytanie, jednak narzut i tak jest widoczny.
 
 ## PostgreSQL
-<!-- TODO we can also check the version with WHERE id <= 10_000 -->
 
 ### Podzapytanie
 
@@ -386,7 +388,9 @@ WHERE t.unitprice > t.avgprice;
 
 ### Porównanie wyników
 
-<!-- TODO -->
+Zapytanie wykorzystujące JOIN ma o około 3.5 razy niższy koszt niż zapytanie z użyciem funkcji okna.
+Zapytanie z użyciem podzapytania ma najwyższy koszt, pomimo ograniczenia danych do 10 000 wierszy,
+czyli o około 200 razy mniejszy niż zapytanie z użyciem JOIN i funkcję okna.
 
 ## SQLite
 
@@ -472,12 +476,13 @@ WHERE t.unitprice > t.avgprice;
 #### Koszt: --
 
 ### Porównanie wyników
-
-<!-- TODO -->
+Zapytanie z JOIN jest szybsze niż zapytanie z funkcją okna.
+Zapytanie z podzapytaniem jest najwolniejsze, dużo wolniejsze od pozostałych.
 
 ## Porównanie wyników pomiędzy SZBD
 
-<!-- TODO -->
+We wszystykich SZBD zapytanie z JOIN jest najszybsze, zapytanie z funkcją okna jest wolniejsze, a zapytanie z podzapytaniem jest najwolniejsze.
+MSSQL dużo lepiej radzi sobie z zapytaniem z podzapytaniem niż pozostałe bazy danych.
 
 ---
 
@@ -609,7 +614,8 @@ FROM producthistory;
 
 ### Porównanie wyników
 
-<!-- TODO -->
+W przypadku tych zapytań niezmiennie JOIN jest najlepszy, jednak funkcja okna w tym przypadku jest gorsza niż podzapytanie.
+MSSQL jest dobry w optymalizacji podzapytań.
 
 ## PostgreSQL
 
@@ -721,7 +727,8 @@ FROM producthistory window category_window AS (PARTITION BY categoryid),
 
 ### Porównanie wyników
 
-<!-- TODO -->
+W przypadku postgresa bez zaskoczeń podzapytanie radzi sobie najgorzej, JOIN najlepiej.
+Tym razem koszt zapytania jest około 4 razy niższy dla zapytania z użyciem JOIN.
 
 ## SQLite
 
@@ -834,13 +841,13 @@ FROM producthistory window category_window AS (PARTITION BY categoryid),
 
 ### Porównanie wyników
 
-<!-- TODO -->
+Podobnie jak w postgresie, z tym że JOIN i funkcja ona miały podobne czasy wykonania.
 Nie ufam czasom wykonania – były mierzone sqlite3 CLI
 
 ## Porównanie wyników pomiędzy SZBD
 
-<!-- TODO -->
-
+MSSQL bardzo dobrze radzi sobie z podzapytaniami, jednak JOIN jest najszybszy.
+JOIN jest najszybszy w przypadku wszystkich baz danych.
 ---
 
 
@@ -926,7 +933,7 @@ FROM products;
 
 ## Porównanie wyników pomiędzy SZBD
 
-<!-- TODO -->
+Zaskakująco SQLITE radzi sobie lepiej niż POSTGRES. Czasy wykonania są jednak niemal błyskawiczne w przypadku wszystkich SZBD.
 
 ## Skrócony rezultat zapytań (z MSSQL, TOP 15)
 
@@ -1143,7 +1150,8 @@ ORDER BY categoryid, rowno;
 
 ## Porównanie wyników pomiędzy SZBD
 
-<!-- TODO -->
+Postgres teoretycznie był szybszy korzystając z podzapytania, natomiast pozostałe SZBD było szybsze korzystając z funkcji okna.
+Być może czasy wykonania są na tyle szybkie, że różne czasy wynikają z czynników zewnętrznych.
 
 ---
 # Zadanie 4
@@ -1242,7 +1250,8 @@ ORDER BY year, productid, ranking;
 
 ### Porównanie wyników
 
-<!-- TODO -->
+W tym przypadku MSSQL radzi sobie tragicznie z podzapytaniem i zapytanie z wykorzystaniem funkcji okna wykonywane jest o wiele szybciej.
+Dodatkowo zmuszeni byliśmy ograniczyć dane do roku 1940, aby zapytanie z podzapytaniem w ogóle się wykonało sensownym czasie.
 
 ## PostgreSQL
 
@@ -1326,7 +1335,7 @@ ORDER BY year, productid, ranking;
 
 ### Porównanie wyników
 
-<!-- TODO -->
+Analogicznie
 
 ## SQLite
 
@@ -1410,11 +1419,11 @@ ORDER BY year, productid, ranking;
 
 ### Porównanie wyników
 
-<!-- TODO -->
+Analogicznie
 
 ## Porównanie wyników pomiędzy SZBD
 
-<!-- TODO -->
+W przypadku wszystkich SZBD zapytanie z wykorzystaniem funkcji okna jest szybsze niż zapytanie z podzapytaniem.
 
 ---
 
@@ -1616,7 +1625,8 @@ ORDER BY date;
 
 ## Porównanie wyników pomiędzy SZBD
 
-<!-- TODO -->
+Bez zaskoczeń we wszystkich SZBD funkcja okna działa szybciej niż funkcja okna w podzapytaniu.
+Co ciekawe koszt w MSSWL jest bardzo podobny jednak czas wykonania dla funkcji okna znacznie krótszy.
 
 ## Skrócony rezultat zapytań (z MSSQL, pierwsze 10 wierszy i ostatnie 10 wierszy)
 
@@ -1675,11 +1685,12 @@ ORDER BY date;
 
 
 **Warto zaznaczyć różnicę w pierwszym wierszu w kolumnie _previousprodprice_**
+Powinniśmy byli dodatkowo dodać warunek, bo bierzemy z poprzedniego roku.
 
 ## Porównanie funkcji
 
-* `lag()` – <!-- TODO -->
-* `lead()` – <!-- TODO -->
+* `lag()` – zwraca wartość z poprzedniego wiersza w ramach partycji
+* `lead()` – zwraca wartość z następnego wiersza w ramach partycji
 
 ---
 
@@ -1992,8 +2003,8 @@ ORDER BY date;
 
 ## Porównanie wyników pomiędzy SZBD
 
-<!-- TODO -->
 Patrząc po planach wykonań zapytań _Podzapytanie_ oraz _Podzapytanie w podzapytaniu_, to te zapytania są równoważne.
+Najlepiej sobie radzi MSSQL.
 
 ---
 
@@ -2122,7 +2133,8 @@ GROUP BY c.customerid, o.orderid, c.contactname, o.orderdate, o.freight;
 
 ## Porównanie wyników pomiędzy SZBD
 
-<!-- TODO -->
+Zaskakująco w przypadku tego zapytania postgres sobie radzi najlepiej,
+natomiast mssql najgorzej.
 
 ---
 
@@ -2499,11 +2511,11 @@ Tak, ponieważ klauzula `ORDER BY unitprice DESC` gwarantuje nam, że pierwszym 
 
 #### Czy funkcja `last_value()` pokazuje najtańszy produkt?
 
-Tak, aczkolwiek nie jest to najtańszy produkt dla całej kategorii stworzonej przez partycję, lecz najtańszy produkt w oparciu o ramkę wierszy z zakresu [pierwszy wiersz w danej partycji, aktualne wiersze w danej partycji]. W tych "aktualnych wierszach chodzi o to, że gdy kilka produktów ma taką samą wartość `unitprice`, to ze względu na sortowanie malejące po tej kolumnie, w danym wierszu mogą być rozpatrywane też kolejne wiersze, jeżeli mają taką samą wartość `unitprice`. **(TODO nie do końca rozumiem dlaczego)** <!-- TODO -->
+Tak, aczkolwiek nie jest to najtańszy produkt dla całej kategorii stworzonej przez partycję, lecz najtańszy produkt w oparciu o ramkę wierszy z zakresu [pierwszy wiersz w danej partycji, aktualne wiersze w danej partycji]. W tych "aktualnych wierszach chodzi o to, że gdy kilka produktów ma taką samą wartość `unitprice`, to ze względu na sortowanie malejące po tej kolumnie, w danym wierszu mogą być rozpatrywane też kolejne wiersze, jeżeli mają taką samą wartość `unitprice`. Najwyraźniej SZBD bez podania ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING zawęża zakres poszukiwania do wszystkich wierszy wstecz i końca danej grupy.
 
 #### Co jest przyczyną takiego działania funkcji `last_value`?
 
-No właśnie nie do końca rozumiem. <!-- TODO -->
+Rozwiązanie specyficzne dla bazy danych.
 
 #### Co trzeba zmienić żeby funkcja last_value pokazywała najtańszy produkt w danej kategorii?
 
@@ -2768,7 +2780,7 @@ ORDER BY categoryid, unitprice DESC;
 
 ## Porównanie wyników pomiędzy SZBD
 
-<!-- TODO -->
+MSSQL działał najwolniej, jednak różnice są niewielkie.
 
 ---
 
@@ -2918,7 +2930,7 @@ ORDER BY orderid;
 
 ## Porównanie wyników pomiędzy SZBD
 
-<!-- TODO -->
+MSSQL działał najwolniej, natomiast postgres najszybciej.
 
 ---
 
