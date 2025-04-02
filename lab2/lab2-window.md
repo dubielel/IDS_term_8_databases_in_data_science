@@ -725,7 +725,7 @@ FROM producthistory window category_window AS (PARTITION BY categoryid),
 
 ## SQLite
 
-### <<QUERY TYPE>>
+### Podzapytanie
 
 ```sql
 WITH limited_data AS (
@@ -771,7 +771,7 @@ FROM limited_data;
 
 #### Koszt: --
 
-### <<QUERY TYPE>>
+### Join
 
 ```sql
 SELECT id,
@@ -808,7 +808,7 @@ JOIN (
 
 #### Koszt: --
 
-### <<QUERY TYPE>>
+### Funkcja okna
 
 ```sql
 SELECT id,
@@ -2087,7 +2087,7 @@ GROUP BY c.customerid, o.orderid, c.contactname, o.orderdate, o.freight;
 
 ## SQLite
 
-### <<QUERY TYPE>>
+### Funkcje okna
 
 ```sql
 SELECT c.contactname,
@@ -2122,7 +2122,7 @@ GROUP BY c.customerid, o.orderid, c.contactname, o.orderdate, o.freight;
 
 ## Porównanie wyników pomiędzy SZBD
 
-<<MANY SQL ENGINES RESULTS COMPARISON>>
+<!-- TODO -->
 
 ---
 
@@ -2148,8 +2148,383 @@ order by categoryid, unitprice desc;
 ---
 > Wyniki: 
 
+## MSSQL
+
+### Funkcje okna
+
 ```sql
---  ...
+SELECT productid,
+       productname,
+       unitprice,
+       categoryid,
+       first_value(productname) over (
+           PARTITION BY categoryid
+           ORDER BY unitprice DESC
+       ) first,
+       last_value(productname) over (
+           PARTITION BY categoryid
+           ORDER BY unitprice DESC
+       ) last
+FROM products
+ORDER BY categoryid, unitprice DESC;
+```
+
+#### Plan zapytania:
+
+![zadanie7-window-qp](./mssql/zadanie7/zadanie7-window-qp.png)
+
+#### Czas wykonania: 3.0 \[ms\]
+
+#### Koszt: 0.016471
+
+#### Wynik:
+
+| productid | productname                      | unitprice | categoryid | first                   | last                             |
+| :-------- | :------------------------------- | :-------- | :--------- | :---------------------- | :------------------------------- |
+| 38        | Côte de Blaye                    | 263.5000  | 1          | Côte de Blaye           | Côte de Blaye                    |
+| 43        | Ipoh Coffee                      | 46.0000   | 1          | Côte de Blaye           | Ipoh Coffee                      |
+| 2         | Chang                            | 19.0000   | 1          | Côte de Blaye           | Chang                            |
+| 1         | Chai                             | 18.0000   | 1          | Côte de Blaye           | Lakkalikööri                     |
+| 39        | Chartreuse verte                 | 18.0000   | 1          | Côte de Blaye           | Lakkalikööri                     |
+| 35        | Steeleye Stout                   | 18.0000   | 1          | Côte de Blaye           | Lakkalikööri                     |
+| 76        | Lakkalikööri                     | 18.0000   | 1          | Côte de Blaye           | Lakkalikööri                     |
+| 70        | Outback Lager                    | 15.0000   | 1          | Côte de Blaye           | Outback Lager                    |
+| 67        | Laughing Lumberjack Lager        | 14.0000   | 1          | Côte de Blaye           | Sasquatch Ale                    |
+| 34        | Sasquatch Ale                    | 14.0000   | 1          | Côte de Blaye           | Sasquatch Ale                    |
+| 75        | Rhönbräu Klosterbier             | 7.7500    | 1          | Côte de Blaye           | Rhönbräu Klosterbier             |
+| 24        | Guaraná Fantástica               | 4.5000    | 1          | Côte de Blaye           | Guaraná Fantástica               |
+| 63        | Vegie-spread                     | 43.9000   | 2          | Vegie-spread            | Vegie-spread                     |
+| 8         | Northwoods Cranberry Sauce       | 40.0000   | 2          | Vegie-spread            | Northwoods Cranberry Sauce       |
+| 61        | Sirop d'érable                   | 28.5000   | 2          | Vegie-spread            | Sirop d'érable                   |
+| 6         | Grandma's Boysenberry Spread     | 25.0000   | 2          | Vegie-spread            | Grandma's Boysenberry Spread     |
+| 4         | Chef Anton's Cajun Seasoning     | 22.0000   | 2          | Vegie-spread            | Chef Anton's Cajun Seasoning     |
+| 5         | Chef Anton's Gumbo Mix           | 21.3500   | 2          | Vegie-spread            | Chef Anton's Gumbo Mix           |
+| 65        | Louisiana Fiery Hot Pepper Sauce | 21.0500   | 2          | Vegie-spread            | Louisiana Fiery Hot Pepper Sauce |
+| 44        | Gula Malacca                     | 19.4500   | 2          | Vegie-spread            | Gula Malacca                     |
+| 66        | Louisiana Hot Spiced Okra        | 17.0000   | 2          | Vegie-spread            | Louisiana Hot Spiced Okra        |
+| 15        | Genen Shouyu                     | 15.5000   | 2          | Vegie-spread            | Genen Shouyu                     |
+| 77        | Original Frankfurter grüne Soße  | 13.0000   | 2          | Vegie-spread            | Original Frankfurter grüne Soße  |
+| 3         | Aniseed Syrup                    | 10.0000   | 2          | Vegie-spread            | Aniseed Syrup                    |
+| 20        | Sir Rodney's Marmalade           | 81.0000   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade           |
+| 62        | Tarte au sucre                   | 49.3000   | 3          | Sir Rodney's Marmalade  | Tarte au sucre                   |
+| 27        | Schoggi Schokolade               | 43.9000   | 3          | Sir Rodney's Marmalade  | Schoggi Schokolade               |
+| 26        | Gumbär Gummibärchen              | 31.2300   | 3          | Sir Rodney's Marmalade  | Gumbär Gummibärchen              |
+| 49        | Maxilaku                         | 20.0000   | 3          | Sir Rodney's Marmalade  | Maxilaku                         |
+| 16        | Pavlova                          | 17.4500   | 3          | Sir Rodney's Marmalade  | Pavlova                          |
+| 50        | Valkoinen suklaa                 | 16.2500   | 3          | Sir Rodney's Marmalade  | Valkoinen suklaa                 |
+| 25        | NuNuCa Nuß-Nougat-Creme          | 14.0000   | 3          | Sir Rodney's Marmalade  | NuNuCa Nuß-Nougat-Creme          |
+| 48        | Chocolade                        | 12.7500   | 3          | Sir Rodney's Marmalade  | Chocolade                        |
+| 68        | Scottish Longbreads              | 12.5000   | 3          | Sir Rodney's Marmalade  | Scottish Longbreads              |
+| 21        | Sir Rodney's Scones              | 10.0000   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Scones              |
+| 47        | Zaanse koeken                    | 9.5000    | 3          | Sir Rodney's Marmalade  | Zaanse koeken                    |
+| 19        | Teatime Chocolate Biscuits       | 9.2000    | 3          | Sir Rodney's Marmalade  | Teatime Chocolate Biscuits       |
+| 59        | Raclette Courdavault             | 55.0000   | 4          | Raclette Courdavault    | Raclette Courdavault             |
+| 12        | Queso Manchego La Pastora        | 38.0000   | 4          | Raclette Courdavault    | Queso Manchego La Pastora        |
+| 69        | Gudbrandsdalsost                 | 36.0000   | 4          | Raclette Courdavault    | Gudbrandsdalsost                 |
+| 72        | Mozzarella di Giovanni           | 34.8000   | 4          | Raclette Courdavault    | Mozzarella di Giovanni           |
+| 60        | Camembert Pierrot                | 34.0000   | 4          | Raclette Courdavault    | Camembert Pierrot                |
+| 32        | Mascarpone Fabioli               | 32.0000   | 4          | Raclette Courdavault    | Mascarpone Fabioli               |
+| 71        | Flotemysost                      | 21.5000   | 4          | Raclette Courdavault    | Flotemysost                      |
+| 11        | Queso Cabrales                   | 21.0000   | 4          | Raclette Courdavault    | Queso Cabrales                   |
+| 31        | Gorgonzola Telino                | 12.5000   | 4          | Raclette Courdavault    | Gorgonzola Telino                |
+| 33        | Geitost                          | 2.5000    | 4          | Raclette Courdavault    | Geitost                          |
+| 56        | Gnocchi di nonna Alice           | 38.0000   | 5          | Gnocchi di nonna Alice  | Gnocchi di nonna Alice           |
+| 64        | Wimmers gute Semmelknödel        | 33.2500   | 5          | Gnocchi di nonna Alice  | Wimmers gute Semmelknödel        |
+| 22        | Gustaf's Knäckebröd              | 21.0000   | 5          | Gnocchi di nonna Alice  | Gustaf's Knäckebröd              |
+| 57        | Ravioli Angelo                   | 19.5000   | 5          | Gnocchi di nonna Alice  | Ravioli Angelo                   |
+| 42        | Singaporean Hokkien Fried Mee    | 14.0000   | 5          | Gnocchi di nonna Alice  | Singaporean Hokkien Fried Mee    |
+| 23        | Tunnbröd                         | 9.0000    | 5          | Gnocchi di nonna Alice  | Tunnbröd                         |
+| 52        | Filo Mix                         | 7.0000    | 5          | Gnocchi di nonna Alice  | Filo Mix                         |
+| 29        | Thüringer Rostbratwurst          | 123.7900  | 6          | Thüringer Rostbratwurst | Thüringer Rostbratwurst          |
+| 9         | Mishi Kobe Niku                  | 97.0000   | 6          | Thüringer Rostbratwurst | Mishi Kobe Niku                  |
+| 17        | Alice Mutton                     | 39.0000   | 6          | Thüringer Rostbratwurst | Alice Mutton                     |
+| 53        | Perth Pasties                    | 32.8000   | 6          | Thüringer Rostbratwurst | Perth Pasties                    |
+| 55        | Pâté chinois                     | 24.0000   | 6          | Thüringer Rostbratwurst | Pâté chinois                     |
+| 54        | Tourtière                        | 7.4500    | 6          | Thüringer Rostbratwurst | Tourtière                        |
+| 51        | Manjimup Dried Apples            | 53.0000   | 7          | Manjimup Dried Apples   | Manjimup Dried Apples            |
+| 28        | Rössle Sauerkraut                | 45.6000   | 7          | Manjimup Dried Apples   | Rössle Sauerkraut                |
+| 7         | Uncle Bob's Organic Dried Pears  | 30.0000   | 7          | Manjimup Dried Apples   | Uncle Bob's Organic Dried Pears  |
+| 14        | Tofu                             | 23.2500   | 7          | Manjimup Dried Apples   | Tofu                             |
+| 74        | Longlife Tofu                    | 10.0000   | 7          | Manjimup Dried Apples   | Longlife Tofu                    |
+| 18        | Carnarvon Tigers                 | 62.5000   | 8          | Carnarvon Tigers        | Carnarvon Tigers                 |
+| 10        | Ikura                            | 31.0000   | 8          | Carnarvon Tigers        | Ikura                            |
+| 37        | Gravad lax                       | 26.0000   | 8          | Carnarvon Tigers        | Gravad lax                       |
+| 30        | Nord-Ost Matjeshering            | 25.8900   | 8          | Carnarvon Tigers        | Nord-Ost Matjeshering            |
+| 36        | Inlagd Sill                      | 19.0000   | 8          | Carnarvon Tigers        | Inlagd Sill                      |
+| 40        | Boston Crab Meat                 | 18.4000   | 8          | Carnarvon Tigers        | Boston Crab Meat                 |
+| 73        | Röd Kaviar                       | 15.0000   | 8          | Carnarvon Tigers        | Röd Kaviar                       |
+| 58        | Escargots de Bourgogne           | 13.2500   | 8          | Carnarvon Tigers        | Escargots de Bourgogne           |
+| 46        | Spegesild                        | 12.0000   | 8          | Carnarvon Tigers        | Spegesild                        |
+| 41        | Jack's New England Clam Chowder  | 9.6500    | 8          | Carnarvon Tigers        | Jack's New England Clam Chowder  |
+| 45        | Rogede sild                      | 9.5000    | 8          | Carnarvon Tigers        | Rogede sild                      |
+| 13        | Konbu                            | 6.0000    | 8          | Carnarvon Tigers        | Konbu                            |
+
+
+## PostgreSQL
+
+### Funkcje okna
+
+```sql
+SELECT productid,
+       productname,
+       unitprice,
+       categoryid,
+       first_value(productname) over (
+           PARTITION BY categoryid
+           ORDER BY unitprice DESC
+       ) first,
+       last_value(productname) over (
+           PARTITION BY categoryid
+           ORDER BY unitprice DESC
+       ) last
+FROM products
+ORDER BY categoryid, unitprice DESC;
+```
+
+#### Plan zapytania:
+
+![zadanie7-window-qp](./postgres/zadanie7/zadanie7-window-qp.png)
+
+#### Czas wykonania: 0.103 \[ms\]
+
+#### Koszt: 5.92
+
+#### Wynik:
+
+| productid | productname                      | unitprice | categoryid | first                   | last                             |
+| :-------- | :------------------------------- | :-------- | :--------- | :---------------------- | :------------------------------- |
+| 38        | Côte de Blaye                    | 263.5     | 1          | Côte de Blaye           | Côte de Blaye                    |
+| 43        | Ipoh Coffee                      | 46        | 1          | Côte de Blaye           | Ipoh Coffee                      |
+| 2         | Chang                            | 19        | 1          | Côte de Blaye           | Chang                            |
+| 1         | Chai                             | 18        | 1          | Côte de Blaye           | Chartreuse verte                 |
+| 76        | Lakkalikööri                     | 18        | 1          | Côte de Blaye           | Chartreuse verte                 |
+| 35        | Steeleye Stout                   | 18        | 1          | Côte de Blaye           | Chartreuse verte                 |
+| 39        | Chartreuse verte                 | 18        | 1          | Côte de Blaye           | Chartreuse verte                 |
+| 70        | Outback Lager                    | 15        | 1          | Côte de Blaye           | Outback Lager                    |
+| 34        | Sasquatch Ale                    | 14        | 1          | Côte de Blaye           | Laughing Lumberjack Lager        |
+| 67        | Laughing Lumberjack Lager        | 14        | 1          | Côte de Blaye           | Laughing Lumberjack Lager        |
+| 75        | Rhönbräu Klosterbier             | 7.75      | 1          | Côte de Blaye           | Rhönbräu Klosterbier             |
+| 24        | Guaraná Fantástica               | 4.5       | 1          | Côte de Blaye           | Guaraná Fantástica               |
+| 63        | Vegie-spread                     | 43.9      | 2          | Vegie-spread            | Vegie-spread                     |
+| 8         | Northwoods Cranberry Sauce       | 40        | 2          | Vegie-spread            | Northwoods Cranberry Sauce       |
+| 61        | Sirop d'érable                   | 28.5      | 2          | Vegie-spread            | Sirop d'érable                   |
+| 6         | Grandma's Boysenberry Spread     | 25        | 2          | Vegie-spread            | Grandma's Boysenberry Spread     |
+| 4         | Chef Anton's Cajun Seasoning     | 22        | 2          | Vegie-spread            | Chef Anton's Cajun Seasoning     |
+| 5         | Chef Anton's Gumbo Mix           | 21.35     | 2          | Vegie-spread            | Chef Anton's Gumbo Mix           |
+| 65        | Louisiana Fiery Hot Pepper Sauce | 21.05     | 2          | Vegie-spread            | Louisiana Fiery Hot Pepper Sauce |
+| 44        | Gula Malacca                     | 19.45     | 2          | Vegie-spread            | Gula Malacca                     |
+| 66        | Louisiana Hot Spiced Okra        | 17        | 2          | Vegie-spread            | Louisiana Hot Spiced Okra        |
+| 15        | Genen Shouyu                     | 13        | 2          | Vegie-spread            | Original Frankfurter grüne Soße  |
+| 77        | Original Frankfurter grüne Soße  | 13        | 2          | Vegie-spread            | Original Frankfurter grüne Soße  |
+| 3         | Aniseed Syrup                    | 10        | 2          | Vegie-spread            | Aniseed Syrup                    |
+| 20        | Sir Rodney's Marmalade           | 81        | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade           |
+| 62        | Tarte au sucre                   | 49.3      | 3          | Sir Rodney's Marmalade  | Tarte au sucre                   |
+| 27        | Schoggi Schokolade               | 43.9      | 3          | Sir Rodney's Marmalade  | Schoggi Schokolade               |
+| 26        | Gumbär Gummibärchen              | 31.23     | 3          | Sir Rodney's Marmalade  | Gumbär Gummibärchen              |
+| 49        | Maxilaku                         | 20        | 3          | Sir Rodney's Marmalade  | Maxilaku                         |
+| 16        | Pavlova                          | 17.45     | 3          | Sir Rodney's Marmalade  | Pavlova                          |
+| 50        | Valkoinen suklaa                 | 16.25     | 3          | Sir Rodney's Marmalade  | Valkoinen suklaa                 |
+| 25        | NuNuCa Nuß-Nougat-Creme          | 14        | 3          | Sir Rodney's Marmalade  | NuNuCa Nuß-Nougat-Creme          |
+| 48        | Chocolade                        | 12.75     | 3          | Sir Rodney's Marmalade  | Chocolade                        |
+| 68        | Scottish Longbreads              | 12.5      | 3          | Sir Rodney's Marmalade  | Scottish Longbreads              |
+| 21        | Sir Rodney's Scones              | 10        | 3          | Sir Rodney's Marmalade  | Sir Rodney's Scones              |
+| 47        | Zaanse koeken                    | 9.5       | 3          | Sir Rodney's Marmalade  | Zaanse koeken                    |
+| 19        | Teatime Chocolate Biscuits       | 9.2       | 3          | Sir Rodney's Marmalade  | Teatime Chocolate Biscuits       |
+| 59        | Raclette Courdavault             | 55        | 4          | Raclette Courdavault    | Raclette Courdavault             |
+| 12        | Queso Manchego La Pastora        | 38        | 4          | Raclette Courdavault    | Queso Manchego La Pastora        |
+| 69        | Gudbrandsdalsost                 | 36        | 4          | Raclette Courdavault    | Gudbrandsdalsost                 |
+| 72        | Mozzarella di Giovanni           | 34.8      | 4          | Raclette Courdavault    | Mozzarella di Giovanni           |
+| 60        | Camembert Pierrot                | 34        | 4          | Raclette Courdavault    | Camembert Pierrot                |
+| 32        | Mascarpone Fabioli               | 32        | 4          | Raclette Courdavault    | Mascarpone Fabioli               |
+| 71        | Flotemysost                      | 21.5      | 4          | Raclette Courdavault    | Flotemysost                      |
+| 11        | Queso Cabrales                   | 21        | 4          | Raclette Courdavault    | Queso Cabrales                   |
+| 31        | Gorgonzola Telino                | 12.5      | 4          | Raclette Courdavault    | Gorgonzola Telino                |
+| 33        | Geitost                          | 2.5       | 4          | Raclette Courdavault    | Geitost                          |
+| 56        | Gnocchi di nonna Alice           | 38        | 5          | Gnocchi di nonna Alice  | Gnocchi di nonna Alice           |
+| 64        | Wimmers gute Semmelknödel        | 33.25     | 5          | Gnocchi di nonna Alice  | Wimmers gute Semmelknödel        |
+| 22        | Gustaf's Knäckebröd              | 21        | 5          | Gnocchi di nonna Alice  | Gustaf's Knäckebröd              |
+| 57        | Ravioli Angelo                   | 19.5      | 5          | Gnocchi di nonna Alice  | Ravioli Angelo                   |
+| 42        | Singaporean Hokkien Fried Mee    | 14        | 5          | Gnocchi di nonna Alice  | Singaporean Hokkien Fried Mee    |
+| 23        | Tunnbröd                         | 9         | 5          | Gnocchi di nonna Alice  | Tunnbröd                         |
+| 52        | Filo Mix                         | 7         | 5          | Gnocchi di nonna Alice  | Filo Mix                         |
+| 29        | Thüringer Rostbratwurst          | 123.79    | 6          | Thüringer Rostbratwurst | Thüringer Rostbratwurst          |
+| 9         | Mishi Kobe Niku                  | 97        | 6          | Thüringer Rostbratwurst | Mishi Kobe Niku                  |
+| 17        | Alice Mutton                     | 39        | 6          | Thüringer Rostbratwurst | Alice Mutton                     |
+| 53        | Perth Pasties                    | 32.8      | 6          | Thüringer Rostbratwurst | Perth Pasties                    |
+| 55        | Pâté chinois                     | 24        | 6          | Thüringer Rostbratwurst | Pâté chinois                     |
+| 54        | Tourtière                        | 7.45      | 6          | Thüringer Rostbratwurst | Tourtière                        |
+| 51        | Manjimup Dried Apples            | 53        | 7          | Manjimup Dried Apples   | Manjimup Dried Apples            |
+| 28        | Rössle Sauerkraut                | 45.6      | 7          | Manjimup Dried Apples   | Rössle Sauerkraut                |
+| 7         | Uncle Bob's Organic Dried Pears  | 30        | 7          | Manjimup Dried Apples   | Uncle Bob's Organic Dried Pears  |
+| 14        | Tofu                             | 23.25     | 7          | Manjimup Dried Apples   | Tofu                             |
+| 74        | Longlife Tofu                    | 10        | 7          | Manjimup Dried Apples   | Longlife Tofu                    |
+| 18        | Carnarvon Tigers                 | 62.5      | 8          | Carnarvon Tigers        | Carnarvon Tigers                 |
+| 10        | Ikura                            | 31        | 8          | Carnarvon Tigers        | Ikura                            |
+| 37        | Gravad lax                       | 26        | 8          | Carnarvon Tigers        | Gravad lax                       |
+| 30        | Nord-Ost Matjeshering            | 25.89     | 8          | Carnarvon Tigers        | Nord-Ost Matjeshering            |
+| 36        | Inlagd Sill                      | 19        | 8          | Carnarvon Tigers        | Inlagd Sill                      |
+| 40        | Boston Crab Meat                 | 18.4      | 8          | Carnarvon Tigers        | Boston Crab Meat                 |
+| 73        | Röd Kaviar                       | 15        | 8          | Carnarvon Tigers        | Röd Kaviar                       |
+| 58        | Escargots de Bourgogne           | 13.25     | 8          | Carnarvon Tigers        | Escargots de Bourgogne           |
+| 46        | Spegesild                        | 12        | 8          | Carnarvon Tigers        | Spegesild                        |
+| 41        | Jack's New England Clam Chowder  | 9.65      | 8          | Carnarvon Tigers        | Jack's New England Clam Chowder  |
+| 45        | Rogede sild                      | 9.5       | 8          | Carnarvon Tigers        | Rogede sild                      |
+| 13        | Konbu                            | 6         | 8          | Carnarvon Tigers        | Konbu                            |
+
+
+## SQLite
+
+### Funkcje okna
+
+```sql
+SELECT productid,
+       productname,
+       unitprice,
+       categoryid,
+       first_value(productname) over (
+           PARTITION BY categoryid
+           ORDER BY unitprice DESC
+       ) first,
+       last_value(productname) over (
+           PARTITION BY categoryid
+           ORDER BY unitprice DESC
+       ) last
+FROM products
+ORDER BY categoryid, unitprice DESC;
+```
+
+#### Plan zapytania:
+
+![zadanie7-window-qp](./sqlite/zadanie7/zadanie7-window-qp.png)
+
+#### Czas wykonania: 2 \[ms\]
+
+#### Koszt: --
+
+#### Wynik:
+
+| ProductID | ProductName                      | UnitPrice | CategoryID | first                   | last                             |
+| :-------- | :------------------------------- | :-------- | :--------- | :---------------------- | :------------------------------- |
+| 38        | Côte de Blaye                    | 263.5     | 1          | Côte de Blaye           | Côte de Blaye                    |
+| 43        | Ipoh Coffee                      | 46        | 1          | Côte de Blaye           | Ipoh Coffee                      |
+| 2         | Chang                            | 19        | 1          | Côte de Blaye           | Chang                            |
+| 1         | Chai                             | 18        | 1          | Côte de Blaye           | Lakkalikööri                     |
+| 35        | Steeleye Stout                   | 18        | 1          | Côte de Blaye           | Lakkalikööri                     |
+| 39        | Chartreuse verte                 | 18        | 1          | Côte de Blaye           | Lakkalikööri                     |
+| 76        | Lakkalikööri                     | 18        | 1          | Côte de Blaye           | Lakkalikööri                     |
+| 70        | Outback Lager                    | 15        | 1          | Côte de Blaye           | Outback Lager                    |
+| 34        | Sasquatch Ale                    | 14        | 1          | Côte de Blaye           | Laughing Lumberjack Lager        |
+| 67        | Laughing Lumberjack Lager        | 14        | 1          | Côte de Blaye           | Laughing Lumberjack Lager        |
+| 75        | Rhönbräu Klosterbier             | 7.75      | 1          | Côte de Blaye           | Rhönbräu Klosterbier             |
+| 24        | Guaraná Fantástica               | 4.5       | 1          | Côte de Blaye           | Guaraná Fantástica               |
+| 63        | Vegie-spread                     | 43.9      | 2          | Vegie-spread            | Vegie-spread                     |
+| 8         | Northwoods Cranberry Sauce       | 40        | 2          | Vegie-spread            | Northwoods Cranberry Sauce       |
+| 61        | Sirop d'érable                   | 28.5      | 2          | Vegie-spread            | Sirop d'érable                   |
+| 6         | Grandma's Boysenberry Spread     | 25        | 2          | Vegie-spread            | Grandma's Boysenberry Spread     |
+| 4         | Chef Anton's Cajun Seasoning     | 22        | 2          | Vegie-spread            | Chef Anton's Cajun Seasoning     |
+| 5         | Chef Anton's Gumbo Mix           | 21.35     | 2          | Vegie-spread            | Chef Anton's Gumbo Mix           |
+| 65        | Louisiana Fiery Hot Pepper Sauce | 21.05     | 2          | Vegie-spread            | Louisiana Fiery Hot Pepper Sauce |
+| 44        | Gula Malacca                     | 19.45     | 2          | Vegie-spread            | Gula Malacca                     |
+| 66        | Louisiana Hot Spiced Okra        | 17        | 2          | Vegie-spread            | Louisiana Hot Spiced Okra        |
+| 15        | Genen Shouyu                     | 15.5      | 2          | Vegie-spread            | Genen Shouyu                     |
+| 77        | Original Frankfurter grüne Soße  | 13        | 2          | Vegie-spread            | Original Frankfurter grüne Soße  |
+| 3         | Aniseed Syrup                    | 10        | 2          | Vegie-spread            | Aniseed Syrup                    |
+| 20        | Sir Rodney's Marmalade           | 81        | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade           |
+| 62        | Tarte au sucre                   | 49.3      | 3          | Sir Rodney's Marmalade  | Tarte au sucre                   |
+| 27        | Schoggi Schokolade               | 43.9      | 3          | Sir Rodney's Marmalade  | Schoggi Schokolade               |
+| 26        | Gumbär Gummibärchen              | 31.23     | 3          | Sir Rodney's Marmalade  | Gumbär Gummibärchen              |
+| 49        | Maxilaku                         | 20        | 3          | Sir Rodney's Marmalade  | Maxilaku                         |
+| 16        | Pavlova                          | 17.45     | 3          | Sir Rodney's Marmalade  | Pavlova                          |
+| 50        | Valkoinen suklaa                 | 16.25     | 3          | Sir Rodney's Marmalade  | Valkoinen suklaa                 |
+| 25        | NuNuCa Nuß-Nougat-Creme          | 14        | 3          | Sir Rodney's Marmalade  | NuNuCa Nuß-Nougat-Creme          |
+| 48        | Chocolade                        | 12.75     | 3          | Sir Rodney's Marmalade  | Chocolade                        |
+| 68        | Scottish Longbreads              | 12.5      | 3          | Sir Rodney's Marmalade  | Scottish Longbreads              |
+| 21        | Sir Rodney's Scones              | 10        | 3          | Sir Rodney's Marmalade  | Sir Rodney's Scones              |
+| 47        | Zaanse koeken                    | 9.5       | 3          | Sir Rodney's Marmalade  | Zaanse koeken                    |
+| 19        | Teatime Chocolate Biscuits       | 9.2       | 3          | Sir Rodney's Marmalade  | Teatime Chocolate Biscuits       |
+| 59        | Raclette Courdavault             | 55        | 4          | Raclette Courdavault    | Raclette Courdavault             |
+| 12        | Queso Manchego La Pastora        | 38        | 4          | Raclette Courdavault    | Queso Manchego La Pastora        |
+| 69        | Gudbrandsdalsost                 | 36        | 4          | Raclette Courdavault    | Gudbrandsdalsost                 |
+| 72        | Mozzarella di Giovanni           | 34.8      | 4          | Raclette Courdavault    | Mozzarella di Giovanni           |
+| 60        | Camembert Pierrot                | 34        | 4          | Raclette Courdavault    | Camembert Pierrot                |
+| 32        | Mascarpone Fabioli               | 32        | 4          | Raclette Courdavault    | Mascarpone Fabioli               |
+| 71        | Flotemysost                      | 21.5      | 4          | Raclette Courdavault    | Flotemysost                      |
+| 11        | Queso Cabrales                   | 21        | 4          | Raclette Courdavault    | Queso Cabrales                   |
+| 31        | Gorgonzola Telino                | 12.5      | 4          | Raclette Courdavault    | Gorgonzola Telino                |
+| 33        | Geitost                          | 2.5       | 4          | Raclette Courdavault    | Geitost                          |
+| 56        | Gnocchi di nonna Alice           | 38        | 5          | Gnocchi di nonna Alice  | Gnocchi di nonna Alice           |
+| 64        | Wimmers gute Semmelknödel        | 33.25     | 5          | Gnocchi di nonna Alice  | Wimmers gute Semmelknödel        |
+| 22        | Gustaf's Knäckebröd              | 21        | 5          | Gnocchi di nonna Alice  | Gustaf's Knäckebröd              |
+| 57        | Ravioli Angelo                   | 19.5      | 5          | Gnocchi di nonna Alice  | Ravioli Angelo                   |
+| 42        | Singaporean Hokkien Fried Mee    | 14        | 5          | Gnocchi di nonna Alice  | Singaporean Hokkien Fried Mee    |
+| 23        | Tunnbröd                         | 9         | 5          | Gnocchi di nonna Alice  | Tunnbröd                         |
+| 52        | Filo Mix                         | 7         | 5          | Gnocchi di nonna Alice  | Filo Mix                         |
+| 29        | Thüringer Rostbratwurst          | 123.79    | 6          | Thüringer Rostbratwurst | Thüringer Rostbratwurst          |
+| 9         | Mishi Kobe Niku                  | 97        | 6          | Thüringer Rostbratwurst | Mishi Kobe Niku                  |
+| 17        | Alice Mutton                     | 39        | 6          | Thüringer Rostbratwurst | Alice Mutton                     |
+| 53        | Perth Pasties                    | 32.8      | 6          | Thüringer Rostbratwurst | Perth Pasties                    |
+| 55        | Pâté chinois                     | 24        | 6          | Thüringer Rostbratwurst | Pâté chinois                     |
+| 54        | Tourtière                        | 7.45      | 6          | Thüringer Rostbratwurst | Tourtière                        |
+| 51        | Manjimup Dried Apples            | 53        | 7          | Manjimup Dried Apples   | Manjimup Dried Apples            |
+| 28        | Rössle Sauerkraut                | 45.6      | 7          | Manjimup Dried Apples   | Rössle Sauerkraut                |
+| 7         | Uncle Bob's Organic Dried Pears  | 30        | 7          | Manjimup Dried Apples   | Uncle Bob's Organic Dried Pears  |
+| 14        | Tofu                             | 23.25     | 7          | Manjimup Dried Apples   | Tofu                             |
+| 74        | Longlife Tofu                    | 10        | 7          | Manjimup Dried Apples   | Longlife Tofu                    |
+| 18        | Carnarvon Tigers                 | 62.5      | 8          | Carnarvon Tigers        | Carnarvon Tigers                 |
+| 10        | Ikura                            | 31        | 8          | Carnarvon Tigers        | Ikura                            |
+| 37        | Gravad lax                       | 26        | 8          | Carnarvon Tigers        | Gravad lax                       |
+| 30        | Nord-Ost Matjeshering            | 25.89     | 8          | Carnarvon Tigers        | Nord-Ost Matjeshering            |
+| 36        | Inlagd Sill                      | 19        | 8          | Carnarvon Tigers        | Inlagd Sill                      |
+| 40        | Boston Crab Meat                 | 18.4      | 8          | Carnarvon Tigers        | Boston Crab Meat                 |
+| 73        | Röd Kaviar                       | 15        | 8          | Carnarvon Tigers        | Röd Kaviar                       |
+| 58        | Escargots de Bourgogne           | 13.25     | 8          | Carnarvon Tigers        | Escargots de Bourgogne           |
+| 46        | Spegesild                        | 12        | 8          | Carnarvon Tigers        | Spegesild                        |
+| 41        | Jack's New England Clam Chowder  | 9.65      | 8          | Carnarvon Tigers        | Jack's New England Clam Chowder  |
+| 45        | Rogede sild                      | 9.5       | 8          | Carnarvon Tigers        | Rogede sild                      |
+| 13        | Konbu                            | 6         | 8          | Carnarvon Tigers        | Konbu                            |
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
+**Na pewno różnica w sortowaniu wierszy gdy wartość sortująca jest taka sama (patrz MSSQL/SQLite vs. PostgreSQL)**
+
+## Porównanie funkcji
+
+* `first_value()` – zwraca wartość obliczoną dla wiersza, który jest pierwszym wierszem ramki funkcji okna.
+* `last_value()` – zwraca wartość obliczoną dla wiersza, który jest ostatnim wierszem ramki funkcji okna.
+
+#### Czy funkcja `first_value` pokazuje w tym przypadku najdroższy produkt w danej kategorii?
+
+Tak, ponieważ klauzula `ORDER BY unitprice DESC` gwarantuje nam, że pierwszym wierszem ramki funkcji okna zawsze jest najdroższy produkt w danej kategorii.
+
+#### Czy funkcja `last_value()` pokazuje najtańszy produkt?
+
+Tak, aczkolwiek nie jest to najtańszy produkt dla całej kategorii stworzonej przez partycję, lecz najtańszy produkt w oparciu o ramkę wierszy z zakresu [pierwszy wiersz w danej partycji, aktualne wiersze w danej partycji]. W tych "aktualnych wierszach chodzi o to, że gdy kilka produktów ma taką samą wartość `unitprice`, to ze względu na sortowanie malejące po tej kolumnie, w danym wierszu mogą być rozpatrywane też kolejne wiersze, jeżeli mają taką samą wartość `unitprice`. **(TODO nie do końca rozumiem dlaczego)** <!-- TODO -->
+
+#### Co jest przyczyną takiego działania funkcji `last_value`?
+
+No właśnie nie do końca rozumiem. <!-- TODO -->
+
+#### Co trzeba zmienić żeby funkcja last_value pokazywała najtańszy produkt w danej kategorii?
+
+Do wywołania `last_value()` należy dodać tak zwane `frame_clause`, które pozwala na specyfikację zakresu działania funkcji okna. Ustawienie tego zakresu na `RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING` powoduje, że funkcja okna będzie w każdym wierszu brała pod uwagę cały zakres partycji.
+
+```sql
+SELECT productid,
+       productname,
+       unitprice,
+       categoryid,
+       first_value(productname) over (
+           PARTITION BY categoryid
+           ORDER BY unitprice DESC
+           ) first,
+       last_value(productname) over (
+           PARTITION BY categoryid
+           ORDER BY unitprice DESC
+           RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+           ) last
+FROM products
+ORDER BY categoryid, unitprice DESC;
 ```
 
 ---
@@ -2161,9 +2536,239 @@ Spróbuj uzyskać ten sam wynik bez użycia funkcji okna, porównaj wyniki, czas
 ---
 > Wyniki: 
 
+
+## MSSQL
+
+### Zapytanie służące do upewnienia się, że podzapytania działają poprawnie
+
 ```sql
---  ...
+SELECT p1.productid,
+       p1.productname,
+       p1.unitprice,
+       p1.categoryid,
+       first_value(productname) over (
+           PARTITION BY categoryid
+           ORDER BY unitprice DESC
+       ) first_window,
+       (
+           SELECT TOP 1 p2.productname
+           FROM products p2
+           WHERE p2.categoryid = p1.categoryid
+           ORDER BY p2.unitprice DESC
+       ) first_subquery,
+       last_value(productname) over (
+           PARTITION BY categoryid
+           ORDER BY unitprice DESC
+       ) last_without_unbounded_window,
+       (
+           SELECT TOP 1 p3.productname
+           FROM products p3
+           WHERE p3.categoryid = p1.categoryid
+               AND p3.unitprice >= p1.unitprice
+           ORDER BY p3.unitprice ASC,
+                    p3.productid DESC -- descending on productid to get the last result to get the same result as in the previous column but it does not work in all cases
+       ) last_without_unbounded_subquery,
+       last_value(productname) over (
+           PARTITION BY categoryid
+           ORDER BY unitprice DESC
+           RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+       ) last_window,
+       (
+           SELECT TOP 1 p3.productname
+           FROM products p3
+           WHERE p3.categoryid = p1.categoryid
+           ORDER BY p3.unitprice ASC
+       ) last_subquery
+FROM products p1
+ORDER BY categoryid, unitprice DESC;
 ```
+
+#### Wynik:
+
+| productid | productname                      | unitprice | categoryid | first_window            | first_subquery          | last_without_unbounded_window    | last_without_unbounded_subquery  | last_window                | last_subquery              |
+| :-------- | :------------------------------- | :-------- | :--------- | :---------------------- | :---------------------- | :------------------------------- | :------------------------------- | :------------------------- | :------------------------- |
+| 38        | Côte de Blaye                    | 263.5000  | 1          | Côte de Blaye           | Côte de Blaye           | Côte de Blaye                    | Côte de Blaye                    | Guaraná Fantástica         | Guaraná Fantástica         |
+| 43        | Ipoh Coffee                      | 46.0000   | 1          | Côte de Blaye           | Côte de Blaye           | Ipoh Coffee                      | Ipoh Coffee                      | Guaraná Fantástica         | Guaraná Fantástica         |
+| 2         | Chang                            | 19.0000   | 1          | Côte de Blaye           | Côte de Blaye           | Chang                            | Chang                            | Guaraná Fantástica         | Guaraná Fantástica         |
+| 1         | Chai                             | 18.0000   | 1          | Côte de Blaye           | Côte de Blaye           | Lakkalikööri                     | Lakkalikööri                     | Guaraná Fantástica         | Guaraná Fantástica         |
+| 39        | Chartreuse verte                 | 18.0000   | 1          | Côte de Blaye           | Côte de Blaye           | Lakkalikööri                     | Lakkalikööri                     | Guaraná Fantástica         | Guaraná Fantástica         |
+| 35        | Steeleye Stout                   | 18.0000   | 1          | Côte de Blaye           | Côte de Blaye           | Lakkalikööri                     | Lakkalikööri                     | Guaraná Fantástica         | Guaraná Fantástica         |
+| 76        | Lakkalikööri                     | 18.0000   | 1          | Côte de Blaye           | Côte de Blaye           | Lakkalikööri                     | Lakkalikööri                     | Guaraná Fantástica         | Guaraná Fantástica         |
+| 70        | Outback Lager                    | 15.0000   | 1          | Côte de Blaye           | Côte de Blaye           | Outback Lager                    | Outback Lager                    | Guaraná Fantástica         | Guaraná Fantástica         |
+| 67        | Laughing Lumberjack Lager        | 14.0000   | 1          | Côte de Blaye           | Côte de Blaye           | Sasquatch Ale                    | Laughing Lumberjack Lager        | Guaraná Fantástica         | Guaraná Fantástica         |
+| 34        | Sasquatch Ale                    | 14.0000   | 1          | Côte de Blaye           | Côte de Blaye           | Sasquatch Ale                    | Laughing Lumberjack Lager        | Guaraná Fantástica         | Guaraná Fantástica         |
+| 75        | Rhönbräu Klosterbier             | 7.7500    | 1          | Côte de Blaye           | Côte de Blaye           | Rhönbräu Klosterbier             | Rhönbräu Klosterbier             | Guaraná Fantástica         | Guaraná Fantástica         |
+| 24        | Guaraná Fantástica               | 4.5000    | 1          | Côte de Blaye           | Côte de Blaye           | Guaraná Fantástica               | Guaraná Fantástica               | Guaraná Fantástica         | Guaraná Fantástica         |
+| 63        | Vegie-spread                     | 43.9000   | 2          | Vegie-spread            | Vegie-spread            | Vegie-spread                     | Vegie-spread                     | Aniseed Syrup              | Aniseed Syrup              |
+| 8         | Northwoods Cranberry Sauce       | 40.0000   | 2          | Vegie-spread            | Vegie-spread            | Northwoods Cranberry Sauce       | Northwoods Cranberry Sauce       | Aniseed Syrup              | Aniseed Syrup              |
+| 61        | Sirop d'érable                   | 28.5000   | 2          | Vegie-spread            | Vegie-spread            | Sirop d'érable                   | Sirop d'érable                   | Aniseed Syrup              | Aniseed Syrup              |
+| 6         | Grandma's Boysenberry Spread     | 25.0000   | 2          | Vegie-spread            | Vegie-spread            | Grandma's Boysenberry Spread     | Grandma's Boysenberry Spread     | Aniseed Syrup              | Aniseed Syrup              |
+| 4         | Chef Anton's Cajun Seasoning     | 22.0000   | 2          | Vegie-spread            | Vegie-spread            | Chef Anton's Cajun Seasoning     | Chef Anton's Cajun Seasoning     | Aniseed Syrup              | Aniseed Syrup              |
+| 5         | Chef Anton's Gumbo Mix           | 21.3500   | 2          | Vegie-spread            | Vegie-spread            | Chef Anton's Gumbo Mix           | Chef Anton's Gumbo Mix           | Aniseed Syrup              | Aniseed Syrup              |
+| 65        | Louisiana Fiery Hot Pepper Sauce | 21.0500   | 2          | Vegie-spread            | Vegie-spread            | Louisiana Fiery Hot Pepper Sauce | Louisiana Fiery Hot Pepper Sauce | Aniseed Syrup              | Aniseed Syrup              |
+| 44        | Gula Malacca                     | 19.4500   | 2          | Vegie-spread            | Vegie-spread            | Gula Malacca                     | Gula Malacca                     | Aniseed Syrup              | Aniseed Syrup              |
+| 66        | Louisiana Hot Spiced Okra        | 17.0000   | 2          | Vegie-spread            | Vegie-spread            | Louisiana Hot Spiced Okra        | Louisiana Hot Spiced Okra        | Aniseed Syrup              | Aniseed Syrup              |
+| 15        | Genen Shouyu                     | 15.5000   | 2          | Vegie-spread            | Vegie-spread            | Genen Shouyu                     | Genen Shouyu                     | Aniseed Syrup              | Aniseed Syrup              |
+| 77        | Original Frankfurter grüne Soße  | 13.0000   | 2          | Vegie-spread            | Vegie-spread            | Original Frankfurter grüne Soße  | Original Frankfurter grüne Soße  | Aniseed Syrup              | Aniseed Syrup              |
+| 3         | Aniseed Syrup                    | 10.0000   | 2          | Vegie-spread            | Vegie-spread            | Aniseed Syrup                    | Aniseed Syrup                    | Aniseed Syrup              | Aniseed Syrup              |
+| 20        | Sir Rodney's Marmalade           | 81.0000   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Sir Rodney's Marmalade           | Sir Rodney's Marmalade           | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 62        | Tarte au sucre                   | 49.3000   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Tarte au sucre                   | Tarte au sucre                   | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 27        | Schoggi Schokolade               | 43.9000   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Schoggi Schokolade               | Schoggi Schokolade               | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 26        | Gumbär Gummibärchen              | 31.2300   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Gumbär Gummibärchen              | Gumbär Gummibärchen              | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 49        | Maxilaku                         | 20.0000   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Maxilaku                         | Maxilaku                         | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 16        | Pavlova                          | 17.4500   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Pavlova                          | Pavlova                          | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 50        | Valkoinen suklaa                 | 16.2500   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Valkoinen suklaa                 | Valkoinen suklaa                 | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 25        | NuNuCa Nuß-Nougat-Creme          | 14.0000   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | NuNuCa Nuß-Nougat-Creme          | NuNuCa Nuß-Nougat-Creme          | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 48        | Chocolade                        | 12.7500   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Chocolade                        | Chocolade                        | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 68        | Scottish Longbreads              | 12.5000   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Scottish Longbreads              | Scottish Longbreads              | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 21        | Sir Rodney's Scones              | 10.0000   | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Sir Rodney's Scones              | Sir Rodney's Scones              | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 47        | Zaanse koeken                    | 9.5000    | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Zaanse koeken                    | Zaanse koeken                    | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 19        | Teatime Chocolate Biscuits       | 9.2000    | 3          | Sir Rodney's Marmalade  | Sir Rodney's Marmalade  | Teatime Chocolate Biscuits       | Teatime Chocolate Biscuits       | Teatime Chocolate Biscuits | Teatime Chocolate Biscuits |
+| 59        | Raclette Courdavault             | 55.0000   | 4          | Raclette Courdavault    | Raclette Courdavault    | Raclette Courdavault             | Raclette Courdavault             | Geitost                    | Geitost                    |
+| 12        | Queso Manchego La Pastora        | 38.0000   | 4          | Raclette Courdavault    | Raclette Courdavault    | Queso Manchego La Pastora        | Queso Manchego La Pastora        | Geitost                    | Geitost                    |
+| 69        | Gudbrandsdalsost                 | 36.0000   | 4          | Raclette Courdavault    | Raclette Courdavault    | Gudbrandsdalsost                 | Gudbrandsdalsost                 | Geitost                    | Geitost                    |
+| 72        | Mozzarella di Giovanni           | 34.8000   | 4          | Raclette Courdavault    | Raclette Courdavault    | Mozzarella di Giovanni           | Mozzarella di Giovanni           | Geitost                    | Geitost                    |
+| 60        | Camembert Pierrot                | 34.0000   | 4          | Raclette Courdavault    | Raclette Courdavault    | Camembert Pierrot                | Camembert Pierrot                | Geitost                    | Geitost                    |
+| 32        | Mascarpone Fabioli               | 32.0000   | 4          | Raclette Courdavault    | Raclette Courdavault    | Mascarpone Fabioli               | Mascarpone Fabioli               | Geitost                    | Geitost                    |
+| 71        | Flotemysost                      | 21.5000   | 4          | Raclette Courdavault    | Raclette Courdavault    | Flotemysost                      | Flotemysost                      | Geitost                    | Geitost                    |
+| 11        | Queso Cabrales                   | 21.0000   | 4          | Raclette Courdavault    | Raclette Courdavault    | Queso Cabrales                   | Queso Cabrales                   | Geitost                    | Geitost                    |
+| 31        | Gorgonzola Telino                | 12.5000   | 4          | Raclette Courdavault    | Raclette Courdavault    | Gorgonzola Telino                | Gorgonzola Telino                | Geitost                    | Geitost                    |
+| 33        | Geitost                          | 2.5000    | 4          | Raclette Courdavault    | Raclette Courdavault    | Geitost                          | Geitost                          | Geitost                    | Geitost                    |
+| 56        | Gnocchi di nonna Alice           | 38.0000   | 5          | Gnocchi di nonna Alice  | Gnocchi di nonna Alice  | Gnocchi di nonna Alice           | Gnocchi di nonna Alice           | Filo Mix                   | Filo Mix                   |
+| 64        | Wimmers gute Semmelknödel        | 33.2500   | 5          | Gnocchi di nonna Alice  | Gnocchi di nonna Alice  | Wimmers gute Semmelknödel        | Wimmers gute Semmelknödel        | Filo Mix                   | Filo Mix                   |
+| 22        | Gustaf's Knäckebröd              | 21.0000   | 5          | Gnocchi di nonna Alice  | Gnocchi di nonna Alice  | Gustaf's Knäckebröd              | Gustaf's Knäckebröd              | Filo Mix                   | Filo Mix                   |
+| 57        | Ravioli Angelo                   | 19.5000   | 5          | Gnocchi di nonna Alice  | Gnocchi di nonna Alice  | Ravioli Angelo                   | Ravioli Angelo                   | Filo Mix                   | Filo Mix                   |
+| 42        | Singaporean Hokkien Fried Mee    | 14.0000   | 5          | Gnocchi di nonna Alice  | Gnocchi di nonna Alice  | Singaporean Hokkien Fried Mee    | Singaporean Hokkien Fried Mee    | Filo Mix                   | Filo Mix                   |
+| 23        | Tunnbröd                         | 9.0000    | 5          | Gnocchi di nonna Alice  | Gnocchi di nonna Alice  | Tunnbröd                         | Tunnbröd                         | Filo Mix                   | Filo Mix                   |
+| 52        | Filo Mix                         | 7.0000    | 5          | Gnocchi di nonna Alice  | Gnocchi di nonna Alice  | Filo Mix                         | Filo Mix                         | Filo Mix                   | Filo Mix                   |
+| 29        | Thüringer Rostbratwurst          | 123.7900  | 6          | Thüringer Rostbratwurst | Thüringer Rostbratwurst | Thüringer Rostbratwurst          | Thüringer Rostbratwurst          | Tourtière                  | Tourtière                  |
+| 9         | Mishi Kobe Niku                  | 97.0000   | 6          | Thüringer Rostbratwurst | Thüringer Rostbratwurst | Mishi Kobe Niku                  | Mishi Kobe Niku                  | Tourtière                  | Tourtière                  |
+| 17        | Alice Mutton                     | 39.0000   | 6          | Thüringer Rostbratwurst | Thüringer Rostbratwurst | Alice Mutton                     | Alice Mutton                     | Tourtière                  | Tourtière                  |
+| 53        | Perth Pasties                    | 32.8000   | 6          | Thüringer Rostbratwurst | Thüringer Rostbratwurst | Perth Pasties                    | Perth Pasties                    | Tourtière                  | Tourtière                  |
+| 55        | Pâté chinois                     | 24.0000   | 6          | Thüringer Rostbratwurst | Thüringer Rostbratwurst | Pâté chinois                     | Pâté chinois                     | Tourtière                  | Tourtière                  |
+| 54        | Tourtière                        | 7.4500    | 6          | Thüringer Rostbratwurst | Thüringer Rostbratwurst | Tourtière                        | Tourtière                        | Tourtière                  | Tourtière                  |
+| 51        | Manjimup Dried Apples            | 53.0000   | 7          | Manjimup Dried Apples   | Manjimup Dried Apples   | Manjimup Dried Apples            | Manjimup Dried Apples            | Longlife Tofu              | Longlife Tofu              |
+| 28        | Rössle Sauerkraut                | 45.6000   | 7          | Manjimup Dried Apples   | Manjimup Dried Apples   | Rössle Sauerkraut                | Rössle Sauerkraut                | Longlife Tofu              | Longlife Tofu              |
+| 7         | Uncle Bob's Organic Dried Pears  | 30.0000   | 7          | Manjimup Dried Apples   | Manjimup Dried Apples   | Uncle Bob's Organic Dried Pears  | Uncle Bob's Organic Dried Pears  | Longlife Tofu              | Longlife Tofu              |
+| 14        | Tofu                             | 23.2500   | 7          | Manjimup Dried Apples   | Manjimup Dried Apples   | Tofu                             | Tofu                             | Longlife Tofu              | Longlife Tofu              |
+| 74        | Longlife Tofu                    | 10.0000   | 7          | Manjimup Dried Apples   | Manjimup Dried Apples   | Longlife Tofu                    | Longlife Tofu                    | Longlife Tofu              | Longlife Tofu              |
+| 18        | Carnarvon Tigers                 | 62.5000   | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Carnarvon Tigers                 | Carnarvon Tigers                 | Konbu                      | Konbu                      |
+| 10        | Ikura                            | 31.0000   | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Ikura                            | Ikura                            | Konbu                      | Konbu                      |
+| 37        | Gravad lax                       | 26.0000   | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Gravad lax                       | Gravad lax                       | Konbu                      | Konbu                      |
+| 30        | Nord-Ost Matjeshering            | 25.8900   | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Nord-Ost Matjeshering            | Nord-Ost Matjeshering            | Konbu                      | Konbu                      |
+| 36        | Inlagd Sill                      | 19.0000   | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Inlagd Sill                      | Inlagd Sill                      | Konbu                      | Konbu                      |
+| 40        | Boston Crab Meat                 | 18.4000   | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Boston Crab Meat                 | Boston Crab Meat                 | Konbu                      | Konbu                      |
+| 73        | Röd Kaviar                       | 15.0000   | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Röd Kaviar                       | Röd Kaviar                       | Konbu                      | Konbu                      |
+| 58        | Escargots de Bourgogne           | 13.2500   | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Escargots de Bourgogne           | Escargots de Bourgogne           | Konbu                      | Konbu                      |
+| 46        | Spegesild                        | 12.0000   | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Spegesild                        | Spegesild                        | Konbu                      | Konbu                      |
+| 41        | Jack's New England Clam Chowder  | 9.6500    | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Jack's New England Clam Chowder  | Jack's New England Clam Chowder  | Konbu                      | Konbu                      |
+| 45        | Rogede sild                      | 9.5000    | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Rogede sild                      | Rogede sild                      | Konbu                      | Konbu                      |
+| 13        | Konbu                            | 6.0000    | 8          | Carnarvon Tigers        | Carnarvon Tigers        | Konbu                            | Konbu                            | Konbu                      | Konbu                      |
+
+**Wiersze 10 i 11 się nie zgadzają dla kolumn: `last_without_unbounded_window` i `last_without_unbounded_subquery`**
+
+### Podzapytanie
+
+```sql
+SELECT p1.productid,
+       p1.productname,
+       p1.unitprice,
+       p1.categoryid,
+       (SELECT TOP 1 p2.productname
+        FROM products p2
+        WHERE p2.categoryid = p1.categoryid
+        ORDER BY p2.unitprice DESC
+        ) first,
+       (SELECT TOP 1 p3.productname
+        FROM products p3
+        WHERE p3.categoryid = p1.categoryid
+          AND p3.unitprice >= p1.unitprice -- deleting this check will have the same impact as RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ORDER BY p3.unitprice ASC, p3.productid DESC -- descending on productid to get the last result to get the same result as in the previous column but it does not work in all cases
+       ) last
+FROM products p1
+ORDER BY categoryid, unitprice DESC;
+```
+
+#### Plan zapytania:
+
+![zadanie7-subquery-qp](./mssql/zadanie7/zadanie7-subquery-qp.png)
+
+#### Czas wykonania: 4 \[ms\]
+
+#### Koszt: 1.03479
+
+## PostgreSQL
+
+### Podzapytanie
+
+```sql
+SELECT p1.productid,
+       p1.productname,
+       p1.unitprice,
+       p1.categoryid,
+       (SELECT p2.productname
+        FROM products p2
+        WHERE p2.categoryid = p1.categoryid
+        ORDER BY p2.unitprice DESC
+        LIMIT 1
+       ) first,
+       (SELECT p3.productname
+        FROM products p3
+        WHERE p3.categoryid = p1.categoryid
+          AND p3.unitprice >= p1.unitprice -- deleting this check will have the same impact as RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+          -- TODO I don't know how to mimic the last_value function without RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING set
+        ORDER BY p3.unitprice ASC
+        LIMIT 1
+       ) last
+FROM products p1
+ORDER BY categoryid, unitprice DESC;
+```
+
+#### Plan zapytania:
+
+![zadanie7-subquery-qp](./postgres/zadanie7/zadanie7-subquery-qp.png)
+
+#### Czas wykonania: 2.45 \[ms\]
+
+#### Koszt: 326.81
+
+## SQLite
+
+### Podzapytanie
+
+```sql
+SELECT p1.productid,
+       p1.productname,
+       p1.unitprice,
+       p1.categoryid,
+       (SELECT p2.productname
+        FROM products p2
+        WHERE p2.categoryid = p1.categoryid
+        ORDER BY p2.unitprice DESC
+        LIMIT 1
+       ) first,
+       (SELECT p3.productname
+        FROM products p3
+        WHERE p3.categoryid = p1.categoryid
+          AND p3.unitprice >= p1.unitprice -- deleting this check will have the same impact as RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ORDER BY p3.unitprice ASC, p3.productid DESC -- `p3.productid DESC` is not necessary with RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        LIMIT 1
+       ) last
+FROM products p1
+ORDER BY categoryid, unitprice DESC;
+```
+
+#### Plan zapytania:
+
+![zadanie7-subquery-qp](./sqlite/zadanie7/zadanie7-subquery-qp.png)
+
+#### Czas wykonania: 2 \[ms\]
+
+#### Koszt: --
+
+## Porównanie wyników pomiędzy SZBD
+
+<!-- TODO -->
 
 ---
 
