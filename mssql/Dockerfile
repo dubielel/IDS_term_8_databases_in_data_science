@@ -4,6 +4,7 @@ WORKDIR /scripts
 
 COPY *.sql .
 COPY *.sh .
+COPY *.bak .
 
 # IDK why I need to change the user to root to make the scripts executable
 USER root

@@ -4,5 +4,7 @@ sqlite/*.sqlite
 
 .DS_Store
 
+AdventureWorks2017.bak
+
 **/*.temp
 **/*.log
