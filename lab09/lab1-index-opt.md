@@ -57,11 +57,11 @@ Oprogramowanie dostępne jest na przygotowanej maszynie wirtualnej
 Stwórz swoją bazę danych o nazwie lab4. 
 
 ```sql
-create database lab1  
-go  
-  
-use lab1 
-go
+CREATE database lab1
+GO
+
+USE lab1
+GO
 ```
 
 
@@ -87,13 +87,13 @@ Operatory (oraz reprezentujące je piktogramy/Ikonki) używane w graficznej prez
 Wykonaj poniższy skrypt, aby przygotować dane:
 
 ```sql
-select * into [salesorderheader]  
-from [adventureworks2017].sales.[salesorderheader]  
-go  
-  
-select * into [salesorderdetail]  
-from [adventureworks2017].sales.[salesorderdetail]  
-go
+SELECT * INTO [ salesorderheader ]
+FROM [ adventureworks2017 ].sales.[ salesorderheader ]
+GO
+
+SELECT * INTO [ salesorderdetail ]
+FROM [ adventureworks2017 ].sales.[ salesorderdetail ]
+GO
 ```
 
 
@@ -103,43 +103,55 @@ go
 Wpisz do MSSQL Managment Studio (na razie nie wykonuj tych zapytań):
 
 ```sql
--- zapytanie 1  
-select *  
-from salesorderheader sh  
-inner join salesorderdetail sd on sh.salesorderid = sd.salesorderid  
-where orderdate = '2008-06-01 00:00:00.000'  
-go  
+-- zapytanie 1
+SELECT *
+FROM salesorderheader sh
+INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+WHERE orderdate = '2008-06-01 00:00:00.000'
+GO
 
 -- zapytanie 1.1
-select *  
-from salesorderheader sh  
-inner join salesorderdetail sd on sh.salesorderid = sd.salesorderid  
-where orderdate = '2013-01-28 00:00:00.000' 
-go  
-  
--- zapytanie 2  
-select orderdate, productid, sum(orderqty) as orderqty, 
-       sum(unitpricediscount) as unitpricediscount, sum(linetotal)  
-from salesorderheader sh  
-inner join salesorderdetail sd on sh.salesorderid = sd.salesorderid  
-group by orderdate, productid  
-having sum(orderqty) >= 100  
-go  
-  
--- zapytanie 3  
-select salesordernumber, purchaseordernumber, duedate, shipdate  
-from salesorderheader sh  
-inner join salesorderdetail sd on sh.salesorderid = sd.salesorderid  
-where orderdate in ('2008-06-01','2008-06-02', '2008-06-03', '2008-06-04', '2008-06-05')  
-go  
-  
--- zapytanie 4  
-select sh.salesorderid, salesordernumber, purchaseordernumber, duedate, shipdate  
-from salesorderheader sh  
-inner join salesorderdetail sd on sh.salesorderid = sd.salesorderid  
-where carriertrackingnumber in ('ef67-4713-bd', '6c08-4c4c-b8')  
-order by sh.salesorderid  
-go
+SELECT *
+FROM salesorderheader sh
+INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+WHERE orderdate = '2013-01-28 00:00:00.000'
+GO
+
+-- zapytanie 2
+SELECT orderdate,
+       productid,
+       SUM(orderqty) AS orderqty,
+       SUM(unitpricediscount) AS unitpricediscount,
+       SUM(linetotal)
+FROM salesorderheader sh
+INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+GROUP BY orderdate, productid
+HAVING SUM(orderqty) >= 100
+GO
+
+-- zapytanie 3
+SELECT salesordernumber,
+       purchaseordernumber,
+       duedate,
+       shipdate
+FROM salesorderheader sh
+INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+WHERE orderdate IN (
+    '2008-06-01', '2008-06-02', '2008-06-03', '2008-06-04', '2008-06-05'
+)
+GO
+
+-- zapytanie 4
+SELECT sh.salesorderid,
+       salesordernumber,
+       purchaseordernumber,
+       duedate,
+       shipdate
+FROM salesorderheader sh
+INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+WHERE carriertrackingnumber IN ('ef67-4713-bd', '6c08-4c4c-b8')
+ORDER BY sh.salesorderid
+GO
 ```
 
 
@@ -249,15 +261,20 @@ Przydatne materiały/dokumentacja. Proszę zapoznać się z dokumentacją:
 Skopiuj tabelę `Customer` do swojej bazy danych:
 
 ```sql
-select * into customer from adventureworks2017.sales.customer
+SELECT * INTO customer
+FROM adventureworks2017.sales.customer
 ```
 
 Wykonaj analizy zapytań:
 
 ```sql
-select * from customer where storeid = 594  
+SELECT *
+FROM customer
+WHERE storeid = 594
   
-select * from customer where storeid between 594 and 610
+SELECT *
+FROM customer
+WHERE storeid BETWEEN 594 AND 610
 ```
 
 Zanotuj czas zapytania oraz jego koszt koszt:
@@ -268,7 +285,9 @@ Zanotuj czas zapytania oraz jego koszt koszt:
 
 ### Zapytanie 1:
 ```sql
-select * from customer where storeid = 594
+SELECT *
+FROM customer
+WHERE storeid = 594
 1 row retrieved starting from 1 in 42 ms (execution: 20 ms, fetching: 22 ms)
 ```
 
@@ -285,7 +304,9 @@ Wynik:
 
 ### Zapytanie 2:
 ```sql
-select * from customer where storeid between 594 and 610
+SELECT *
+FROM customer
+WHERE storeid BETWEEN 594 AND 610
 16 rows retrieved starting from 1 in 47 ms (execution: 17 ms, fetching: 30 ms)
 ```
 
@@ -317,12 +338,14 @@ Wynik:
 Dodaj indeks:
 
 ```sql
-create index customer_store_cls_idx on customer(storeid)
+CREATE INDEX customer_store_cls_idx ON customer(storeid)
 ```
 
 ### Zapytanie 1:
 ```sql
-select * from customer where storeid = 594
+SELECT *
+FROM customer
+WHERE storeid = 594
 1 row retrieved starting from 1 in 52 ms (execution: 33 ms, fetching: 19 ms)
 ```
 
@@ -335,7 +358,9 @@ Wynik: jest taki sam jak w przypadku zapytania bez indeksu
 
 ### Zapytanie 2:
 ```sql
-select * from customer where storeid between 594 and 610
+SELECT *
+FROM customer
+WHERE storeid BETWEEN 594 AND 610
 16 rows retrieved starting from 1 in 44 ms (execution: 20 ms, fetching: 24 ms)
 ```
 
@@ -369,7 +394,7 @@ Można skorzystać z clustered index, aby przyspieszyć wyszukiwanie, bo serwer 
 Dodaj indeks klastrowany:
 
 ```sql
-create clustered index customer_store_cls_idx on customer(storeid)
+CREATE clustered INDEX customer_store_cls_idx ON customer(storeid)
 ```
 
 Czy zmienił się plan/koszt/czas? Skomentuj dwa podejścia w wyszukiwaniu krotek.
@@ -390,26 +415,39 @@ Celem zadania jest porównanie indeksów zawierających dodatkowe kolumny.
 Skopiuj tabelę `Address` do swojej bazy danych:
 
 ```sql
-select * into address from  adventureworks2017.person.address
+SELECT * INTO address
+FROM adventureworks2017.person.address
 ```
 
 W tej części będziemy analizować następujące zapytanie:
 
 ```sql
-select addressline1, addressline2, city, stateprovinceid, postalcode  
-from address  
-where postalcode between n'98000' and n'99999'
+SELECT addressline1,
+    addressline2,
+    city,
+    stateprovinceid,
+    postalcode
+FROM address
+WHERE postalcode BETWEEN n'98000' AND n'99999'
 ```
 
 ```sql
-create index address_postalcode_1  
-on address (postalcode)  
-include (addressline1, addressline2, city, stateprovinceid);  
-go  
-  
-create index address_postalcode_2  
-on address (postalcode, addressline1, addressline2, city, stateprovinceid);  
-go
+CREATE INDEX address_postalcode_1 ON address (postalcode) INCLUDE (
+    addressline1,
+    addressline2,
+    city,
+    stateprovinceid
+);
+GO
+
+CREATE INDEX address_postalcode_2 ON address (
+    postalcode,
+    addressline1,
+    addressline2,
+    city,
+    stateprovinceid
+);
+GO
 ```
 
 
@@ -431,12 +469,15 @@ Aby wymusić użycie indeksu użyj `WITH(INDEX(Address_PostalCode_1))` po `FROM`
 Sprawdź rozmiar Indeksów:
 
 ```sql
-select i.name as indexname, sum(s.used_page_count) * 8 as indexsizekb  
-from sys.dm_db_partition_stats as s  
-inner join sys.indexes as i on s.object_id = i.object_id and s.index_id = i.index_id  
-where i.name = 'address_postalcode_1' or i.name = 'address_postalcode_2'  
-group by i.name  
-go
+SELECT i.name AS indexname,
+       SUM(s.used_page_count) * 8 AS indexsizekb
+FROM sys.dm_db_partition_stats AS s
+INNER JOIN sys.indexes AS i ON s.object_id = i.object_id
+    AND s.index_id = i.index_id
+WHERE i.name = 'address_postalcode_1'
+    OR i.name = 'address_postalcode_2'
+GROUP BY i.name
+GO
 ```
 
 
@@ -457,27 +498,28 @@ Celem zadania jest poznanie indeksów z filtrami.
 Skopiuj tabelę `BillOfMaterials` do swojej bazy danych:
 
 ```sql
-select * into billofmaterials  
-from adventureworks2017.production.billofmaterials
+SELECT * INTO billofmaterials
+FROM adventureworks2017.production.billofmaterials
 ```
 
 
 W tej części analizujemy zapytanie:
 
 ```sql
-select productassemblyid, componentid, startdate  
-from billofmaterials  
-where enddate is not null  
-    and componentid = 327  
-    and startdate >= '2010-08-05'
+SELECT productassemblyid,
+       componentid,
+       startdate
+FROM billofmaterials
+WHERE enddate IS NOT NULL
+    AND componentid = 327
+    AND startdate >= '2010-08-05'
 ```
 
 Zastosuj indeks:
 
 ```sql
-create nonclustered index billofmaterials_cond_idx  
-    on billofmaterials (componentid, startdate)  
-    where enddate is not null
+CREATE nonclustered INDEX billofmaterials_cond_idx ON billofmaterials (componentid, startdate)
+WHERE enddate IS NOT NULL
 ```
 
 Sprawdź czy działa.
@@ -494,11 +536,13 @@ Możliwe, że serwer SQL nie użył indeksu, ponieważ nie byłoby to optymalne.
 > Wyniki: 
 
 ```sql
-select productassemblyid, componentid, startdate
-from billofmaterials
-where enddate is not null
-  and componentid = 327
-  and startdate >= '2010-08-05'
+SELECT productassemblyid,
+       componentid,
+       startdate
+FROM billofmaterials
+WHERE enddate IS NOT NULL
+    AND componentid = 327
+    AND startdate >= '2010-08-05'
 14 rows retrieved starting from 1 in 66 ms (execution: 28 ms, fetching: 38 ms)
 ```
 
@@ -507,13 +551,16 @@ Spróbuj wymusić indeks. Co się stało, dlaczego takie zachowanie?
 > Wyniki: 
 
 ```sql
-SELECT productassemblyid, componentid, startdate
+SELECT productassemblyid,
+       componentid,
+       startdate
 FROM billofmaterials WITH (INDEX(billofmaterials_cond_idx))
 WHERE enddate IS NOT NULL
-  AND componentid = 327
-  AND startdate >= '2010-08-05';
+    AND componentid = 327
+    AND startdate >= '2010-08-05';
 14 rows retrieved starting from 1 in 29 ms (execution: 13 ms, fetching: 16 ms)
 ```
+
 ![img2.png](zad5/img2.png)
 
 Po wymuszeniu indeksu plan zapytania zmienił się. Oznacza to, że serwer SQL poprzednio umyślnie nie użył indeksu, ponieważ nie byłoby to optymalne.
