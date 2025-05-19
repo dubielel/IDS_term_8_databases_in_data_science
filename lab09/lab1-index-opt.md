@@ -383,6 +383,7 @@ Koszt zapytania znacznie się zmniejszył, natomiast czas wykonania nieznacznie 
 Może to być spowodowane tym, że serwer musiał wykonać dodatkowe operacje związane z RID Lookup przy zapytaniu `select *`.
 Można wykorzystać Covering index i zawrzeć pozostałe kolumny w indeksie (korzystając z INCLUDE), aby uniknąć dodatkowych operacji.
 Można skorzystać z clustered index, aby przyspieszyć wyszukiwanie, bo serwer będzie korzystać z key lookup, które jest bardziej wydajne.
+
 ---
 > Wyniki: 
 
