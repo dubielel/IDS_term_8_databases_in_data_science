@@ -311,6 +311,8 @@ lab04> SELECT *
 > Komentarz:
 >
 > Pierwsze zapytanie, które uruchomiliśmy, musiało skorzystać z cache'u, który stworzył się poprzedniego dnia. Jest to o tyle ciekawe, że przed uruchomieniem tych zapytań kontener z SZBD został uruchomiony ponownie.
+>
+> Pierwsze zapytanie jest prostym zdobyciem informacji dotyczących zamówienia, które zostało złożone 2008-06-01 00:00:00.000. Okazało się, że nie ma takiego zamówienia.
 
 > Plan zapytania:
 >
@@ -443,6 +445,66 @@ lab04> SELECT *
 [2025-05-20 06:26:33] CPU time = 46 ms, elapsed time = 74 ms.
 [2025-05-20 06:26:33] completed in 78 ms
 ```
+
+> Komentarz:
+>
+> To zapytanie różni się od poprzedniego tylko i wyłącznie tym, że zmieniona została data złożenia zamówienia na 2013-01-28 00:00:00.000 i spowodowało to pobranie danych ze 115 różnych zamówień.
+
+> Różnica pomiędzy tymi dwoma zapytaniami jest taka, że w zapytaniu 1.1 tabela `salesorderdetail` została przejrzana – logical reads 1498 vs. logical reads 0 dla zapytania 1. Tabela `salesorderheader` w obydwóch przypadkach została przejrzana w taki sam sposób jednokrotnie.
+
+> Optymalizacja:
+
+> Optymalizacją dwóch powyższych zapytań mogłoby być zastosowanie indeksów dla kolumn użytych w łączeniu tabel oraz filtrowaniu danych
+
+```sql
+CREATE INDEX IX_salesorderheader_id_date ON salesorderheader(salesorderid, OrderDate);
+
+CREATE INDEX IX_salesorderdetail_header_product ON salesorderdetail(salesorderid);
+```
+
+```sql
+lab04> SELECT *
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate = '2013-01-28 00:00:00.000'
+[2025-05-20 16:34:00] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 16:34:00] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 16:34:00] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 16:34:00] CPU time = 20 ms, elapsed time = 20 ms.
+[2025-05-20 16:34:00] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 115,
+    logical reads 1490,
+    physical reads 5,
+    page server reads 0,
+    read-ahead reads 16,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:34:00] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 219,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 110,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:34:00] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 16:34:00] CPU time = 20 ms, elapsed time = 24 ms.
+[2025-05-20 16:34:00] completed in 48 ms
+```
+
+> Dołożenie indeksów prowadzi do nieznacznego zmniejszenia odczytów logicznych z tabeli `saleorderdetail`, ale znacząco zwiększa ilość skanowań tej tabeli oraz odczytów fizycznych. Natomiast indeks na tabeli `salesorderheader` znacząco zmniejszył ilość odczytów logicznych i wprowadził tylko jeden odczyt fizyczny.
+
+> Plan zoptymalizowanego zapytania:
+
+> ![gp_1_1_optim](./zad01/qp_1_1_optim.png)
 
 > **Zapytanie 2**
 
