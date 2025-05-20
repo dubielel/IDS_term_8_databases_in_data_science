@@ -1382,7 +1382,6 @@ Czy zmienił się plan/koszt/czas? Skomentuj dwa podejścia w wyszukiwaniu krote
 --  ...
 ```
 
-
 # Zadanie 4 - dodatkowe kolumny w indeksie
 
 Celem zadania jest porównanie indeksów zawierających dodatkowe kolumny.
@@ -1403,7 +1402,7 @@ SELECT addressline1,
     stateprovinceid,
     postalcode
 FROM address
-WHERE postalcode BETWEEN n'98000' AND n'99999'
+WHERE postalcode BETWEEN '98000' AND '99999'
 ```
 
 ```sql
@@ -1426,10 +1425,12 @@ GO
 ```
 
 Czy jest widoczna różnica w planach/kosztach zapytań? 
+
 - w sytuacji gdy nie ma indeksów
 - przy wykorzystaniu indeksu:
-	- address_postalcode_1
-	- address_postalcode_2
+  - address_postalcode_1
+  - address_postalcode_2
+
 Jeśli tak to jaka? 
 
 Aby wymusić użycie indeksu użyj `WITH(INDEX(Address_PostalCode_1))` po `FROM`
@@ -1639,6 +1640,30 @@ lab04> SELECT addressline1,
 
 > Po wykonaniu tego zapytania wyczyściliśmy cache.
 
+Czy jest widoczna różnica w planach/kosztach zapytań? 
+
+- w sytuacji gdy nie ma indeksów
+- przy wykorzystaniu indeksu:
+  - address_postalcode_1
+  - address_postalcode_2
+
+Jeśli tak to jaka? 
+
+> W sytuacji, gdy nie ma żadnego indeksu vs. jest którykolwiek z nich, różnica w kosztach zapytań pomiędzy brakiem indeksu a posiadaniem indeksu jest rzędu jednej jednostki: 0.27745 (bez indeksu) a 0.0284668 (address_postalcode_1 lub address_postalcode_2, wynik taki sam).
+>
+> W samych planach widać różnicę w kosztach zapytań, ale również w czasie _Actual Time_ 14 (bez indeksu) vs. 3 (address_postalcode_1) lub 2 (address_postalcode_2).
+>
+> Różnica w statystykach czasu zmierzonych bezpośrednio przez MSSQL również jest widoczna i prezentuje się następująco:
+>
+> |                      | CPU time | Elapsed time | Completed |
+> |----------------------|----------|--------------|-----------|
+> |      bez indeksu     | 9 ms     | 19 ms        | 31 ms     |
+> | address_postalcode_1 | 5 ms     | 6 ms         | 10 ms     |
+> | address_postalcode_2 | 5 ms     | 7 ms         | 17 ms     |
+>
+> Widać tutaj sporą różnicę w czasach pomiędzy zapytaniem bez indeksu a zapytaniami z indeksem.
+> Pomiędzy zapytaniami z indeksami, CPU Time i Elapsed Time są bardzo zbliżone, różnią się w Completed Time, lecz mam poczucie, że to może być niezwiązane z indeksami.
+
 Sprawdź rozmiar Indeksów:
 
 ```sql
@@ -1729,6 +1754,11 @@ lab04> SELECT i.name AS indexname,
 > | address_postalcode_1 | 1784        |
 > | address_postalcode_2 | 1808        |
 
+Który jest większy? Jak można skomentować te dwa podejścia do indeksowania? Które kolumny na to wpływają?
+
+> Indeks `address_postalcode_1` odnosi się bezpośrednio tylko do kolumny `postalcode`, a wyrażenie `INCLUDE` oznacza, że kolumny `addressline1`, `addressline2`, `city` oraz `stateprovinceid` są przechowywane na poziomie liści danego indeksu, ale nie są jego częścią. Takie podejście pozwala na tworzenie bardziej efektywnych zapytań, w których następuje filtrowanie bądź sortowanie po kolumnie `postalcode` oraz kolumny zawarte w `INCLUDE` są wybierane do pobrania. Ten indeks jest mniejszy, ponieważ opiera się tylko na jednej kolumnie, a do pozostałych odnosi się dopiero na poziomie liści.
+>
+> Indeks `address_postalcode_2` natomiast odnosi się bezpośrednio do wszystkich kolumn `postalcode`, `addressline1`, `addressline2`, `city` oraz `stateprovinceid` (w takiej kolejności), tworząc na ich podstawie klucz złożony. To powoduje, że indeks jest większy. Taki indeks jest bardziej przydatny, gdy celem jest filtrowanie lub sortowanie po wielu kolumnach w nim zawartych.
 
 # Zadanie 5 – Indeksy z filtrami
 
