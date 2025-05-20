@@ -1068,6 +1068,78 @@ lab04> SELECT sh.salesorderid,
 >
 > ![qp_4](./zad01/qp_4.png)
 
+> Optymalizacja
+>
+> I w tym wypadku sposobem na optymalizację jest dodanie indeksów na kolumnach związanych z łączeniem i filtrowaniem danych.
+
+```sql
+CREATE INDEX IX_salesorderheader_id ON salesorderheader(salesorderid);
+
+CREATE INDEX idx_salesorderdetail_carriertrackingnumber ON salesorderdetail(
+    carriertrackingnumber,
+    salesorderid
+);
+```
+
+```sql
+lab04> SELECT sh.salesorderid,
+              salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE carriertrackingnumber IN ('ef67-4713-bd', '6c08-4c4c-b8')
+       ORDER BY sh.salesorderid
+[2025-05-20 17:11:24] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 17:11:24] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 17:11:24] [S0000][3615] Table 'salesorderheader'.
+    Scan count 68,
+    logical reads 230,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 16,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 17:11:24] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 17:11:24] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 2,
+    logical reads 7,
+    physical reads 5,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 17:11:24] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 17:11:24] CPU time = 4 ms, elapsed time = 5 ms.
+[2025-05-20 17:11:24] completed in 9 ms
+```
+
+> Indeks dla tabeli `salesorderheader` pozwolił zmniejszyć liczbę odczytów logicznych ponad trzykrotnie kosztem jednego odczytu fizycznego i 68 skanowań. Dla tabeli `salesorderdetail` skanowanie wzrosło o 1, liczba odczytów fizycznych o 5, lecz liczba odczytów logicznych zmalała z 1498 do 7.
+
+> Plan zoptymalizowanego zapytania:
+>
+> ![gp_4_optim](./zad01/qp_4_optim.png)
+
 ---
 
 # Zadanie 2 - Dobór indeksów / optymalizacja
