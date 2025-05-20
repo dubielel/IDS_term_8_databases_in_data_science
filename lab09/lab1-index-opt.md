@@ -1135,7 +1135,6 @@ CREATE INDEX address_postalcode_2 ON address (
 GO
 ```
 
-
 Czy jest widoczna różnica w planach/kosztach zapytań? 
 - w sytuacji gdy nie ma indeksów
 - przy wykorzystaniu indeksu:
@@ -1147,9 +1146,208 @@ Aby wymusić użycie indeksu użyj `WITH(INDEX(Address_PostalCode_1))` po `FROM`
 
 > Wyniki: 
 
+> **Zapytanie bez indeksów**
+
 ```sql
---  ...
+lab04> SELECT addressline1,
+              addressline2,
+              city,
+              stateprovinceid,
+              postalcode
+       FROM address
+       WHERE postalcode BETWEEN '98000' AND '99999'
+[2025-05-20 07:14:41] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 07:14:41] CPU time = 7 ms, elapsed time = 8 ms.
+[2025-05-20 07:14:41] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 07:14:41] CPU time = 0 ms,
+    elapsed time = 0 ms.
+[2025-05-20 07:14:41] [S0000][3615] Table 'address'.
+    Scan count 1,
+    logical reads 342,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 356,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 07:14:41] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 07:14:41] CPU time = 9 ms, elapsed time = 19 ms.
+[2025-05-20 07:14:41] completed in 31 ms
 ```
+
+> Plan zapytania:
+>
+> ![qp_bez_indeksow](./zad04/qp_bez_indeksow.png)
+
+> Po wykonaniu tego zapytania wyczyściliśmy cache.
+
+> **Stworzenie pierwszego indeksu**
+
+```sql
+lab04> CREATE INDEX address_postalcode_1 ON address (postalcode) INCLUDE (
+           addressline1,
+           addressline2,
+           city,
+           stateprovinceid
+       )
+[2025-05-20 07:17:40] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 07:17:40] CPU time = 5 ms, elapsed time = 5 ms.
+[2025-05-20 07:17:40] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 07:17:40] [S0000][3615] Table 'address'.
+    Scan count 1,
+    logical reads 342,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 356,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 07:17:40] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 07:17:40] CPU time = 89 ms, elapsed time = 101 ms.
+[2025-05-20 07:17:40] completed in 110 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_indeks_1_create](./zad04/qp_indeks_1_create.png)
+
+> Po wykonaniu tego zapytania wyczyściliśmy cache.
+
+> **Zapytanie z pierwszym indeksem**
+
+```sql
+lab04> SELECT addressline1,
+              addressline2,
+              city,
+              stateprovinceid,
+              postalcode
+       FROM address WITH(INDEX(address_postalcode_1))
+       WHERE postalcode BETWEEN '98000' AND '99999'
+[2025-05-20 15:27:19] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 15:27:19] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 15:27:19] [S0000][3615] Table 'address'.
+    Scan count 1,
+    logical reads 32,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 30,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:27:19] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 15:27:19] CPU time = 5 ms, elapsed time = 6 ms.
+[2025-05-20 15:27:19] completed in 10 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_indeks_1](./zad04/qp_indeks_1.png)
+
+> Po wykonaniu tego zapytania wyczyściliśmy cache.
+
+> **Stworzenie drugiego indeksu**
+
+```sql
+lab04> CREATE INDEX address_postalcode_2 ON address (
+           postalcode,
+           addressline1,
+           addressline2,
+           city,
+           stateprovinceid
+       )
+[2025-05-20 15:31:04] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 15:31:04] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 15:31:04] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:31:04] [S0000][3615] Table 'address'.
+    Scan count 1,
+    logical reads 222,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 229,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:31:04] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 15:31:04] CPU time = 56 ms, elapsed time = 63 ms.
+[2025-05-20 15:31:04] completed in 67 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_indeks_2_create](./zad04/qp_indeks_2_create.png)
+
+> Po wykonaniu tego zapytania wyczyściliśmy cache.
+
+> **Zapytanie z drugim indeksem**
+
+```sql
+lab04> SELECT addressline1,
+              addressline2,
+              city,
+              stateprovinceid,
+              postalcode
+       FROM address WITH (INDEX(address_postalcode_2))
+       WHERE postalcode BETWEEN '98000' AND '99999'
+[2025-05-20 15:32:37] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 15:32:37] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 15:32:37] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 15:32:37] CPU time = 6 ms, elapsed time = 6 ms.
+[2025-05-20 15:32:37] [S0000][3615] Table 'address'.
+    Scan count 1,
+    logical reads 34,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 30,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:32:37] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 15:32:37] CPU time = 5 ms, elapsed time = 7 ms.
+[2025-05-20 15:32:37] completed in 17 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_indeks_2](./zad04/qp_indeks_2.png)
+
+> Po wykonaniu tego zapytania wyczyściliśmy cache.
 
 Sprawdź rozmiar Indeksów:
 
@@ -1165,15 +1363,81 @@ GROUP BY i.name
 GO
 ```
 
-
 Który jest większy? Jak można skomentować te dwa podejścia do indeksowania? Które kolumny na to wpływają?
 
 
 > Wyniki: 
 
 ```sql
---  ...
+lab04> SELECT i.name AS indexname,
+              SUM(s.used_page_count) * 8 AS indexsizekb
+       FROM sys.dm_db_partition_stats AS s
+                INNER JOIN sys.indexes AS i ON s.object_id = i.object_id
+           AND s.index_id = i.index_id
+       WHERE i.name = 'address_postalcode_1'
+          OR i.name = 'address_postalcode_2'
+       GROUP BY i.name
+[2025-05-20 15:34:25] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 15:34:25] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 15:34:25] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:34:25] [S0000][3615] Table 'sysschobjs'.
+    Scan count 0,
+    logical reads 4,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:34:25] [S0000][3615] Table 'sysidxstats'.
+    Scan count 378,
+    logical reads 765,
+    physical reads 2,
+    page server reads 0,
+    read-ahead reads 24,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:34:25] [S0000][3615] Table 'sysrowsets'.
+    Scan count 1,
+    logical reads 5,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:34:25] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 15:34:25] CPU time = 11 ms, elapsed time = 14 ms.
+[2025-05-20 15:34:25] completed in 19 ms
 ```
+
+> Rezultat zapytania:
+>
+> | indexname            | indexsizekb |
+> | :------------------- | :---------- |
+> | address_postalcode_1 | 1784        |
+> | address_postalcode_2 | 1808        |
 
 
 # Zadanie 5 – Indeksy z filtrami
