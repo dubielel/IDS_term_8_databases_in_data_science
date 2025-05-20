@@ -457,7 +457,7 @@ lab04> SELECT *
 > Optymalizacją dwóch powyższych zapytań mogłoby być zastosowanie indeksów dla kolumn użytych w łączeniu tabel oraz filtrowaniu danych
 
 ```sql
-CREATE INDEX IX_salesorderheader_id_date ON salesorderheader(salesorderid, OrderDate);
+CREATE INDEX IX_salesorderheader_id_date ON salesorderheader(salesorderid, orderdate);
 
 CREATE INDEX IX_salesorderdetail_header_product ON salesorderdetail(salesorderid);
 ```
@@ -872,6 +872,63 @@ lab04> SELECT salesordernumber,
 > Plan zapytania:
 >
 > ![qp_3](./zad01/qp_3.png)
+
+> Optymalizacja
+>
+> Dla tego zapytania optymalizacją również mogłoby być użycie indeksów na kolumnach używanych w filtrowaniu i łączeniu
+
+```sql
+CREATE INDEX IX_salesorderheader_id_date ON salesorderheader(salesorderid, orderdate);
+
+CREATE INDEX IX_salesorderdetail_header_product ON salesorderdetail(salesorderid);
+```
+
+```sql
+lab04> SELECT salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate IN (
+           '2008-06-01', '2008-06-02', '2008-06-03', '2008-06-04', '2008-06-05'
+       )
+[2025-05-20 17:00:03] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 17:00:03] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 17:00:03] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 17:00:03] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 104,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 102,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 17:00:03] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 17:00:03] CPU time = 13 ms, elapsed time = 16 ms.
+[2025-05-20 17:00:03] completed in 20 ms
+```
+
+> W tym przypadku dodanie indeksów zmniejsza ilość odczytów logicznych siedmiokrotnie, dodając przy tym jeden odczyt fizyczny.
+
+> Plan zoptymalizowanego zapytania:
+>
+> ![qp_3_optim](./zad01/qp_3_optim.png)
 
 > **Zapytanie 4**
 
