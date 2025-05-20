@@ -157,7 +157,21 @@ GO
 
 Włącz dwie opcje: **Include Actual Execution Plan** oraz **Include Live Query Statistics**:
 
+---
+> Na początku włączyliśmy statystyki I/O oraz czasowe.
 
+```sql
+[2025-05-20 05:58:40] Connected
+lab04> use lab04
+[2025-05-20 05:58:40] [S0001][5701] Changed database context to 'lab04'.
+[2025-05-20 05:58:40] completed in 14 ms
+lab04> SET STATISTICS IO ON
+[2025-05-20 05:58:40] completed in 4 ms
+lab04> SET STATISTICS TIME ON
+[2025-05-20 05:58:44] completed in 3 ms
+```
+
+---
 
 <!-- ![[_img/index1-1.png | 500]] -->
 
@@ -170,9 +184,679 @@ Teraz wykonaj poszczególne zapytania (najlepiej każde analizuj oddzielnie). Co
 ---
 > Wyniki: 
 
+> **Zapytanie 1**
+
 ```sql
---  ...
+lab04> SELECT *
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate = '2008-06-01 00:00:00.000'
+[2025-05-20 06:00:34] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:00:34] CPU time = 13 ms, elapsed time = 13 ms.
+[2025-05-20 06:00:34] [S0000][3615] Table 'Workfile'
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:00:34] [S0000][3615] Table 'Worktable'
+    Scan count 0
+    logical reads 0
+    physical reads 0
+    page server reads 0
+    read-ahead reads 0
+    page server read-ahead reads 0
+    lob logical reads 0
+    lob physical reads 0
+    lob page server reads 0
+    lob read-ahead reads 0
+    lob page server read-ahead reads 0.
+[2025-05-20 06:00:34] [S0000][3615] Table 'Worktable'
+    Scan count 0
+    logical reads 0
+    physical reads 0
+    page server reads 0
+    read-ahead reads 0
+    page server read-ahead reads 0
+    lob logical reads 0
+    lob physical reads 0
+    lob page server reads 0
+    lob read-ahead reads 0
+    lob page server read-ahead reads 0.
+[2025-05-20 06:00:34] [S0000][3615] Table 'salesorderheader'
+    Scan count 1
+    logical reads 782
+    physical reads 0
+    page server reads 0
+    read-ahead reads 0
+    page server read-ahead reads 0
+    lob logical reads 0
+    lob physical reads 0
+    lob page server reads 0
+    lob read-ahead reads 0
+    lob page server read-ahead reads 0.
+[2025-05-20 06:00:34] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:00:34] CPU time = 20 ms,  elapsed time = 20 ms.
+[2025-05-20 06:00:34] completed in 41 ms
 ```
+
+> **Po wyczyszeniu cache**
+
+```sql
+lab04> SELECT *
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate = '2008-06-01 00:00:00.000'
+[2025-05-20 06:38:04] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:38:04] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 06:38:04] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:38:04] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:38:04] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:38:04] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 789,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:38:04] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:38:04] CPU time = 14 ms, elapsed time = 21 ms.
+[2025-05-20 06:38:04] completed in 27 ms
+```
+
+> Komentarz:
+>
+> Pierwsze zapytanie, które uruchomiliśmy, musiało skorzystać z cache'u, który stworzył się poprzedniego dnia. Jest to o tyle ciekawe, że przed uruchomieniem tych zapytań kontener z SZBD został uruchomiony ponownie.
+
+> Plan zapytania:
+>
+> ![qp_1_0](./zad01/qp_1_0.png)
+
+> **Zapytanie 1.1**
+
+```sql
+lab04> SELECT *
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate = '2013-01-28 00:00:00.000'
+[2025-05-20 06:09:58] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:09:58] CPU time = 7 ms, elapsed time = 7 ms.
+[2025-05-20 06:09:58] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:09:58] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:09:58] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 1,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:09:58] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:09:58] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:09:58] CPU time = 49 ms, elapsed time = 51 ms.
+[2025-05-20 06:09:58] completed in 64 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_1_1](./zad01/qp_1_1.png)
+
+> **Po wyczyszczeniu cache**
+
+```sql
+lab04> SELECT *
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate = '2013-01-28 00:00:00.000'
+[2025-05-20 06:26:33] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:26:33] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 06:26:33] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:26:33] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:26:33] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 1,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 1512,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:26:33] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 789,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:26:33] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:26:33] CPU time = 46 ms, elapsed time = 74 ms.
+[2025-05-20 06:26:33] completed in 78 ms
+```
+
+> **Zapytanie 2**
+
+```sql
+lab04> SELECT orderdate,
+              productid,
+              SUM(orderqty) AS orderqty,
+              SUM(unitpricediscount) AS unitpricediscount,
+              SUM(linetotal)
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       GROUP BY orderdate, productid
+       HAVING SUM(orderqty) >= 100
+[2025-05-20 06:14:18] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:14:18] CPU time = 23 ms, elapsed time = 23 ms.
+[2025-05-20 06:14:18] [S0000][3615] Table 'salesorderheader'.
+    Scan count 5,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:14:18] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 5,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:14:18] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:14:18] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:14:18] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:14:18] CPU time = 195 ms, elapsed time = 87 ms.
+[2025-05-20 06:14:18] completed in 114 ms
+```
+
+> **Po wyczyszczeniu cache**
+
+```sql
+lab04> SELECT orderdate,
+              productid,
+              SUM(orderqty) AS orderqty,
+              SUM(unitpricediscount) AS unitpricediscount,
+              SUM(linetotal)
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       GROUP BY orderdate, productid
+       HAVING SUM(orderqty) >= 100
+[2025-05-20 06:30:34] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:30:34] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 06:30:34] [S0000][3615] Table 'salesorderheader'.
+    Scan count 5,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 789,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:30:34] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 5,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 1512,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:30:34] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:30:34] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:30:34] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:30:34] CPU time = 189 ms, elapsed time = 84 ms.
+[2025-05-20 06:30:34] completed in 88 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_2](./zad01/qp_2.png)
+
+> **Zapytanie 3**
+
+```sql
+lab04> SELECT salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate IN (
+           '2008-06-01', '2008-06-02', '2008-06-03', '2008-06-04', '2008-06-05'
+       )
+[2025-05-20 06:17:41] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:17:41] CPU time = 7 ms, elapsed time = 7 ms.
+[2025-05-20 06:17:41] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:17:41] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:17:41] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:17:41] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:17:41] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:17:41] CPU time = 14 ms, elapsed time = 13 ms.
+[2025-05-20 06:17:41] completed in 26 ms
+```
+
+> **Po wyczyszczeniu cache**
+
+```sql
+lab04> SELECT salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate IN (
+           '2008-06-01', '2008-06-02', '2008-06-03', '2008-06-04', '2008-06-05'
+       )
+[2025-05-20 06:33:16] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:33:16] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 06:33:16] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:33:16] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:33:16] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:33:16] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 789,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:33:16] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:33:16] CPU time = 16 ms, elapsed time = 22 ms.
+[2025-05-20 06:33:16] completed in 29 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_3](./zad01/qp_3.png)
+
+> **Zapytanie 4**
+
+```sql
+lab04> SELECT sh.salesorderid,
+              salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE carriertrackingnumber IN ('ef67-4713-bd', '6c08-4c4c-b8')
+       ORDER BY sh.salesorderid
+[2025-05-20 06:20:48] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:20:48] CPU time = 6 ms, elapsed time = 6 ms.
+[2025-05-20 06:20:48] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:20:48] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:20:48] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:20:48] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 1,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:20:48] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:20:48] CPU time = 35 ms, elapsed time = 34 ms.
+[2025-05-20 06:20:48] completed in 48 ms
+```
+
+> **Po wyczyszczeniu cache**
+
+```sql
+lab04> SELECT sh.salesorderid,
+              salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE carriertrackingnumber IN ('ef67-4713-bd', '6c08-4c4c-b8')
+       ORDER BY sh.salesorderid
+[2025-05-20 06:36:24] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:36:24] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 06:36:24] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:36:24] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:36:24] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 789,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:36:24] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 1,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 1512,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:36:24] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:36:24] CPU time = 42 ms, elapsed time = 56 ms.
+[2025-05-20 06:36:24] completed in 63 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_4](./zad01/qp_4.png)
 
 ---
 
