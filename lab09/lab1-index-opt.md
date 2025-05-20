@@ -157,7 +157,21 @@ GO
 
 Włącz dwie opcje: **Include Actual Execution Plan** oraz **Include Live Query Statistics**:
 
+---
+> Na początku włączyliśmy statystyki I/O oraz czasowe.
 
+```sql
+[2025-05-20 05:58:40] Connected
+lab04> use lab04
+[2025-05-20 05:58:40] [S0001][5701] Changed database context to 'lab04'.
+[2025-05-20 05:58:40] completed in 14 ms
+lab04> SET STATISTICS IO ON
+[2025-05-20 05:58:40] completed in 4 ms
+lab04> SET STATISTICS TIME ON
+[2025-05-20 05:58:44] completed in 3 ms
+```
+
+---
 
 <!-- ![[_img/index1-1.png | 500]] -->
 
@@ -170,9 +184,969 @@ Teraz wykonaj poszczególne zapytania (najlepiej każde analizuj oddzielnie). Co
 ---
 > Wyniki: 
 
+> **Zapytanie 1**
+
 ```sql
---  ...
+lab04> SELECT *
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate = '2008-06-01 00:00:00.000'
+[2025-05-20 06:00:34] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:00:34] CPU time = 13 ms, elapsed time = 13 ms.
+[2025-05-20 06:00:34] [S0000][3615] Table 'Workfile'
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:00:34] [S0000][3615] Table 'Worktable'
+    Scan count 0
+    logical reads 0
+    physical reads 0
+    page server reads 0
+    read-ahead reads 0
+    page server read-ahead reads 0
+    lob logical reads 0
+    lob physical reads 0
+    lob page server reads 0
+    lob read-ahead reads 0
+    lob page server read-ahead reads 0.
+[2025-05-20 06:00:34] [S0000][3615] Table 'Worktable'
+    Scan count 0
+    logical reads 0
+    physical reads 0
+    page server reads 0
+    read-ahead reads 0
+    page server read-ahead reads 0
+    lob logical reads 0
+    lob physical reads 0
+    lob page server reads 0
+    lob read-ahead reads 0
+    lob page server read-ahead reads 0.
+[2025-05-20 06:00:34] [S0000][3615] Table 'salesorderheader'
+    Scan count 1
+    logical reads 782
+    physical reads 0
+    page server reads 0
+    read-ahead reads 0
+    page server read-ahead reads 0
+    lob logical reads 0
+    lob physical reads 0
+    lob page server reads 0
+    lob read-ahead reads 0
+    lob page server read-ahead reads 0.
+[2025-05-20 06:00:34] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:00:34] CPU time = 20 ms,  elapsed time = 20 ms.
+[2025-05-20 06:00:34] completed in 41 ms
 ```
+
+> **Po wyczyszeniu cache**
+
+```sql
+lab04> SELECT *
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate = '2008-06-01 00:00:00.000'
+[2025-05-20 06:38:04] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:38:04] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 06:38:04] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:38:04] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:38:04] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:38:04] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 789,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:38:04] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:38:04] CPU time = 14 ms, elapsed time = 21 ms.
+[2025-05-20 06:38:04] completed in 27 ms
+```
+
+> Komentarz:
+>
+> Pierwsze zapytanie, które uruchomiliśmy, musiało skorzystać z cache'u, który stworzył się poprzedniego dnia. Jest to o tyle ciekawe, że przed uruchomieniem tych zapytań kontener z SZBD został uruchomiony ponownie.
+>
+> Pierwsze zapytanie jest prostym zdobyciem informacji dotyczących zamówienia, które zostało złożone 2008-06-01 00:00:00.000. Okazało się, że nie ma takiego zamówienia.
+
+> Plan zapytania:
+>
+> ![qp_1_0](./zad01/qp_1_0.png)
+
+> **Zapytanie 1.1**
+
+```sql
+lab04> SELECT *
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate = '2013-01-28 00:00:00.000'
+[2025-05-20 06:09:58] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:09:58] CPU time = 7 ms, elapsed time = 7 ms.
+[2025-05-20 06:09:58] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:09:58] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:09:58] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 1,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:09:58] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:09:58] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:09:58] CPU time = 49 ms, elapsed time = 51 ms.
+[2025-05-20 06:09:58] completed in 64 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_1_1](./zad01/qp_1_1.png)
+
+> **Po wyczyszczeniu cache**
+
+```sql
+lab04> SELECT *
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate = '2013-01-28 00:00:00.000'
+[2025-05-20 06:26:33] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:26:33] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 06:26:33] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:26:33] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:26:33] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 1,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 1512,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:26:33] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 789,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:26:33] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:26:33] CPU time = 46 ms, elapsed time = 74 ms.
+[2025-05-20 06:26:33] completed in 78 ms
+```
+
+> Komentarz:
+>
+> To zapytanie różni się od poprzedniego tylko i wyłącznie tym, że zmieniona została data złożenia zamówienia na 2013-01-28 00:00:00.000 i spowodowało to pobranie danych ze 115 różnych zamówień.
+
+> Różnica pomiędzy tymi dwoma zapytaniami jest taka, że w zapytaniu 1.1 tabela `salesorderdetail` została przejrzana – logical reads 1498 vs. logical reads 0 dla zapytania 1. Tabela `salesorderheader` w obydwóch przypadkach została przejrzana w taki sam sposób jednokrotnie.
+
+> Optymalizacja:
+
+> Optymalizacją dwóch powyższych zapytań mogłoby być zastosowanie indeksów dla kolumn użytych w łączeniu tabel oraz filtrowaniu danych
+
+```sql
+CREATE INDEX IX_salesorderheader_id_date ON salesorderheader(salesorderid, orderdate);
+
+CREATE INDEX IX_salesorderdetail_header_product ON salesorderdetail(salesorderid);
+```
+
+```sql
+lab04> SELECT *
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate = '2013-01-28 00:00:00.000'
+[2025-05-20 16:34:00] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 16:34:00] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 16:34:00] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 16:34:00] CPU time = 20 ms, elapsed time = 20 ms.
+[2025-05-20 16:34:00] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 115,
+    logical reads 1490,
+    physical reads 5,
+    page server reads 0,
+    read-ahead reads 16,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:34:00] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 219,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 110,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:34:00] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 16:34:00] CPU time = 20 ms, elapsed time = 24 ms.
+[2025-05-20 16:34:00] completed in 48 ms
+```
+
+> Dołożenie indeksów prowadzi do nieznacznego zmniejszenia odczytów logicznych z tabeli `saleorderdetail`, ale znacząco zwiększa ilość skanowań tej tabeli oraz odczytów fizycznych. Natomiast indeks na tabeli `salesorderheader` znacząco zmniejszył ilość odczytów logicznych i wprowadził tylko jeden odczyt fizyczny.
+
+> Plan zoptymalizowanego zapytania:
+
+> ![gp_1_1_optim](./zad01/qp_1_1_optim.png)
+
+> **Zapytanie 2**
+
+```sql
+lab04> SELECT orderdate,
+              productid,
+              SUM(orderqty) AS orderqty,
+              SUM(unitpricediscount) AS unitpricediscount,
+              SUM(linetotal)
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       GROUP BY orderdate, productid
+       HAVING SUM(orderqty) >= 100
+[2025-05-20 06:14:18] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:14:18] CPU time = 23 ms, elapsed time = 23 ms.
+[2025-05-20 06:14:18] [S0000][3615] Table 'salesorderheader'.
+    Scan count 5,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:14:18] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 5,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:14:18] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:14:18] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:14:18] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:14:18] CPU time = 195 ms, elapsed time = 87 ms.
+[2025-05-20 06:14:18] completed in 114 ms
+```
+
+> **Po wyczyszczeniu cache**
+
+```sql
+lab04> SELECT orderdate,
+              productid,
+              SUM(orderqty) AS orderqty,
+              SUM(unitpricediscount) AS unitpricediscount,
+              SUM(linetotal)
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       GROUP BY orderdate, productid
+       HAVING SUM(orderqty) >= 100
+[2025-05-20 06:30:34] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:30:34] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 06:30:34] [S0000][3615] Table 'salesorderheader'.
+    Scan count 5,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 789,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:30:34] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 5,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 1512,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:30:34] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:30:34] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:30:34] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:30:34] CPU time = 189 ms, elapsed time = 84 ms.
+[2025-05-20 06:30:34] completed in 88 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_2](./zad01/qp_2.png)
+
+> Komentarz:
+>
+> To zapytanie miało na celu wydobyć zagregowane statystyki dotyczące zamówień pogrupowanych na podstawie ilości zamówionych produktów i przefiltrowanych tylko dla zamówień z ponad stoma zamówionymi produktami.
+
+> Optymalizacja:
+>
+> Optymalizacją tego zapytania mogłoby być zastosowanie indeksów dla kolumn użytych w łączeniu tabel oraz w grupowaniu danych.
+
+```sql
+CREATE INDEX IX_salesorderheader_id_date ON salesorderheader(salesorderid, orderdate);
+
+CREATE INDEX IX_salesorderdetail_header_product ON salesorderdetail(
+    salesorderid,
+    productid,
+    orderqty,
+    unitpricediscount,
+    linetotal
+);
+```
+
+```sql
+lab04> SELECT orderdate,
+              productid,
+              SUM(orderqty) AS orderqty,
+              SUM(unitpricediscount) AS unitpricediscount,
+              SUM(linetotal)
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       GROUP BY orderdate, productid
+       HAVING SUM(orderqty) >= 100
+[2025-05-20 16:20:13] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 16:20:13] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 16:20:13] [S0000][3615] Table 'salesorderheader'.
+    Scan count 5,
+    logical reads 307,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 102,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:20:13] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 5,
+    logical reads 788,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 760,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:20:13] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:20:13] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:20:13] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 16:20:13] CPU time = 217 ms, elapsed time = 80 ms.
+[2025-05-20 16:20:13] completed in 83 ms
+```
+
+> Zmniejsza to ilość odczytów logicznych z obydwóch tabel o niemal połowę, lecz dokłada po jednym odczycie fizycznym dla każdej z nich.
+
+> Plan zoptymalizowanego zapytania:
+>
+> ![qp_2](./zad01/qp_2_optim.png)
+
+> **Zapytanie 3**
+
+```sql
+lab04> SELECT salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate IN (
+           '2008-06-01', '2008-06-02', '2008-06-03', '2008-06-04', '2008-06-05'
+       )
+[2025-05-20 06:17:41] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:17:41] CPU time = 7 ms, elapsed time = 7 ms.
+[2025-05-20 06:17:41] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:17:41] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:17:41] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:17:41] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:17:41] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:17:41] CPU time = 14 ms, elapsed time = 13 ms.
+[2025-05-20 06:17:41] completed in 26 ms
+```
+
+> **Po wyczyszczeniu cache**
+
+```sql
+lab04> SELECT salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate IN (
+           '2008-06-01', '2008-06-02', '2008-06-03', '2008-06-04', '2008-06-05'
+       )
+[2025-05-20 06:33:16] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:33:16] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 06:33:16] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:33:16] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:33:16] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:33:16] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 789,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:33:16] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:33:16] CPU time = 16 ms, elapsed time = 22 ms.
+[2025-05-20 06:33:16] completed in 29 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_3](./zad01/qp_3.png)
+
+> Komentarz
+>
+> Celem tego zapytania jest wydobycie informacji na temat dat (zakończenia i wysłania) oraz informacji o płatności powiązanych z danym zamówieniem. Dodatkowo wyszczególnione są zamówienia z listy konkretnych dat.
+
+> Optymalizacja
+>
+> Dla tego zapytania optymalizacją również mogłoby być użycie indeksów na kolumnach używanych w filtrowaniu i łączeniu
+
+```sql
+CREATE INDEX IX_salesorderheader_id_date ON salesorderheader(salesorderid, orderdate);
+
+CREATE INDEX IX_salesorderdetail_header_product ON salesorderdetail(salesorderid);
+```
+
+```sql
+lab04> SELECT salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE orderdate IN (
+           '2008-06-01', '2008-06-02', '2008-06-03', '2008-06-04', '2008-06-05'
+       )
+[2025-05-20 17:00:03] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 17:00:03] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 17:00:03] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 17:00:03] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 104,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 102,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 17:00:03] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 17:00:03] CPU time = 13 ms, elapsed time = 16 ms.
+[2025-05-20 17:00:03] completed in 20 ms
+```
+
+> W tym przypadku dodanie indeksów zmniejsza ilość odczytów logicznych siedmiokrotnie, dodając przy tym jeden odczyt fizyczny.
+
+> Plan zoptymalizowanego zapytania:
+>
+> ![qp_3_optim](./zad01/qp_3_optim.png)
+
+> **Zapytanie 4**
+
+```sql
+lab04> SELECT sh.salesorderid,
+              salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE carriertrackingnumber IN ('ef67-4713-bd', '6c08-4c4c-b8')
+       ORDER BY sh.salesorderid
+[2025-05-20 06:20:48] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:20:48] CPU time = 6 ms, elapsed time = 6 ms.
+[2025-05-20 06:20:48] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:20:48] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:20:48] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:20:48] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 1,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:20:48] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:20:48] CPU time = 35 ms, elapsed time = 34 ms.
+[2025-05-20 06:20:48] completed in 48 ms
+```
+
+> **Po wyczyszczeniu cache**
+
+```sql
+lab04> SELECT sh.salesorderid,
+              salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE carriertrackingnumber IN ('ef67-4713-bd', '6c08-4c4c-b8')
+       ORDER BY sh.salesorderid
+[2025-05-20 06:36:24] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 06:36:24] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 06:36:24] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:36:24] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:36:24] [S0000][3615] Table 'salesorderheader'.
+    Scan count 1,
+    logical reads 782,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 789,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:36:24] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 1,
+    logical reads 1498,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 1512,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 06:36:24] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 06:36:24] CPU time = 42 ms, elapsed time = 56 ms.
+[2025-05-20 06:36:24] completed in 63 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_4](./zad01/qp_4.png)
+
+> Komentarz
+>
+> Podobnie jak w poprzednim przykładzie, celem tego zapytania również jest wydobycie informacji na temat dat (zakończenia i wysłania) oraz informacji o płatności powiązanych z danym zamówieniem. Tym razem zamówienia wyszczególnione są w oparciu o identyfikator śledzenia przesyłki.
+
+> Optymalizacja
+>
+> I w tym wypadku sposobem na optymalizację jest dodanie indeksów na kolumnach związanych z łączeniem i filtrowaniem danych.
+
+```sql
+CREATE INDEX IX_salesorderheader_id ON salesorderheader(salesorderid);
+
+CREATE INDEX idx_salesorderdetail_carriertrackingnumber ON salesorderdetail(
+    carriertrackingnumber,
+    salesorderid
+);
+```
+
+```sql
+lab04> SELECT sh.salesorderid,
+              salesordernumber,
+              purchaseordernumber,
+              duedate,
+              shipdate
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       WHERE carriertrackingnumber IN ('ef67-4713-bd', '6c08-4c4c-b8')
+       ORDER BY sh.salesorderid
+[2025-05-20 17:11:24] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 17:11:24] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 17:11:24] [S0000][3615] Table 'salesorderheader'.
+    Scan count 68,
+    logical reads 230,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 16,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 17:11:24] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 17:11:24] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 2,
+    logical reads 7,
+    physical reads 5,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 17:11:24] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 17:11:24] CPU time = 4 ms, elapsed time = 5 ms.
+[2025-05-20 17:11:24] completed in 9 ms
+```
+
+> Indeks dla tabeli `salesorderheader` pozwolił zmniejszyć liczbę odczytów logicznych ponad trzykrotnie kosztem jednego odczytu fizycznego i 68 skanowań. Dla tabeli `salesorderdetail` skanowanie wzrosło o 1, liczba odczytów fizycznych o 5, lecz liczba odczytów logicznych zmalała z 1498 do 7.
+
+> Plan zoptymalizowanego zapytania:
+>
+> ![gp_4_optim](./zad01/qp_4_optim.png)
 
 ---
 
@@ -408,7 +1382,6 @@ Czy zmienił się plan/koszt/czas? Skomentuj dwa podejścia w wyszukiwaniu krote
 --  ...
 ```
 
-
 # Zadanie 4 - dodatkowe kolumny w indeksie
 
 Celem zadania jest porównanie indeksów zawierających dodatkowe kolumny.
@@ -429,7 +1402,7 @@ SELECT addressline1,
     stateprovinceid,
     postalcode
 FROM address
-WHERE postalcode BETWEEN n'98000' AND n'99999'
+WHERE postalcode BETWEEN '98000' AND '99999'
 ```
 
 ```sql
@@ -451,21 +1424,245 @@ CREATE INDEX address_postalcode_2 ON address (
 GO
 ```
 
-
 Czy jest widoczna różnica w planach/kosztach zapytań? 
+
 - w sytuacji gdy nie ma indeksów
 - przy wykorzystaniu indeksu:
-	- address_postalcode_1
-	- address_postalcode_2
+  - address_postalcode_1
+  - address_postalcode_2
+
 Jeśli tak to jaka? 
 
 Aby wymusić użycie indeksu użyj `WITH(INDEX(Address_PostalCode_1))` po `FROM`
 
 > Wyniki: 
 
+> **Zapytanie bez indeksów**
+
 ```sql
---  ...
+lab04> SELECT addressline1,
+              addressline2,
+              city,
+              stateprovinceid,
+              postalcode
+       FROM address
+       WHERE postalcode BETWEEN '98000' AND '99999'
+[2025-05-20 07:14:41] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 07:14:41] CPU time = 7 ms, elapsed time = 8 ms.
+[2025-05-20 07:14:41] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 07:14:41] CPU time = 0 ms,
+    elapsed time = 0 ms.
+[2025-05-20 07:14:41] [S0000][3615] Table 'address'.
+    Scan count 1,
+    logical reads 342,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 356,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 07:14:41] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 07:14:41] CPU time = 9 ms, elapsed time = 19 ms.
+[2025-05-20 07:14:41] completed in 31 ms
 ```
+
+> Plan zapytania:
+>
+> ![qp_bez_indeksow](./zad04/qp_bez_indeksow.png)
+
+> Po wykonaniu tego zapytania wyczyściliśmy cache.
+
+> **Stworzenie pierwszego indeksu**
+
+```sql
+lab04> CREATE INDEX address_postalcode_1 ON address (postalcode) INCLUDE (
+           addressline1,
+           addressline2,
+           city,
+           stateprovinceid
+       )
+[2025-05-20 07:17:40] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 07:17:40] CPU time = 5 ms, elapsed time = 5 ms.
+[2025-05-20 07:17:40] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 07:17:40] [S0000][3615] Table 'address'.
+    Scan count 1,
+    logical reads 342,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 356,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 07:17:40] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 07:17:40] CPU time = 89 ms, elapsed time = 101 ms.
+[2025-05-20 07:17:40] completed in 110 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_indeks_1_create](./zad04/qp_indeks_1_create.png)
+
+> Po wykonaniu tego zapytania wyczyściliśmy cache.
+
+> **Zapytanie z pierwszym indeksem**
+
+```sql
+lab04> SELECT addressline1,
+              addressline2,
+              city,
+              stateprovinceid,
+              postalcode
+       FROM address WITH(INDEX(address_postalcode_1))
+       WHERE postalcode BETWEEN '98000' AND '99999'
+[2025-05-20 15:27:19] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 15:27:19] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 15:27:19] [S0000][3615] Table 'address'.
+    Scan count 1,
+    logical reads 32,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 30,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:27:19] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 15:27:19] CPU time = 5 ms, elapsed time = 6 ms.
+[2025-05-20 15:27:19] completed in 10 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_indeks_1](./zad04/qp_indeks_1.png)
+
+> Po wykonaniu tego zapytania wyczyściliśmy cache.
+
+> **Stworzenie drugiego indeksu**
+
+```sql
+lab04> CREATE INDEX address_postalcode_2 ON address (
+           postalcode,
+           addressline1,
+           addressline2,
+           city,
+           stateprovinceid
+       )
+[2025-05-20 15:31:04] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 15:31:04] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 15:31:04] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:31:04] [S0000][3615] Table 'address'.
+    Scan count 1,
+    logical reads 222,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 229,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:31:04] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 15:31:04] CPU time = 56 ms, elapsed time = 63 ms.
+[2025-05-20 15:31:04] completed in 67 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_indeks_2_create](./zad04/qp_indeks_2_create.png)
+
+> Po wykonaniu tego zapytania wyczyściliśmy cache.
+
+> **Zapytanie z drugim indeksem**
+
+```sql
+lab04> SELECT addressline1,
+              addressline2,
+              city,
+              stateprovinceid,
+              postalcode
+       FROM address WITH (INDEX(address_postalcode_2))
+       WHERE postalcode BETWEEN '98000' AND '99999'
+[2025-05-20 15:32:37] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 15:32:37] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 15:32:37] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 15:32:37] CPU time = 6 ms, elapsed time = 6 ms.
+[2025-05-20 15:32:37] [S0000][3615] Table 'address'.
+    Scan count 1,
+    logical reads 34,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 30,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:32:37] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 15:32:37] CPU time = 5 ms, elapsed time = 7 ms.
+[2025-05-20 15:32:37] completed in 17 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_indeks_2](./zad04/qp_indeks_2.png)
+
+> Po wykonaniu tego zapytania wyczyściliśmy cache.
+
+Czy jest widoczna różnica w planach/kosztach zapytań? 
+
+- w sytuacji gdy nie ma indeksów
+- przy wykorzystaniu indeksu:
+  - address_postalcode_1
+  - address_postalcode_2
+
+Jeśli tak to jaka? 
+
+> W sytuacji, gdy nie ma żadnego indeksu vs. jest którykolwiek z nich, różnica w kosztach zapytań pomiędzy brakiem indeksu a posiadaniem indeksu jest rzędu jednej jednostki: 0.27745 (bez indeksu) a 0.0284668 (address_postalcode_1 lub address_postalcode_2, wynik taki sam).
+>
+> W samych planach widać różnicę w kosztach zapytań, ale również w czasie _Actual Time_ 14 (bez indeksu) vs. 3 (address_postalcode_1) lub 2 (address_postalcode_2).
+>
+> Różnica w statystykach czasu zmierzonych bezpośrednio przez MSSQL również jest widoczna i prezentuje się następująco:
+>
+> |                      | CPU time | Elapsed time | Completed |
+> |----------------------|----------|--------------|-----------|
+> |      bez indeksu     | 9 ms     | 19 ms        | 31 ms     |
+> | address_postalcode_1 | 5 ms     | 6 ms         | 10 ms     |
+> | address_postalcode_2 | 5 ms     | 7 ms         | 17 ms     |
+>
+> Widać tutaj sporą różnicę w czasach pomiędzy zapytaniem bez indeksu a zapytaniami z indeksem.
+> Pomiędzy zapytaniami z indeksami, CPU Time i Elapsed Time są bardzo zbliżone, różnią się w Completed Time, lecz mam poczucie, że to może być niezwiązane z indeksami.
 
 Sprawdź rozmiar Indeksów:
 
@@ -481,16 +1678,87 @@ GROUP BY i.name
 GO
 ```
 
-
 Który jest większy? Jak można skomentować te dwa podejścia do indeksowania? Które kolumny na to wpływają?
 
 
 > Wyniki: 
 
 ```sql
---  ...
+lab04> SELECT i.name AS indexname,
+              SUM(s.used_page_count) * 8 AS indexsizekb
+       FROM sys.dm_db_partition_stats AS s
+                INNER JOIN sys.indexes AS i ON s.object_id = i.object_id
+           AND s.index_id = i.index_id
+       WHERE i.name = 'address_postalcode_1'
+          OR i.name = 'address_postalcode_2'
+       GROUP BY i.name
+[2025-05-20 15:34:25] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 15:34:25] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 15:34:25] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:34:25] [S0000][3615] Table 'sysschobjs'.
+    Scan count 0,
+    logical reads 4,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:34:25] [S0000][3615] Table 'sysidxstats'.
+    Scan count 378,
+    logical reads 765,
+    physical reads 2,
+    page server reads 0,
+    read-ahead reads 24,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:34:25] [S0000][3615] Table 'sysrowsets'.
+    Scan count 1,
+    logical reads 5,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 15:34:25] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 15:34:25] CPU time = 11 ms, elapsed time = 14 ms.
+[2025-05-20 15:34:25] completed in 19 ms
 ```
 
+> Rezultat zapytania:
+>
+> | indexname            | indexsizekb |
+> | :------------------- | :---------- |
+> | address_postalcode_1 | 1784        |
+> | address_postalcode_2 | 1808        |
+
+Który jest większy? Jak można skomentować te dwa podejścia do indeksowania? Które kolumny na to wpływają?
+
+> Indeks `address_postalcode_1` odnosi się bezpośrednio tylko do kolumny `postalcode`, a wyrażenie `INCLUDE` oznacza, że kolumny `addressline1`, `addressline2`, `city` oraz `stateprovinceid` są przechowywane na poziomie liści danego indeksu, ale nie są jego częścią. Takie podejście pozwala na tworzenie bardziej efektywnych zapytań, w których następuje filtrowanie bądź sortowanie po kolumnie `postalcode` oraz kolumny zawarte w `INCLUDE` są wybierane do pobrania. Ten indeks jest mniejszy, ponieważ opiera się tylko na jednej kolumnie, a do pozostałych odnosi się dopiero na poziomie liści.
+>
+> Indeks `address_postalcode_2` natomiast odnosi się bezpośrednio do wszystkich kolumn `postalcode`, `addressline1`, `addressline2`, `city` oraz `stateprovinceid` (w takiej kolejności), tworząc na ich podstawie klucz złożony. To powoduje, że indeks jest większy. Taki indeks jest bardziej przydatny, gdy celem jest filtrowanie lub sortowanie po wielu kolumnach w nim zawartych.
 
 # Zadanie 5 – Indeksy z filtrami
 
