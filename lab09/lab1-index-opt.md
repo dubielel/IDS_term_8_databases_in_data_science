@@ -1262,7 +1262,17 @@ Zanotuj czas zapytania oraz jego koszt koszt:
 SELECT *
 FROM customer
 WHERE storeid = 594
-1 row retrieved starting from 1 in 42 ms (execution: 20 ms, fetching: 22 ms)
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 6 ms, elapsed time = 7 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3612] SQL Server Execution Times:
+CPU time = 7 ms,  elapsed time = 6 ms.
+1 row retrieved starting from 1 in 40 ms (execution: 21 ms, fetching: 19 ms)
 ```
 
 ![img1.png](zad3/img1.png)
@@ -1281,7 +1291,13 @@ Wynik:
 SELECT *
 FROM customer
 WHERE storeid BETWEEN 594 AND 610
-16 rows retrieved starting from 1 in 47 ms (execution: 17 ms, fetching: 30 ms)
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3612] SQL Server Execution Times:
+CPU time = 3 ms,  elapsed time = 2 ms.
+16 rows retrieved starting from 1 in 23 ms (execution: 8 ms, fetching: 15 ms)
 ```
 
 ![img2.png](zad3/img2.png)
@@ -1320,7 +1336,13 @@ CREATE INDEX customer_store_cls_idx ON customer(storeid)
 SELECT *
 FROM customer
 WHERE storeid = 594
-1 row retrieved starting from 1 in 52 ms (execution: 33 ms, fetching: 19 ms)
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 17 ms, elapsed time = 19 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3612] SQL Server Execution Times:
+CPU time = 3 ms,  elapsed time = 4 ms.
+1 row retrieved starting from 1 in 99 ms (execution: 31 ms, fetching: 68 ms)
 ```
 
 ![img3.png](zad3/img3.png)
@@ -1335,7 +1357,13 @@ Wynik: jest taki sam jak w przypadku zapytania bez indeksu
 SELECT *
 FROM customer
 WHERE storeid BETWEEN 594 AND 610
-16 rows retrieved starting from 1 in 44 ms (execution: 20 ms, fetching: 24 ms)
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 21 ms, elapsed time = 22 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3612] SQL Server Execution Times:
+CPU time = 1 ms,  elapsed time = 0 ms.
+16 rows retrieved starting from 1 in 52 ms (execution: 28 ms, fetching: 24 ms)
 ```
 
 ![img4.png](zad3/img4.png)
@@ -1358,14 +1386,6 @@ Może to być spowodowane tym, że serwer musiał wykonać dodatkowe operacje zw
 Można wykorzystać Covering index i zawrzeć pozostałe kolumny w indeksie (korzystając z INCLUDE), aby uniknąć dodatkowych operacji.
 Można skorzystać z clustered index, aby przyspieszyć wyszukiwanie, bo serwer będzie korzystać z key lookup, które jest bardziej wydajne.
 
----
-> Wyniki: 
-
-```sql
---  ...
-```
-
-
 Dodaj indeks klastrowany:
 
 ```sql
@@ -1374,13 +1394,59 @@ CREATE clustered INDEX customer_store_cls_idx ON customer(storeid)
 
 Czy zmienił się plan/koszt/czas? Skomentuj dwa podejścia w wyszukiwaniu krotek.
 
-
 ---
-> Wyniki: 
+> Wyniki:
+
+### Zapytanie 1:
 
 ```sql
---  ...
+SELECT *
+FROM customer
+WHERE storeid = 594
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 5 ms, elapsed time = 5 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3612] SQL Server Execution Times:
+CPU time = 1 ms,  elapsed time = 0 ms.
+1 row retrieved starting from 1 in 25 ms (execution: 12 ms, fetching: 13 ms)
 ```
+
+![img5.png](zad3/img5.png)
+
+Koszt zapytania: 0.00328
+
+### Zapytanie 2:
+
+```sql
+SELECT *
+FROM customer
+WHERE storeid BETWEEN 594 AND 610
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 4 ms, elapsed time = 4 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3612] SQL Server Execution Times:
+CPU time = 1 ms,  elapsed time = 0 ms.
+16 rows retrieved starting from 1 in 30 ms (execution: 11 ms, fetching: 19 ms)
+```
+
+![img6.png](zad3/img6.png)
+
+Koszt zapytania: 0.00330
+
+Clustered index zmienia układ tabeli, to jest zapisuje ją posortowaną według klucza indeksu.
+W przypadku zapytania `select *` serwer nie musi wykonywać dodatkowych operacji związanych z RID Lookup, ponieważ wszystkie kolumny są już zawarte w indeksie klastrowym.
+Zmniejsza to koszt zapytania oraz czas jego wykonania.
+Na jedną tabele może być tylko jeden indeks klastrowy.
 
 # Zadanie 4 - dodatkowe kolumny w indeksie
 
