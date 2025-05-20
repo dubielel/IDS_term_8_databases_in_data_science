@@ -644,6 +644,97 @@ lab04> SELECT orderdate,
 >
 > ![qp_2](./zad01/qp_2.png)
 
+> Komentarz:
+>
+> To zapytanie miało na celu wydobyć zagregowane statystyki dotyczące zamówień pogrupowanych na podstawie ilości zamówionych produktów i przefiltrowanych tylko dla zamówień z ponad stoma zamówionymi produktami.
+
+> Optymalizacja:
+>
+> Optymalizacją tego zapytania mogłoby być zastosowanie indeksów dla kolumn użytych w łączeniu tabel oraz w grupowaniu danych.
+
+```sql
+CREATE INDEX IX_salesorderheader_id_date ON salesorderheader(salesorderid, orderdate);
+
+CREATE INDEX IX_salesorderdetail_header_product ON salesorderdetail(
+    salesorderid,
+    productid,
+    orderqty,
+    unitpricediscount,
+    linetotal
+);
+```
+
+```sql
+lab04> SELECT orderdate,
+              productid,
+              SUM(orderqty) AS orderqty,
+              SUM(unitpricediscount) AS unitpricediscount,
+              SUM(linetotal)
+       FROM salesorderheader sh
+       INNER JOIN salesorderdetail sd ON sh.salesorderid = sd.salesorderid
+       GROUP BY orderdate, productid
+       HAVING SUM(orderqty) >= 100
+[2025-05-20 16:20:13] [S0000][3613] SQL Server parse and compile time:
+[2025-05-20 16:20:13] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-20 16:20:13] [S0000][3615] Table 'salesorderheader'.
+    Scan count 5,
+    logical reads 307,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 102,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:20:13] [S0000][3615] Table 'salesorderdetail'.
+    Scan count 5,
+    logical reads 788,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 760,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:20:13] [S0000][3615] Table 'Workfile'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:20:13] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-20 16:20:13] [S0000][3612] SQL Server Execution Times:
+[2025-05-20 16:20:13] CPU time = 217 ms, elapsed time = 80 ms.
+[2025-05-20 16:20:13] completed in 83 ms
+```
+
+> Zmniejsza to ilość odczytów logicznych z obydwóch tabel o niemal połowę, lecz dokłada po jednym odczycie fizycznym dla każdej z nich.
+
+> Plan zoptymalizowanego zapytania:
+>
+> ![qp_2](./zad01/qp_2_optim.png)
+
 > **Zapytanie 3**
 
 ```sql
