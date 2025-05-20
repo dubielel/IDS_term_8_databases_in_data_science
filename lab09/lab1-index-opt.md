@@ -873,6 +873,10 @@ lab04> SELECT salesordernumber,
 >
 > ![qp_3](./zad01/qp_3.png)
 
+> Komentarz
+>
+> Celem tego zapytania jest wydobycie informacji na temat dat (zakończenia i wysłania) oraz informacji o płatności powiązanych z danym zamówieniem. Dodatkowo wyszczególnione są zamówienia z listy konkretnych dat.
+
 > Optymalizacja
 >
 > Dla tego zapytania optymalizacją również mogłoby być użycie indeksów na kolumnach używanych w filtrowaniu i łączeniu
@@ -1067,6 +1071,10 @@ lab04> SELECT sh.salesorderid,
 > Plan zapytania:
 >
 > ![qp_4](./zad01/qp_4.png)
+
+> Komentarz
+>
+> Podobnie jak w poprzednim przykładzie, celem tego zapytania również jest wydobycie informacji na temat dat (zakończenia i wysłania) oraz informacji o płatności powiązanych z danym zamówieniem. Tym razem zamówienia wyszczególnione są w oparciu o identyfikator śledzenia przesyłki.
 
 > Optymalizacja
 >
