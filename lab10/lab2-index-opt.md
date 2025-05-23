@@ -1,5 +1,4 @@
-
-# Indeksy,  optymalizator <br>Lab 2
+# Indeksy, optymalizator <br>Lab 2
 
 <!-- <style scoped>
  p,li {
@@ -13,19 +12,19 @@
   }
 </style>  -->
 
-
 ---
 
 **Imię i nazwisko:**
 
---- 
+---
 
-Celem ćwiczenia jest zapoznanie się z planami wykonania zapytań (execution plans), oraz z budową i możliwością wykorzystaniem indeksów 
+Celem ćwiczenia jest zapoznanie się z planami wykonania zapytań (execution plans), oraz z budową i możliwością wykorzystaniem indeksów
 
 Swoje odpowiedzi wpisuj w miejsca oznaczone jako:
 
 ---
-> Wyniki: 
+
+> Wyniki:
 
 ```sql
 --  ...
@@ -42,69 +41,74 @@ Zwróć uwagę na formatowanie kodu
 ## Oprogramowanie - co jest potrzebne?
 
 Do wykonania ćwiczenia potrzebne jest następujące oprogramowanie
+
 - MS SQL Server
-- SSMS - SQL Server Management Studio    
-	- ewentualnie inne narzędzie umożliwiające komunikację z MS SQL Server i analizę planów zapytań
+- SSMS - SQL Server Management Studio
+  - ewentualnie inne narzędzie umożliwiające komunikację z MS SQL Server i analizę planów zapytań
 - przykładowa baza danych AdventureWorks2017.
-    
+
 Oprogramowanie dostępne jest na przygotowanej maszynie wirtualnej
 
-
-
-## Przygotowanie  
+## Przygotowanie
 
 Uruchom Microsoft SQL Managment Studio.
-    
-Stwórz swoją bazę danych o nazwie lab2. 
+
+Stwórz swoją bazę danych o nazwie lab2.
 
 ```sql
-create database lab2  
-go  
-  
-use lab2  
-go
-```
+CREATE DATABASE lab2
+GO
 
+USE lab2
+GO
+```
 
 <div style="page-break-after: always;"></div>
 
-# Zadanie 1 
-
+# Zadanie 1
 
 Skopiuj tabelę `Person` do swojej bazy danych:
 
 ```sql
-select businessentityid  
-      ,persontype  
-      ,namestyle  
-      ,title  
-      ,firstname  
-      ,middlename  
-      ,lastname  
-      ,suffix  
-      ,emailpromotion  
-      ,rowguid  
-      ,modifieddate  
-into person  
-from adventureworks2017.person.person
+SELECT businessentityid,
+       persontype,
+       namestyle,
+       title,
+       firstname,
+       middlename,
+       lastname,
+       suffix,
+       emailpromotion,
+       rowguid,
+       modifieddate
+INTO person
+FROM adventureworks2017.person.person
 ```
+
 ---
 
 Wykonaj analizę planu dla trzech zapytań:
 
 ```sql
-select * from [person] where lastname = 'Agbonile'  
-  
-select * from [person] where lastname = 'Agbonile' and firstname = 'Osarumwense'  
-  
-select * from [person] where firstname = 'Osarumwense'
+SELECT *
+FROM [ person ]
+WHERE lastname = 'Agbonile'
+
+SELECT *
+FROM [ person ]
+WHERE lastname = 'Agbonile'
+    AND firstname = 'Osarumwense'
+
+SELECT *
+FROM [ person ]
+WHERE firstname = 'Osarumwense'
 ```
 
 Co można o nich powiedzieć?
 
-
 ---
-> Wyniki: 
+
+> Wyniki:
 
 ```sql
 --  ...
@@ -113,98 +117,108 @@ Co można o nich powiedzieć?
 Przygotuj indeks obejmujący te zapytania:
 
 ```sql
-create index person_first_last_name_idx  
-on person(lastname, firstname)
+CREATE INDEX person_first_last_name_idx
+ON person(lastname, firstname)
 ```
 
 Sprawdź plan zapytania. Co się zmieniło?
 
-
 ---
-> Wyniki: 
+
+> Wyniki:
 
 ```sql
 --  ...
 ```
 
-
-Przeprowadź ponownie analizę zapytań tym razem dla parametrów: `FirstName = ‘Angela’` `LastName = ‘Price’`. (Trzy zapytania, różna kombinacja parametrów). 
+Przeprowadź ponownie analizę zapytań tym razem dla parametrów: `FirstName = ‘Angela’` `LastName = ‘Price’`. (Trzy zapytania, różna kombinacja parametrów).
 
 Czym różni się ten plan od zapytania o `'Osarumwense Agbonile'` . Dlaczego tak jest?
 
-
 ---
-> Wyniki: 
+
+> Wyniki:
 
 ```sql
 --  ...
 ```
-
 
 # Zadanie 2
 
 Skopiuj tabelę Product do swojej bazy danych:
 
 ```sql
-select * into product from adventureworks2017.production.product
+SELECT * INTO product
+FROM adventureworks2017.production.product
 ```
 
 Stwórz indeks z warunkiem przedziałowym:
 
 ```sql
-create nonclustered index product_range_idx  
-    on product (productsubcategoryid, listprice) include (name)  
-where productsubcategoryid >= 27 and productsubcategoryid <= 36
+CREATE nonclustered INDEX product_range_idx
+ON product (productsubcategoryid, listprice) INCLUDE (name)
+WHERE productsubcategoryid >= 27
+    AND productsubcategoryid <= 36
 ```
 
 Sprawdź, czy indeks jest użyty w zapytaniu:
 
 ```sql
-select name, productsubcategoryid, listprice  
-from product  
-where productsubcategoryid >= 27 and productsubcategoryid <= 36
+SELECT name,
+       productsubcategoryid,
+       listprice
+FROM product
+WHERE productsubcategoryid >= 27
+    AND productsubcategoryid <= 36
 ```
 
 Sprawdź, czy indeks jest użyty w zapytaniu, który jest dopełnieniem zbioru:
 
 ```sql
-select name, productsubcategoryid, listprice  
-from product  
-where productsubcategoryid < 27 or productsubcategoryid > 36
+SELECT name,
+       productsubcategoryid,
+       listprice
+FROM product
+WHERE productsubcategoryid < 27
+    OR productsubcategoryid > 36
 ```
 
-
-Skomentuj oba zapytania. Czy indeks został użyty w którymś zapytaniu, dlaczego?  Jak działają indeksy z warunkiem?
-
+Skomentuj oba zapytania. Czy indeks został użyty w którymś zapytaniu, dlaczego? Jak działają indeksy z warunkiem?
 
 ---
-> Wyniki: 
+
+> Wyniki:
 
 ```sql
 --  ...
 ```
-
 
 # Zadanie 3
 
 Skopiuj tabelę `PurchaseOrderDetail` do swojej bazy danych:
 
 ```sql
-select * into purchaseorderdetail from  adventureworks2017.purchasing.purchaseorderdetail
+SELECT *
+INTO purchaseorderdetail
+FROM adventureworks2017.purchasing.purchaseorderdetail
 ```
 
 Wykonaj analizę zapytania:
 
 ```sql
-select rejectedqty, ((rejectedqty/orderqty)*100) as rejectionrate, productid, duedate  
-from purchaseorderdetail  
-order by rejectedqty desc, productid asc
+SELECT rejectedqty,
+       ((rejectedqty / orderqty) * 100) AS rejectionrate,
+       productid,
+       duedate
+FROM purchaseorderdetail
+ORDER BY rejectedqty DESC, productid ASC
 ```
 
 Która część zapytania ma największy koszt?
 
 ---
-> Wyniki: 
+
+> Wyniki:
 
 ```sql
 --  ...
@@ -212,102 +226,101 @@ Która część zapytania ma największy koszt?
 
 Jaki indeks można zastosować aby zoptymalizować koszt zapytania? Przygotuj polecenie tworzące index.
 
-
 ---
-> Wyniki: 
+
+> Wyniki:
 
 ```sql
 --  ...
 ```
 
- Ponownie wykonaj analizę zapytania:
-
+Ponownie wykonaj analizę zapytania:
 
 ---
-> Wyniki: 
+
+> Wyniki:
 
 ```sql
 --  ...
 ```
-
-
 
 # Zadanie 4 – indeksy column store
-
 
 Celem zadania jest poznanie indeksów typu column store
 
 Utwórz tabelę testową:
 
 ```sql
-create table dbo.saleshistory(  
- salesorderid int not null,  
- salesorderdetailid int not null,  
- carriertrackingnumber nvarchar(25) null,  
- orderqty smallint not null,  
- productid int not null,  
- specialofferid int not null,  
- unitprice money not null,  
- unitpricediscount money not null,  
- linetotal numeric(38, 6) not null,  
- rowguid uniqueidentifier not null,  
- modifieddate datetime not null  
- )
+CREATE TABLE dbo.saleshistory(
+    salesorderid INT NOT NULL,
+    salesorderdetailid INT NOT NULL,
+    carriertrackingnumber NVARCHAR(25) NULL,
+    orderqty SMALLINT NOT NULL,
+    productid INT NOT NULL,
+    specialofferid INT NOT NULL,
+    unitprice MONEY NOT NULL,
+    unitpricediscount MONEY NOT NULL,
+    linetotal NUMERIC(38, 6) NOT NULL,
+    rowguid UNIQUEIDENTIFIER NOT NULL,
+    modifieddate DATETIME NOT NULL
+)
 ```
 
 Załóż indeks:
 
 ```sql
-create clustered index saleshistory_idx  
-on saleshistory(salesorderdetailid)
+CREATE clustered INDEX saleshistory_idx
+ON saleshistory(salesorderdetailid)
 ```
-
-
 
 Wypełnij tablicę danymi:
 
-(UWAGA    `GO 100` oznacza 100 krotne wykonanie polecenia. Jeżeli podejrzewasz, że Twój serwer może to zbyt przeciążyć, zacznij od GO 10, GO 20, GO 50 (w sumie już będzie 80))
+(UWAGA `GO 100` oznacza 100 krotne wykonanie polecenia. Jeżeli podejrzewasz, że Twój serwer może to zbyt przeciążyć, zacznij od GO 10, GO 20, GO 50 (w sumie już będzie 80))
 
 ```sql
-insert into saleshistory  
- select sh.*  
- from adventureworks2017.sales.salesorderdetail sh  
-go 100
+INSERT INTO saleshistory
+SELECT sh. *
+FROM adventureworks2017.sales.salesorderdetail sh
+GO 100
 ```
 
 Sprawdź jak zachowa się zapytanie, które używa obecny indeks:
 
 ```sql
-select productid, sum(unitprice), avg(unitprice), sum(orderqty), avg(orderqty)  
-from saleshistory  
-group by productid  
-order by productid
+SELECT productid,
+       SUM(unitprice),
+       AVG(unitprice),
+       SUM(orderqty),
+       AVG(orderqty)
+FROM saleshistory
+GROUP BY productid
+ORDER BY productid
 ```
 
 Załóż indeks typu column store:
 
 ```sql
-create nonclustered columnstore index saleshistory_columnstore  
- on saleshistory(unitprice, orderqty, productid)
+CREATE NONCLUSTERED COLUMNSTORE INDEX saleshistory_columnstore
+ON saleshistory(unitprice, orderqty, productid)
 ```
 
-Sprawdź różnicę pomiędzy przetwarzaniem w zależności od indeksów. Porównaj plany i opisz różnicę. 
+Sprawdź różnicę pomiędzy przetwarzaniem w zależności od indeksów. Porównaj plany i opisz różnicę.
 Co to są indeksy colums store? Jak działają? (poszukaj materiałów w internecie/literaturze)
 
-
 ---
-> Wyniki: 
+
+> Wyniki:
 
 ```sql
 --  ...
 ```
-
 
 # Zadanie 5 – własne eksperymenty
 
 Należy zaprojektować tabelę w bazie danych, lub wybrać dowolny schemat danych (poza używanymi na zajęciach), a następnie wypełnić ją danymi w taki sposób, aby zrealizować poszczególne punkty w analizie indeksów. Warto wygenerować sobie tabele o większym rozmiarze.
 
 Do analizy, proszę uwzględnić następujące rodzaje indeksów:
+
 - Klastrowane (np.  dla atrybutu nie będącego kluczem głównym)
 - Nieklastrowane
 - Indeksy wykorzystujące kilka atrybutów, indeksy include
@@ -317,9 +330,10 @@ Do analizy, proszę uwzględnić następujące rodzaje indeksów:
 ## Analiza
 
 Proszę przygotować zestaw zapytań do danych, które:
+
 - wykorzystują poszczególne indeksy
 - które przy wymuszeniu indeksu działają gorzej, niż bez niego (lub pomimo założonego indeksu, tabela jest w pełni skanowana)
-Odpowiedź powinna zawierać:
+  Odpowiedź powinna zawierać:
 - Schemat tabeli
 - Opis danych (ich rozmiar, zawartość, statystyki)
 - Opis indeksu
@@ -327,14 +341,11 @@ Odpowiedź powinna zawierać:
 - Komentarze do zapytań, ich wyników
 - Sprawdzenie, co proponuje Database Engine Tuning Advisor (porównanie czy udało się Państwu znaleźć odpowiednie indeksy do zapytania)
 
-
-> Wyniki: 
+> Wyniki:
 
 ```sql
 --  ...
 ```
-
-
 
 |         |     |     |
 | ------- | --- | --- |
