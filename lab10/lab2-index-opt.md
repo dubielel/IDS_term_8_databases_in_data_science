@@ -63,6 +63,19 @@ USE lab2
 GO
 ```
 
+Przydatne wywołania w MSSQL:
+
+```sql
+SET STATISTICS IO ON
+SET STATISTICS TIME ON
+
+-- Use this when you want to clear the cache
+-- Recommended after each query
+CHECKPOINT;
+GO
+DBCC DROPCLEANBUFFERS
+```
+
 <div style="page-break-after: always;"></div>
 
 # Zadanie 1
