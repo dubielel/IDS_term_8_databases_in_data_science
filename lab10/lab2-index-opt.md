@@ -185,6 +185,10 @@ WHERE productsubcategoryid >= 27
     AND productsubcategoryid <= 36
 ```
 
+> ![image](zad2/img1.png)
+> 
+> Tak, został wykorzystany indeks.
+
 Sprawdź, czy indeks jest użyty w zapytaniu, który jest dopełnieniem zbioru:
 
 ```sql
@@ -196,7 +200,15 @@ WHERE productsubcategoryid < 27
     OR productsubcategoryid > 36
 ```
 
+> ![image](zad2/img2.png)
+> 
+> Nie został wykorzystany indeks.
+
 Skomentuj oba zapytania. Czy indeks został użyty w którymś zapytaniu, dlaczego? Jak działają indeksy z warunkiem?
+
+> Indeksy z warunkiem są używane tylko wtedy, gdy zapytanie pasuje do warunku. W przeciwnym razie, SQL Server nie użyje indeksu, ponieważ nie przyniesie to korzyści w wydajności. W naszym przypadku, w pierwszym zapytaniu warunek był spełniony, więc indeks został użyty. W drugim zapytaniu warunek nie był spełniony, więc SQL Server zdecydował się na pełne skanowanie tabeli.
+> 
+> Indeks z warunkiem działa w ten sposób, że tylko te wiersze, które spełniają określony warunek, są indeksowane. Dzięki temu można zaoszczędzić miejsce i przyspieszyć wyszukiwanie danych, ale tylko dla zapytań, które pasują do tego warunku.
 
 ---
 
