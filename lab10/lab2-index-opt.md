@@ -14,7 +14,7 @@
 
 ---
 
-**Imię i nazwisko:**
+**Imię i nazwisko: Kacper Cienkosz, Miłosz Dubiel**
 
 ---
 
