@@ -150,21 +150,41 @@ CPU time = 4 ms,  elapsed time = 3 ms.
 1 row retrieved starting from 1 in 97 ms (execution: 59 ms, fetching: 38 ms)
 ```
 
+> Plan zapytania:
+>
+> ![zad1_img1](zad1/img1.png)
+
 ### Zapytanie 2
 ```sql
 lab2> SELECT *
       FROM person
       WHERE lastname = 'Agbonile'
         AND firstname = 'Osarumwense'
-[2025-05-23 17:58:03] [S0000][3613] SQL Server parse and compile time:
-[2025-05-23 17:58:03] CPU time = 46 ms, elapsed time = 46 ms.
-[2025-05-23 17:58:03] [S0000][3613] SQL Server parse and compile time:
-[2025-05-23 17:58:03] CPU time = 0 ms, elapsed time = 0 ms.
-[2025-05-23 17:58:03] [S0000][3615] Table 'person'. Scan count 1, logical reads 207, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
-[2025-05-23 17:58:03] [S0000][3612] SQL Server Execution Times:
-[2025-05-23 17:58:03] CPU time = 3 ms,  elapsed time = 2 ms.
-[2025-05-23 17:58:03] 1 row retrieved starting from 1 in 75 ms (execution: 54 ms, fetching: 21 ms)
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 46 ms, elapsed time = 46 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3615]
+Table 'person'.
+Scan count 1,
+logical reads 207,
+physical reads 0,
+page server reads 0,
+read-ahead reads 0,
+page server read-ahead reads 0,
+lob logical reads 0,
+lob physical reads 0, lob page server reads 0,
+lob read-ahead reads 0,
+lob page server read-ahead reads 0.
+[S0000][3612] SQL Server Execution Times:
+CPU time = 3 ms,  elapsed time = 2 ms.
+1 row retrieved starting from 1 in 75 ms (execution: 54 ms, fetching: 21 ms)
 ```
+
+> Plan zapytania:
+>
+> ![zad1_img2](zad1/img2.png)
+
 ### Zapytanie 3
 ```sql
 SELECT *
@@ -192,6 +212,12 @@ CPU time = 7 ms,  elapsed time = 10 ms.
 1 row retrieved starting from 1 in 44 ms (execution: 22 ms, fetching: 22 ms)
 ```
 
+> Plan zapytania:
+>
+> ![zad1_img3](zad1/img3.png)
+
+> Wszystkie trzy zapytania wykonują pełne skanowanie tabeli `person`, ponieważ nie ma indeksu, który mógłby przyspieszyć wyszukiwanie. W każdym przypadku liczba odczytów logicznych jest taka sama (207), co wskazuje na to, że SQL Server przeszukuje całą tabelę.
+
 Przygotuj indeks obejmujący te zapytania:
 
 ```sql
@@ -205,21 +231,80 @@ Sprawdź plan zapytania. Co się zmieniło?
 
 > Wyniki:
 
+### Zapytanie 1
+
 ```sql
---  ...
+SELECT *
+FROM person
+WHERE lastname = 'Agbonile'
 ```
+
+> Plan zapytania:
+> ![zad1_img4](zad1/img4.png)
+### Zapytanie 2
+
+```sql
+SELECT *
+FROM person
+WHERE lastname = 'Agbonile'
+AND firstname = 'Osarumwense'
+```
+> Plan zapytania:
+> ![zad1_img5](zad1/img5.png)
+### Zapytanie 3
+
+```sql
+SELECT *
+FROM person
+WHERE firstname = 'Osarumwense'
+```
+> Plan zapytania:
+> ![zad1_img6](zad1/img6.png)
+> Po dodaniu indeksu `person_first_last_name_idx`, plany zapytań uległy znaczącej zmianie. Teraz SQL Server korzysta z indeksu.
+
+> W przypadku pierwszego zapytania serwer wykonuje **`INDEX SEEK`**, co oznacza, że bezpośrednio przeszukuje indeks, zamiast skanować całą tabelę.
+
+> Drugie zapytanie również korzysta z indeksu, ale wykonuje **`INDEX SEEK`** z dodatkowymi warunkami na kolumnę `firstname`, co jest bardziej efektywne niż pełne skanowanie tabeli. W tym zapytaniu wykorzystywany jest cały indeks, co znacznie poprawia wydajność. Widać to poprzez koszt zapytania.
+
+> Trzecie zapytanie również korzysta z indeksu, ale w tym przypadku SQL Server wykonuje **`FULL INDEX SCAN`**, ponieważ nie ma warunku na kolumnę `lastname`. To oznacza, że serwer przeszukuje wszystkie wiersze w indeksie, ale nadal jest to bardziej efektywne niż pełne skanowanie tabeli. Wynika to z zasady **lefft-prefix**. Mówi ona, że żeby zapytanie z indeksem było efektywne, musi wykorzystywać kolumny indeksu w kolejności, w jakiej zostały zdefiniowane.
 
 Przeprowadź ponownie analizę zapytań tym razem dla parametrów: `FirstName = ‘Angela’` `LastName = ‘Price’`. (Trzy zapytania, różna kombinacja parametrów).
 
 Czym różni się ten plan od zapytania o `'Osarumwense Agbonile'` . Dlaczego tak jest?
 
----
-
 > Wyniki:
 
+### Zapytanie 1
+
 ```sql
---  ...
+SELECT *
+FROM person
+WHERE lastname = 'Price'
 ```
+> Plan zapytania:
+> ![zad1_img7](zad1/img7.png)
+### Zapytanie 2
+
+```sql
+SELECT *
+FROM person
+WHERE lastname = 'Price'
+AND firstname = 'Angela'
+```
+> Plan zapytania:
+> ![zad1_img8](zad1/img8.png)
+### Zapytanie 3
+
+```sql
+SELECT *
+FROM person
+WHERE firstname = 'Angela'
+``` 
+> Plan zapytania:
+> ![zad1_img9](zad1/img9.png)
+> W przypadku zapytań z parametrami `FirstName = 'Angela'` i `LastName = 'Price'` serwer nie zdecydował się wykorzystać indeksu w przypadku pierwszego i trzeciego zapytania. Jest tak ponieważ zarówno imię Angela, jak i nazwisko Price występują w tabeli wiele razy, więc SQL Server uznał, że pełne skanowanie tabeli będzie bardziej efektywne niż korzystanie z indeksu, który ustalony jest według nazwiska i imieni.
+
+
 
 # Zadanie 2
 
