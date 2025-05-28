@@ -601,7 +601,7 @@ CREATE TABLE dbo.saleshistory(
 Załóż indeks:
 
 ```sql
-CREATE clustered INDEX saleshistory_idx
+CREATE CLUSTERED INDEX saleshistory_idx
 ON saleshistory(salesorderdetailid)
 ```
 
@@ -643,9 +643,144 @@ Co to są indeksy colums store? Jak działają? (poszukaj materiałów w interne
 
 > Wyniki:
 
+> **Zapytanie z indeksem `saleshistory_idx`**
+
 ```sql
---  ...
+lab05> SELECT productid,
+              SUM(unitprice),
+              AVG(unitprice),
+              SUM(orderqty),
+              AVG(orderqty)
+       FROM saleshistory WITH(INDEX(saleshistory_idx))
+       GROUP BY productid
+       ORDER BY productid
+[2025-05-28 19:10:27] [S0000][3613] SQL Server parse and compile time:
+[2025-05-28 19:10:27] CPU time = 19 ms, elapsed time = 22 ms.
+[2025-05-28 19:10:27] [S0000][3615] Table 'saleshistory'.
+    Scan count 5,
+    logical reads 343119,
+    physical reads 3,
+    page server reads 0,
+    read-ahead reads 343327,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-28 19:10:27] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-28 19:10:27] [S0000][3612] SQL Server Execution Times:
+[2025-05-28 19:10:27] CPU time = 2383 ms, elapsed time = 5511 ms.
+[2025-05-28 19:10:27] completed in 5 s 544 ms
 ```
+> Plan zapytania:
+>
+> ![qp_clustered_index](zad04/qp_clustered_index.png)
+
+> Okrojona tabelka z rezultatem surowego planu zapytania:
+>
+> | Step            | EstimatedCPU | EstimatedIO | EstimatedTotalSubtreeCost | Estimated step cost (własne obliczenia) |
+> | --------------- | ------------ | ----------- | ------------------------- | --------------------------------------- |
+> | Full index scan | 6.67251      | 252.693     | 259.365                   | 259.365                                 |
+> | Aggregate       | 2.89842      | 0.0         | 262.264                   | 2.899                                   |
+> | Value           | 0.0          | 0.0         | 262.264                   | 0.0                                     |
+> | Sort            | 0.000219373  | 0.00187688  | 262.266                   | 0.002                                   |
+> | Transformation  | 0.0305796    | 0.0         | 262.296                   | 0.03                                    |
+> | Select          | N/A          | N/A         | 262.296                   | 0.0                                     |
+
+> **Zapytanie z indeksem `saleshistory_columnstore`**
+
+```sql
+lab05> SELECT productid,
+              SUM(unitprice),
+              AVG(unitprice),
+              SUM(orderqty),
+              AVG(orderqty)
+       FROM saleshistory WITH(INDEX(saleshistory_columnstore))
+       GROUP BY productid
+       ORDER BY productid
+[2025-05-28 19:10:55] [S0000][3613] SQL Server parse and compile time:
+[2025-05-28 19:10:55] CPU time = 35 ms, elapsed time = 38 ms.
+[2025-05-28 19:10:55] [S0000][3615] Table 'saleshistory'.
+    Scan count 8,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 3761,
+    lob physical reads 42,
+    lob page server reads 0,
+    lob read-ahead reads 7905,
+    lob page server read-ahead reads 0.
+[2025-05-28 19:10:55] [S0000][3642] Table 'saleshistory'. Segment reads 13, segment skipped 0.
+[2025-05-28 19:10:55] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-28 19:10:55] [S0000][3612] SQL Server Execution Times:
+[2025-05-28 19:10:55] CPU time = 131 ms, elapsed time = 114 ms.
+[2025-05-28 19:10:55] completed in 160 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_columnstore_index](zad04/qp_columnstore_index.png)
+
+> Okrojona tabelka z rezultatem surowego planu zapytania:
+>
+> | Step            | EstimatedCPU | EstimatedIO | EstimatedTotalSubtreeCost | Estimated step cost (własne obliczenia) |
+> | --------------- | ------------ | ----------- | ------------------------- | --------------------------------------- |
+> | Full index scan | 0.667251     | 0.00831019  | 0.675562                  | 0.675562                                |
+> | Aggregate       | 2.89842      | 0.0         | 3.57398                   | 2.898418                                |
+> | Value           | 0.0          | 0.0         | 3.57398                   | 0.0                                     |
+> | Sort            | 0.000219373  | 0.00187688  | 3.57608                   | 0.0021                                  |
+> | Transformation  | 0.0305796    | 0.0         | 3.60666                   | 0.03058                                 |
+> | Select          | N/A          | N/A         | 3.60666                   | 0.0                                     |
+
+Sprawdź różnicę pomiędzy przetwarzaniem w zależności od indeksów. Porównaj plany i opisz różnicę.
+
+> Porównując ze sobą wyniki z dwóch powyższych tabel, widać bardzo wyraźnie, że wszystkie kroki oprócz pierwszego (Aggregate, Value, Sort, Transformation, Select) są prawie identyczne w obydwóch zapytaniach.
+>
+> Jedyna różnica (ogromna) wynika z dokonanego pełnego skanu tabeli za pomocą dwóch różnych indeksów. "Klasyczny" indeks `CLUSTERED` wiąże się z ogromnym kosztem wykonania (259.365). Ten bardzo duży koszt robi się jeszcze bardziej drastyczny, gdy spojrzymy na koszt wykonania pełnego skanu za pomocą indeksu `COLUMNSTORE` – wtedy koszt wyniósł 0.675562 i jest on prawie 400-krotnie mniejszy od kosztu dla indeksu `CLUSTERED`.
+>
+> Różnica w kosztach tych dwóch zapytań niesie ze sobą również różnicę w czasie wykonania zapytań:
+>
+> |                      | CPU time | Elapsed time | Completed |
+> | -------------------- | -------- | ------------ | --------- |
+> | indeks `CLUSTERED`   | 2383 ms  | 5511 ms      | 5544 ms   |
+> | indeks `COLUMNSTORE` | 131 ms   | 114 ms       | 160 ms    |
+>
+> Różnice w czasach są kolosalne: ponad 5 sekund dla zapytania z indeksem `CLUSTERED` względem 160 milisekund dla zapytania z indeksem `COLUMNSTORE`!
+
+Co to są indeksy colums store? Jak działają? (poszukaj materiałów w internecie/literaturze)
+
+> Indeksy typu `COLUMNSTORE` zostały zaprojektowane aby przyspieszyć analizy dużych zbiorów danych (np. w hurtowniach danych). Charakteryzują się tym, że przechowują dane w formacie kolumnowym, a nie wierszowym.
+>
+> Pozwala to na dużo szybsze wykonywanie zapytań analitycznych, które wykorzystują funkcje agregujące. Ich dodatkową zaletą jest również dużo łatwiejsza i lepsza kompresja danych, co pozwala na zmniejszenie rozmiaru danych przechowywanych. Ponadto, indeksy `COLUMNSTORE` pozwalają na tzw. _Batch execution_, czyli przetwarzanie wsadowe/wektorowe, które pozwala przetwarzać wiele wierszy jednocześnie.
+>
+> Minusem dla tego typu indeksów jest z pewnością częste wykonywanie operacji `INSERT/UPDATE/DELETE` na pojedynczych rekordach oraz dostęp do wielu kolumn z jednego wiersza (co jest dosyć zrozumiałe, skoro dane są trzymane w formacie kolumnowym).
+>
+> Źródło: [Microsoft's article: Columnstore indexes: overview](https://learn.microsoft.com/en-us/sql/relational-databases/indexes/columnstore-indexes-overview?view=sql-server-ver17)
 
 # Zadanie 5 – własne eksperymenty
 
@@ -687,4 +822,4 @@ Proszę przygotować zestaw zapytań do danych, które:
 | 3       | 2   |     |
 | 4       | 2   |     |
 | 5       | 5   |     |
-| razem   | 15  |     |
+| razem   | 13  |     |
