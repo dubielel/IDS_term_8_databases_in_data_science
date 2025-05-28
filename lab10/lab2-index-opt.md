@@ -304,35 +304,277 @@ FROM purchaseorderdetail
 ORDER BY rejectedqty DESC, productid ASC
 ```
 
+---
+
+> Wyniki:
+
+```sql
+lab05> SELECT rejectedqty,
+              ((rejectedqty / orderqty) * 100) AS rejectionrate,
+              productid,
+              duedate
+       FROM purchaseorderdetail
+       ORDER BY rejectedqty DESC, productid ASC
+[2025-05-28 17:22:53] [S0000][3613] SQL Server parse and compile time:
+[2025-05-28 17:22:53] CPU time = 2 ms, elapsed time = 3 ms.
+[2025-05-28 17:22:53] [S0000][3615] Table 'Worktable'.
+    Scan count 0,
+    logical reads 0,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 0,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-28 17:22:53] [S0000][3615] Table 'purchaseorderdetail'.
+    Scan count 1,
+    logical reads 78,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 78,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-28 17:22:53] [S0000][3612] SQL Server Execution Times:
+[2025-05-28 17:22:53] CPU time = 21 ms, elapsed time = 22 ms.
+[2025-05-28 17:22:53] completed in 29 ms
+```
+
+> Plan zapytania:
+>
+> ![zad03_qp1](zad03/qp1.png)
+
 Która część zapytania ma największy koszt?
 
+> Patrząc na surowy rezultat planu zapytania, dostępny w DataGrip w formie pseudo-tabelki, którą przytoczymy tutaj w okrojonej formie, zawierającej tylko potrzebne infromacje:
+>
+> | Step            | EstimatedCPU | EstimatedIO | EstimatedTotalSubtreeCost | Estimated step cost (własne obliczenia) |
+> |-----------------|--------------|-------------|---------------------------|-----------------------------------------|
+> | Full table scan | 0.009808     | 0.0602405   | 0.0700485                 | 0.0700485                               |
+> | Sort            | 0.446123     | 0.0112613   | 0.527433                  | 0.4573845                               |
+> | Value           | 0.0008845    | 0.0         | 0.528317                  | 0.000884                                |
+> | Select          | N/A          | N/A         | 0.528317                  | 0.0                                     |
+>
+> Z tabelki wynika, że największy koszt wiązał się z posortowaniem rekordów, który był ponad 6-krotnie wyższy od kosztu wykonania pełnego skanu tabeli.
+
+Jaki indeks można zastosować aby zoptymalizować koszt zapytania? Przygotuj polecenie tworzące index. Ponownie wykonaj analizę zapytania.
+
+> Do optymalizacji tego zapytania można zastosować **`CLUSTERED`** indeks zawierający kolumny, które występują w klauzuli `ORDER BY`, razem z zastosowaniem takiej samej kolejności (sortowania rekordów) jak w zapytaniu.
+
+```sql
+CREATE CLUSTERED INDEX idx_purchaseorderdetail_rejectedqty_productid
+ON purchaseorderdetail (rejectedqty DESC, productid ASC);
+
+SELECT rejectedqty,
+       ((rejectedqty / orderqty) * 100) AS rejectionrate,
+       productid,
+       duedate
+FROM purchaseorderdetail WITH(
+    INDEX(idx_purchaseorderdetail_rejectedqty_productid)
+)
+ORDER BY rejectedqty DESC, productid ASC
+```
+
 ---
 
 > Wyniki:
 
+> Stworzenie indeksu `idx_purchaseorderdetail_rejectedqty_productid`:
+
 ```sql
---  ...
+lab05> CREATE CLUSTERED INDEX idx_purchaseorderdetail_rejectedqty_productid
+           ON purchaseorderdetail (rejectedqty DESC, productid ASC)
+[2025-05-28 18:09:59] [S0000][3613] SQL Server parse and compile time:
+[2025-05-28 18:09:59] CPU time = 1 ms, elapsed time = 1 ms.
+[2025-05-28 18:09:59] [S0000][3615] Table 'purchaseorderdetail'.
+    Scan count 1,
+    logical reads 87,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 87,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-28 18:09:59] [S0000][3612] SQL Server Execution Times:
+[2025-05-28 18:09:59] CPU time = 30 ms, elapsed time = 39 ms.
+[2025-05-28 18:09:59] completed in 46 ms
 ```
 
-Jaki indeks można zastosować aby zoptymalizować koszt zapytania? Przygotuj polecenie tworzące index.
+> Wykonanie zapytania w oparciu o indeks:
+
+```sql
+lab05> SELECT rejectedqty,
+              ((rejectedqty / orderqty) * 100) AS rejectionrate,
+              productid,
+              duedate
+       FROM purchaseorderdetail WITH(
+           INDEX(idx_purchaseorderdetail_rejectedqty_productid)
+       )
+       ORDER BY rejectedqty DESC, productid ASC
+[2025-05-28 18:11:23] [S0000][3613] SQL Server parse and compile time:
+[2025-05-28 18:11:23] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-28 18:11:23] [S0000][3613] SQL Server parse and compile time:
+[2025-05-28 18:11:23] CPU time = 6 ms, elapsed time = 7 ms.
+[2025-05-28 18:11:23] [S0000][3615] Table 'purchaseorderdetail'.
+    Scan count 1,
+    logical reads 89,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 87,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-28 18:11:23] [S0000][3612] SQL Server Execution Times:
+[2025-05-28 18:11:23] CPU time = 11 ms, elapsed time = 16 ms.
+[2025-05-28 18:11:23] completed in 28 ms
+```
+
+> Plan zapytania:
+>
+> ![qp_clustered_idx](zad03/qp_clustered_idx.png)
+
+> Okrojona tabelka z rezultatem surowego planu zapytania:
+>
+> | Step            | EstimatedCPU | EstimatedIO | EstimatedTotalSubtreeCost | Estimated step cost (własne obliczenia) |
+> |-----------------|--------------|-------------|---------------------------|-----------------------------------------|
+> | Full index scan | 0.0098865    | 0.0668287   | 0.0767152                 | 0.0767152                               |
+> | Value           | 0.0008845    | 0.0         | 0.0775997                 | 0.0008845 (= EstimatedCPU)              |
+> | Select          | N/A          | N/A         | 0.0775997                 | 0.0                                     |
+>
+> Porównując koszty z zapytania bez użycia indeksu oraz z jego użyciem, to widać dużą różnicę rzędu prawie 7-krotności kosztu z indeksem (0.528317 vs. 0.0775997). Pokazuje to, że zastosowanie w tym wypadku `CLUSTERED` indeksu daje bardzo dużą optymalizację kosztu zapytania.
+>
+> Zapytanie z użyciem indeksu jest również szybsze czasowo:
+>
+> |             | CPU time | Elapsed time | Completed |
+> |-------------|----------|--------------|-----------|
+> | bez indeksu | 21 ms    | 22 ms        | 29 ms     |
+> | z indeksem  | 11 ms    | 16 ms        | 28 ms     |
+>
+> Co prawda niewiele szybsze, ale jednak 😄.
 
 ---
+
+> Drugą opcją jest stworzenie **`NONCLUSTERED`** indeksu, który zawiera klauzulę `INCLUDE` z kolumnami, które nie są związane z sortowaniem w tym zapytaniu, ale są "wyciągane" przy jego pomocy.
+
+```sql
+CREATE NONCLUSTERED INDEX idx_purchaseorderdetail_rejectedqty_productid_include
+ON purchaseorderdetail (rejectedqty DESC, productid ASC)
+INCLUDE (duedate, orderqty);
+
+SELECT rejectedqty,
+       ((rejectedqty / orderqty) * 100) AS rejectionrate,
+       productid,
+       duedate
+FROM purchaseorderdetail WITH(
+    INDEX(idx_purchaseorderdetail_rejectedqty_productid_include)
+)
+ORDER BY rejectedqty DESC, productid ASC
+```
 
 > Wyniki:
 
 ```sql
---  ...
+lab05> CREATE NONCLUSTERED INDEX idx_purchaseorderdetail_rejectedqty_productid_include
+           ON purchaseorderdetail (rejectedqty DESC, productid ASC)
+           INCLUDE (duedate, orderqty)
+[2025-05-28 18:24:58] [S0000][3613] SQL Server parse and compile time:
+[2025-05-28 18:24:58] CPU time = 1 ms, elapsed time = 1 ms.
+[2025-05-28 18:24:58] [S0000][3615] Table 'purchaseorderdetail'.
+    Scan count 1,
+    logical reads 87,
+    physical reads 0,
+    page server reads 0,
+    read-ahead reads 87,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-28 18:24:58] [S0000][3612] SQL Server Execution Times:
+[2025-05-28 18:24:58] CPU time = 22 ms, elapsed time = 29 ms.
+[2025-05-28 18:24:58] completed in 34 ms
 ```
-
-Ponownie wykonaj analizę zapytania:
-
----
-
-> Wyniki:
 
 ```sql
---  ...
+lab05> SELECT rejectedqty,
+              ((rejectedqty / orderqty) * 100) AS rejectionrate,
+              productid,
+              duedate
+       FROM purchaseorderdetail WITH(
+           INDEX(idx_purchaseorderdetail_rejectedqty_productid_include)
+       )
+       ORDER BY rejectedqty DESC, productid ASC
+[2025-05-28 18:26:09] [S0000][3613] SQL Server parse and compile time:
+[2025-05-28 18:26:09] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-28 18:26:09] [S0000][3613] SQL Server parse and compile time:
+[2025-05-28 18:26:09] CPU time = 5 ms, elapsed time = 5 ms.
+[2025-05-28 18:26:09] [S0000][3615] Table 'purchaseorderdetail'.
+    Scan count 1,
+    logical reads 39,
+    physical reads 1,
+    page server reads 0,
+    read-ahead reads 37,
+    page server read-ahead reads 0,
+    lob logical reads 0,
+    lob physical reads 0,
+    lob page server reads 0,
+    lob read-ahead reads 0,
+    lob page server read-ahead reads 0.
+[2025-05-28 18:26:09] [S0000][3612] SQL Server Execution Times:
+[2025-05-28 18:26:09] CPU time = 12 ms, elapsed time = 14 ms.
+[2025-05-28 18:26:09] completed in 23 ms
 ```
+
+> Plan zapytania:
+>
+> ![qp_nonclustered_idx](zad03/qp_nonclustered_idx.png)
+
+> Okrojona tabelka z rezultatem surowego planu zapytania:
+>
+> | Step            | EstimatedCPU | EstimatedIO | EstimatedTotalSubtreeCost | Estimated step cost (własne obliczenia) |
+> |-----------------|--------------|-------------|---------------------------|-----------------------------------------|
+> | Full index scan | 0.0098865    | 0.0297917   | 0.0396782                 | 0.0396782                               |
+> | Value           | 0.0008845    | 0.0         | 0.0405627                 | 0.0008845 (= EstimatedCPU)              |
+> | Select          | N/A          | N/A         | 0.0405627                 | 0.0                                     |
+>
+> Użycie `NONCLUSTERED` indeksu pozwoliło na jeszcze lepszą optymalizację kosztu zapytania. Zeszliśmy z kosztu 0.528317 (bez indeksu), przez koszt 0.0775997 (z indeksem `CLUSTERED`) aż do kosztu 0.0405627 (z indeksem `NONCLUSTERED`).
+>
+> Istotnym elementem tej optymalizacji przy użyciu indeksu `NONCLUSTERED` jest wykorzystanie klauzuli `INCLUDE` i zawarcie w niej kolumn, po których nie sortujemy, ale je "wyciągamy" – bez tej klauzuli skorzystanie z samego indeksu `NONCLUSTERED` dało nam wynik kosztu na ponad 3-krotnie gorszym poziomie niż bez indeksu (koszt ~1.5).
+>
+> Zapytanie z użyciem indeksu `NONCLUSTERED` jest też szybsze czasowo niż dwa poprzednie (w aspekcie _Completed_):
+>
+> |                           | CPU time | Elapsed time | Completed |
+> |---------------------------|----------|--------------|-----------|
+> | bez indeksu               | 21 ms    | 22 ms        | 29 ms     |
+> | z indeksem `CLUSTERED`    | 11 ms    | 16 ms        | 28 ms     |
+> | z indeksem `NONCLUSTERED` | 12 ms    | 14 ms        | 23 ms     |
+>
+> Oczywiście, ta przewaga jest tak minimalna, że ciężko to będzie odczuć gołym okiem, a dodatkowo nie wiemy, czy nie mieści się w błędzie pomiarowym związanym z innymi procesami następującymi w środowisku testowym.
+>
+> Warto jeszcze zwrócić uwagę na liczbę odczytów logicznych i fizycznych wykonanych zapytań:
+>
+> |                           | logical reads | physical reads | read-ahead reads |
+> |---------------------------|---------------|----------------|------------------|
+> | bez indeksu               | 78            | 0              | 78               |
+> | z indeksem `CLUSTERED`    | 89            | 1              | 87               |
+> | z indeksem `NONCLUSTERED` | 39            | 1              | 37               |
+>
+> _Wszystkie z tych wyników zostały obliczone po wyczyszczeniu cache'u._
+>
+> Widać tutaj ogromną różnicę zapytania z indeksem `NONCLUSTERED`, które jest wygranym w tym pojedynku. Warto natomiast zauważyć, że użycie indeksu `CLUSTERED` zwiększyło zarówno ilość odczytów logicznych, jak i fizycznych, względem zapytania bez indeksu.
 
 # Zadanie 4 – indeksy column store
 
