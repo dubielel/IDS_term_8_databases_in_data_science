@@ -123,8 +123,73 @@ Co można o nich powiedzieć?
 
 > Wyniki:
 
+### Zapytanie 1
 ```sql
---  ...
+SELECT *
+FROM person
+WHERE lastname = 'Agbonile'
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 47 ms, elapsed time = 50 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3615]
+Table 'person'.
+Scan count 1,
+logical reads 207,
+physical reads 0,
+page server reads 0,
+read-ahead reads 0,
+page server read-ahead reads 0,
+lob logical reads 0,
+lob physical reads 0,
+lob page server reads 0,
+lob read-ahead reads 0,
+lob page server read-ahead reads 0.
+[S0000][3612] SQL Server Execution Times:
+CPU time = 4 ms,  elapsed time = 3 ms.
+1 row retrieved starting from 1 in 97 ms (execution: 59 ms, fetching: 38 ms)
+```
+
+### Zapytanie 2
+```sql
+lab2> SELECT *
+      FROM person
+      WHERE lastname = 'Agbonile'
+        AND firstname = 'Osarumwense'
+[2025-05-23 17:58:03] [S0000][3613] SQL Server parse and compile time:
+[2025-05-23 17:58:03] CPU time = 46 ms, elapsed time = 46 ms.
+[2025-05-23 17:58:03] [S0000][3613] SQL Server parse and compile time:
+[2025-05-23 17:58:03] CPU time = 0 ms, elapsed time = 0 ms.
+[2025-05-23 17:58:03] [S0000][3615] Table 'person'. Scan count 1, logical reads 207, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+[2025-05-23 17:58:03] [S0000][3612] SQL Server Execution Times:
+[2025-05-23 17:58:03] CPU time = 3 ms,  elapsed time = 2 ms.
+[2025-05-23 17:58:03] 1 row retrieved starting from 1 in 75 ms (execution: 54 ms, fetching: 21 ms)
+```
+### Zapytanie 3
+```sql
+SELECT *
+FROM person
+WHERE firstname = 'Osarumwense'
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 6 ms, elapsed time = 7 ms.
+[S0000][3613] SQL Server parse and compile time:
+CPU time = 0 ms, elapsed time = 0 ms.
+[S0000][3615]
+Table 'person'.
+Scan count 1,
+logical reads 207,
+physical reads 0,
+page server reads 0,
+read-ahead reads 0,
+page server read-ahead reads 0,
+lob logical reads 0,
+lob physical reads 0,
+lob page server reads 0,
+lob read-ahead reads 0,
+lob page server read-ahead reads 0.
+[S0000][3612] SQL Server Execution Times:
+CPU time = 7 ms,  elapsed time = 10 ms.
+1 row retrieved starting from 1 in 44 ms (execution: 22 ms, fetching: 22 ms)
 ```
 
 Przygotuj indeks obejmujący te zapytania:
