@@ -885,7 +885,8 @@ Proszę przygotować zestaw zapytań do danych, które:
 
 - wykorzystują poszczególne indeksy
 - które przy wymuszeniu indeksu działają gorzej, niż bez niego (lub pomimo założonego indeksu, tabela jest w pełni skanowana)
-  Odpowiedź powinna zawierać:
+
+Odpowiedź powinna zawierać:
 - Schemat tabeli
 - Opis danych (ich rozmiar, zawartość, statystyki)
 - Opis indeksu
@@ -895,9 +896,559 @@ Proszę przygotować zestaw zapytań do danych, które:
 
 > Wyniki:
 
+> W pakiecie przesyłamy dwa pliki: `iot_device_readings-table-init.sql` oraz `create-indexes.sql`. Te pliki zawierają pełne stworzenie tabeli oraz uzupełnienie jej danymi, jak również stworzenie wszystkich indeksów.
+
+> **Schemat tabeli:**
+
 ```sql
---  ...
+CREATE TABLE iot_device_readings (
+    id BIGINT NOT NULL,
+    unix_timestamp BIGINT NOT NULL,
+    peripheral_id INT NOT NULL,
+    connection_type INT NOT NULL,
+    peripheral_status INT NOT NULL,
+    firmware_version INT NOT NULL,
+    packet_counter INT NOT NULL,
+    battery_voltage FLOAT NOT NULL,
+    internal_temperature FLOAT NOT NULL,
+    external_temperature FLOAT NOT NULL,
+    acceleration_x FLOAT NOT NULL,
+    acceleration_y FLOAT NOT NULL,
+    acceleration_z FLOAT NOT NULL,
+    pressure FLOAT NOT NULL,
+    humidity FLOAT NOT NULL,
+    tension FLOAT NOT NULL
+);
 ```
+
+> **Opis danych (ich rozmiar, zawartość, statystyki)**
+>
+> 1 milion losowo wygenerowanych rekordów o strukturze:
+>
+> * `unix_timestamp` - losowy stempel czasowy
+> * `peripheral_id` - liczba z zakresu (1, 101)
+> * `connection_type` - 'Bluetooth' lub 'LoRa'
+> * `peripheral_status` - 'Disabled', 'Event' lub 'Time Domain'
+> * `firmware_version` - wartość z zakresu [1, 10]
+> * `packet_counter` - wartość z zakresu (1, 255)
+> * `battery_voltage` - wartość w V z zakresu (2.5, 4.2)
+> * `internal_temperature` - wartość w stopniach Celsjusza z zakresu (-10, 60)
+> * `external_temperature` - wartość w stopniach Celsjusza z zakresu (-20, 50)
+> * `acceleration_x` - wartość z zakresu (-10, 10)
+> * `acceleration_y` - wartość z zakresu (-10, 10)
+> * `acceleration_z` - wartość z zakresu (-10, 10)
+> * `pressure` - wartość w hPa z zakresu (950, 1050)
+> * `humidity` - wartość w % z zakresu (0, 100)
+> * `tension` - wartość w kN z zakresu (0, 100)
+
+> **Indeksy**
+
+> * Klastrowany nie na kluczu głównym:
+>   ```sql
+>   CREATE CLUSTERED INDEX idx_iot_device_readings_peripheral_id_clustered
+>   ON iot_device_readings (peripheral_id);
+>   ```
+>   Zrobiony na `peripheral_id`, ponieważ to też jest unikalny atrybut.
+>   
+>   **Zapytanie bez indeksu**
+>   
+>   ```sql
+>   iot> SELECT *
+>        FROM iot_device_readings
+>        WHERE peripheral_id = 55
+>   [2025-05-28 22:26:49] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:26:49] CPU time = 0 ms, elapsed time = 0 ms.
+>   [2025-05-28 22:26:49] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:26:49] CPU time = 0 ms, elapsed time = 0 ms.
+>   [2025-05-28 22:26:49] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:26:49] CPU time = 110 ms, elapsed time = 147 ms.
+>   [2025-05-28 22:26:49] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:26:49] CPU time = 0 ms, elapsed time = 0 ms.
+>   [2025-05-28 22:26:49] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 5,
+>       logical reads 15152,
+>       physical reads 0,
+>       page server reads 0,
+>       read-ahead reads 11816,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 22:26:49] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 22:26:49] CPU time = 102 ms, elapsed time = 77 ms.
+>   [2025-05-28 22:26:49] completed in 232 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![qp_1_before](./zad05/qp_1_before.png)
+>   
+>   **Zapytanie z indeksem**
+>   
+>   ```sql
+>   iot> SELECT *
+>        FROM iot_device_readings
+>        WHERE peripheral_id = 55
+>   [2025-05-28 22:29:24] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:29:24] CPU time = 0 ms, elapsed time = 0 ms.
+>   [2025-05-28 22:29:24] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:29:24] CPU time = 0 ms, elapsed time = 0 ms.
+>   [2025-05-28 22:29:24] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:29:24] CPU time = 6 ms, elapsed time = 6 ms.
+>   [2025-05-28 22:29:24] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:29:24] CPU time = 0 ms, elapsed time = 0 ms.
+>   [2025-05-28 22:29:24] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 1,
+>       logical reads 164,
+>       physical reads 2,
+>       page server reads 0,
+>       read-ahead reads 161,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 22:29:24] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 22:29:24] CPU time = 16 ms, elapsed time = 24 ms.
+>   [2025-05-28 22:29:24] completed in 37 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![](./zad05/qp_1_after.png)
+>
+> Komentarz: indeks klastrowany faktycznie zadziałał i zmniejszył koszt oraz czas zapytania.
+
+> * Nieklastrowany:
+>   ```sql
+>   CREATE NONCLUSTERED INDEX idx_iot_device_readings_connection_type
+>   ON iot_device_readings (connection_type);
+>   ```
+>   Zrobiony na `connection_type`, ponieważ jest to wartość dyskretna.
+>   
+>   **Zapytanie bez indeksu**
+>   
+>   ```sql
+>   iot> SELECT *
+>        FROM iot_device_readings
+>        WHERE connection_type = 0
+>   [2025-05-28 22:44:20] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:44:20] CPU time = 14 ms, elapsed time = 15 ms.
+>   [2025-05-28 22:44:20] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:44:20] CPU time = 0 ms, elapsed time = 0 ms.
+>   [2025-05-28 22:44:20] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 1,
+>       logical reads 14706,
+>       physical reads 0,
+>       page server reads 0,
+>       read-ahead reads 14692,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 22:44:20] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 22:44:20] CPU time = 490 ms,  elapsed time = 648 ms.
+>   [2025-05-28 22:44:20] completed in 667 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![](./zad05/qp_2_before.png)
+>   
+>   **Zapytanie z indeksem**
+>   
+>   ```sql
+>   iot> SELECT *
+>        FROM iot_device_readings WITH (INDEX(idx_iot_device_readings_connection_type))
+>        WHERE connection_type = 0
+>   [2025-05-28 22:47:31] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:47:31] CPU time = 17 ms, elapsed time = 20 ms.
+>   [2025-05-28 22:47:31] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 1,
+>       logical reads 501367,
+>       physical reads 1719,
+>       page server reads 0,
+>       read-ahead reads 2099,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 22:47:31] [S0000][3615] Table 'Worktable'.
+>       Scan count 0,
+>       logical reads 0,
+>       physical reads 0,
+>       page server reads 0,
+>       read-ahead reads 0,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 22:47:31] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 22:47:31] CPU time = 1047 ms,  elapsed time = 1319 ms.
+>   [2025-05-28 22:47:31] completed in 1 s 341 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![](./zad05/qp_2_after.png)
+>
+> Komentarz: indeks nieklastrowany zdecydowanie pogorszył zarówno koszt jak i czas zapytania.
+
+> * Kilkuatrybutowy:
+>   ```sql
+>   CREATE NONCLUSTERED INDEX idx_iot_device_readings_peripheralid_timestamp
+>   ON iot_device_readings (peripheral_id, unix_timestamp);
+>   ```
+>   Zrobiony na parze `peripheral_id`, `unix_timestamp`, ponieważ często mogą pojawiać się zapytania związane z konkretnym urządzeniem i czasem.
+>   
+>   **Zapytanie bez indeksu**
+>   
+>   ```sql
+>   iot> SELECT *
+>        FROM iot_device_readings
+>        WHERE peripheral_id = 55
+>          AND unix_timestamp BETWEEN 45781 AND 45795
+>        ORDER BY unix_timestamp DESC
+>   [2025-05-28 22:52:04] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:52:04] CPU time = 138 ms, elapsed time = 154 ms.
+>   [2025-05-28 22:52:04] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:52:04] CPU time = 0 ms, elapsed time = 0 ms.
+>   [2025-05-28 22:52:04] [S0000][3615] Table 'Worktable'. 
+>       Scan count 0,
+>       logical reads 0,
+>       physical reads 0,
+>       page server reads 0,
+>       read-ahead reads 0,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 22:52:04] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 5,
+>       logical reads 14706,
+>       physical reads 0,
+>       page server reads 0,
+>       read-ahead reads 11238,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 22:52:04] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 22:52:04] CPU time = 88 ms,  elapsed time = 59 ms.
+>   [2025-05-28 22:52:04] completed in 219 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![](./zad05/qp_3_before.png)
+>   
+>   **Zapytanie z indeksem**
+>   
+>   ```sql
+>   iot> SELECT *
+>        FROM iot_device_readings WITH (INDEX(idx_iot_device_readings_peripheralid_timestamp))
+>        WHERE peripheral_id = 55
+>          AND unix_timestamp BETWEEN 45781 AND 45795
+>        ORDER BY unix_timestamp DESC
+>   [2025-05-28 22:53:36] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:53:36] CPU time = 11 ms, elapsed time = 12 ms.
+>   [2025-05-28 22:53:36] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 1,
+>       logical reads 5007,
+>       physical reads 1589,
+>       page server reads 0,
+>       read-ahead reads 1192,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 22:53:36] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 22:53:36] CPU time = 68 ms,  elapsed time = 166 ms.
+>   [2025-05-28 22:53:36] completed in 182 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![](./zad05/qp_3_after.png)
+>
+> Komentarz: W tym wypadku jestem zdziwiony, że indeks kilkuatrybutowy zwiększył koszt zapytania, ale na szczeście (przynamniej na papierze) zmniejszył czas zapytania.
+
+>   * Kilkuatrybutowy z klazulą `INCLUDE`:
+>   ```sql
+>   CREATE NONCLUSTERED INDEX idx_iot_device_readings_peripheralid_timestamp_include_temp
+>   ON iot_device_readings (peripheral_id, unix_timestamp)
+>   INCLUDE (internal_temperature, external_temperature);
+>   ```
+>   Pojawił się tutaj jako rozszerzenie powyższego, ale zawierając jeszcze w klazuli `INCLUDE` kolumny związane z temperaturą.
+>   
+>   **Zapytanie bez indeksu**
+>   
+>   ```sql
+>   iot> SELECT internal_temperature, external_temperature
+>        FROM iot_device_readings
+>        WHERE peripheral_id = 55
+>          AND unix_timestamp > 45781
+>   [2025-05-28 22:57:58] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:57:58] CPU time = 13 ms, elapsed time = 15 ms.
+>   [2025-05-28 22:57:58] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:57:58] CPU time = 0 ms, elapsed time = 0 ms.
+>   [2025-05-28 22:57:58] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 5,
+>       logical reads 14706,
+>       physical reads 0,
+>       page server reads 0,
+>       read-ahead reads 14692,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 22:57:58] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 22:57:58] CPU time = 133 ms,  elapsed time = 81 ms.
+>   [2025-05-28 22:57:58] completed in 99 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![](./zad05/qp_4_before.png)
+>   
+>   **Zapytanie z indeksem**
+>   
+>   ```sql
+>   iot> SELECT internal_temperature, external_temperature
+>        FROM iot_device_readings WITH (INDEX(idx_iot_device_readings_peripheralid_timestamp_include_temp))
+>        WHERE peripheral_id = 55
+>          AND unix_timestamp > 45781
+>   [2025-05-28 22:59:28] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 22:59:28] CPU time = 7 ms, elapsed time = 8 ms.
+>   [2025-05-28 22:59:28] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 1,
+>       logical reads 44,
+>       physical reads 2,
+>       page server reads 0,
+>       read-ahead reads 41,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 22:59:28] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 22:59:28] CPU time = 10 ms,  elapsed time = 11 ms.
+>   [2025-05-28 22:59:28] completed in 23 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![](./zad05/qp_4_after.png)
+>
+> Komentarz: w tym przypadku indeks kilkuatrybutowy z klauzulą `INCLUDE` zadziałał bardzo dobrze i kilkukrotnie zmniejszył czas zapytania oraz ogromnie zmniejszył jego koszt.
+
+> * Warunkowy:
+>   ```sql
+>   CREATE NONCLUSTERED INDEX idx_iot_device_readings_status_event
+>   ON iot_device_readings (peripheral_status)
+>   WHERE peripheral_status = 1; -- 1 Means 'Event'
+>   ```
+>   Związany z filtrowaniem po statusie urządzenia (równym 'Event').
+>   
+>   **Zapytanie bez indeksu**
+>   
+>   ```sql
+>   iot> SELECT *
+>        FROM iot_device_readings
+>        WHERE peripheral_status = 1
+>   [2025-05-28 23:01:30] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 23:01:30] CPU time = 10 ms, elapsed time = 11 ms.
+>   [2025-05-28 23:01:30] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 23:01:30] CPU time = 0 ms, elapsed time = 0 ms.
+>   [2025-05-28 23:01:30] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 1,
+>       logical reads 14706,
+>       physical reads 0,
+>       page server reads 0,
+>       read-ahead reads 14692,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 23:01:30] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 23:01:30] CPU time = 361 ms,  elapsed time = 482 ms.
+>   [2025-05-28 23:01:30] completed in 497 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![](./zad05/qp_5_before.png)
+>   
+>   **Zapytanie z indeksem**
+>   
+>   ```sql
+>   iot> SELECT *
+>        FROM iot_device_readings WITH (INDEX(idx_iot_device_readings_status_event))
+>        WHERE peripheral_status = 1
+>   [2025-05-28 23:02:44] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 23:02:44] CPU time = 17 ms, elapsed time = 18 ms.
+>   [2025-05-28 23:02:44] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 1,
+>       logical reads 333695,
+>       physical reads 1739,
+>       page server reads 0,
+>       read-ahead reads 1550,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 23:02:44] [S0000][3615] Table 'Worktable'.
+>       Scan count 0,
+>       logical reads 0,
+>       physical reads 0,
+>       page server reads 0,
+>       read-ahead reads 0,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 23:02:44] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 23:02:44] CPU time = 706 ms,  elapsed time = 905 ms.
+>   [2025-05-28 23:02:44] completed in 926 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![](./zad05/qp_5_after.png)
+>
+> Komentarz: indeks warunkowy nie zadziałał w tym wypadku lepiej niż zwykłe zapytanie, pogarszając czas dwukrotnie i koszt zapytania około 10-krotnie.
+
+> * Kolumnowy:
+>   ```sql
+>   CREATE NONCLUSTERED COLUMNSTORE INDEX idx_iot_device_readings_columnstore
+>   ON iot_device_readings (
+>       peripheral_id,
+>       battery_voltage,
+>       internal_temperature,
+>       external_temperature,
+>       acceleration_x,
+>       acceleration_y,
+>       acceleration_z
+>   );
+>   ```
+>   Związany z zapytaniami analitycznymi dotyczącymi statystyk zbieranych przez urządzenia.
+>   
+>   **Zapytanie bez indeksu**
+>   
+>   ```sql
+>   iot> SELECT
+>            peripheral_id,
+>            MAX(battery_voltage) AS max_battery_voltage,
+>            AVG(internal_temperature) AS avg_internal_temp,
+>            AVG(external_temperature) AS avg_external_temp,
+>            MIN(acceleration_x) AS min_acceleration_x,
+>            AVG(acceleration_y) AS avg_acceleration_y,
+>            MAX(acceleration_z) AS max_acceleration_z
+>        FROM iot_device_readings
+>        GROUP BY peripheral_id
+>   [2025-05-28 23:07:49] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 23:07:49] CPU time = 17 ms, elapsed time = 17 ms.
+>   [2025-05-28 23:07:49] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 5,
+>       logical reads 14706,
+>       physical reads 0,
+>       page server reads 0,
+>       read-ahead reads 14692,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 23:07:49] [S0000][3615] Table 'Worktable'.
+>       Scan count 0,
+>       logical reads 0,
+>       physical reads 0,
+>       page server reads 0,
+>       read-ahead reads 0,
+>       page server read-ahead reads 0,
+>       lob logical reads 0,
+>       lob physical reads 0,
+>       lob page server reads 0,
+>       lob read-ahead reads 0,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 23:07:49] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 23:07:49] CPU time = 298 ms,  elapsed time = 138 ms.
+>   [2025-05-28 23:07:49] completed in 160 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![](./zad05/qp_6_before.png)
+>   
+>   **Zapytanie z indeksem**
+>   
+>   ```sql
+>   iot> SELECT
+>            peripheral_id,
+>            MAX(battery_voltage) AS max_battery_voltage,
+>            AVG(internal_temperature) AS avg_internal_temp,
+>            AVG(external_temperature) AS avg_external_temp,
+>            MIN(acceleration_x) AS min_acceleration_x,
+>            AVG(acceleration_y) AS avg_acceleration_y,
+>            MAX(acceleration_z) AS max_acceleration_z
+>        FROM iot_device_readings WITH (INDEX(idx_iot_device_readings_columnstore))
+>        GROUP BY peripheral_id
+>   [2025-05-28 23:09:35] [S0000][3613] SQL Server parse and compile time:
+>   [2025-05-28 23:09:35] CPU time = 21 ms, elapsed time = 23 ms.
+>   [2025-05-28 23:09:35] [S0000][3615] Table 'iot_device_readings'.
+>       Scan count 2,
+>       logical reads 0,
+>       physical reads 0,
+>       page server reads 0,
+>       read-ahead reads 0,
+>       page server read-ahead reads 0,
+>       lob logical reads 4011,
+>       lob physical reads 10,
+>       lob page server reads 0,
+>       lob read-ahead reads 12337,
+>       lob page server read-ahead reads 0.
+>   [2025-05-28 23:09:35] [S0000][3642] Table 'iot_device_readings'.
+>       Segment reads 1,
+>       segment skipped 0.
+>   [2025-05-28 23:09:35] [S0000][3612] SQL Server Execution Times:
+>   [2025-05-28 23:09:35] CPU time = 165 ms,  elapsed time = 201 ms.
+>   [2025-05-28 23:09:35] completed in 230 ms
+>   ```
+>   
+>   Plan zapytania:
+>   
+>   ![](./zad05/qp_6_after.png)
+>
+> Komentarz: indeks kolumnowy znacząco zmniejszył koszt zapytania, lecz zapytanie trwało delikatnie dłużej niż bez indeksu (co jest dla mnie dziwne).
+>
+> Jestem za to pod wrażeniem jak szybko wykonało się zapytanie bez indeksu.
+
+
 
 |         |     |     |
 | ------- | --- | --- |
