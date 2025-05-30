@@ -102,6 +102,164 @@ stwórz kolekcję `OrdersInfo` zawierającą następujące dane o zamówieniach
 ]
 ```
 
+```js
+db.orders.aggregate([
+  {
+    $lookup: {
+      from: "customers",
+      localField: "CustomerID",
+      foreignField: "CustomerID",
+      as: "Customer"
+    }
+  },
+  {
+    $unwind: "$Customer"
+  },
+  {
+    $lookup: {
+      from: "employees",
+      localField: "EmployeeID",
+      foreignField: "EmployeeID",
+      as: "Employee"
+    }
+  },
+  {
+    $unwind: "$Employee"
+  },
+  {
+    $lookup: {
+      from: "orderdetails",
+      localField: "OrderID",
+      foreignField: "OrderID",
+      as: "Orderdetails"
+    }
+  },
+  {
+    $lookup: {
+      from: "products",
+      localField: "Orderdetails.ProductID",
+      foreignField: "ProductID",
+      as: "Products"
+    }
+  },
+  {
+    $lookup: {
+      from: "categories",
+      localField: "Products.CategoryID",
+      foreignField: "CategoryID",
+      as: "Categories"
+    }
+  },
+  {
+    $lookup: {
+      from: "shippers",
+      localField: "ShipVia",
+      foreignField: "ShipperID",
+      as: "Shipper"
+    }
+  },
+  {
+    $unwind: "$Shipper"
+  },
+  {
+    $project: {
+      _id: 0,
+      OrderID: 1,
+      Customer: {
+        CustomerID: "$Customer.CustomerID",
+        CompanyName: "$Customer.CompanyName",
+        City: "$Customer.City",
+        Country: "$Customer.Country"
+      },
+      Employee: {
+        EmployeeID: "$Employee.EmployeeID",
+        FirstName: "$Employee.FirstName",
+        LastName: "$Employee.LastName",
+        Title: "$Employee.Title"
+      },
+      Dates: {
+        OrderDate: "$OrderDate",
+        RequiredDate: "$RequiredDate"
+      },
+      Orderdetails: {
+        $map: {
+          input: "$Orderdetails",
+          as: "detail",
+          in: {
+            UnitPrice: "$$detail.UnitPrice",
+            Quantity: "$$detail.Quantity",
+            Discount: "$$detail.Discount",
+            Value: {
+              $multiply: [
+                "$$detail.UnitPrice",
+                "$$detail.Quantity",
+                { $subtract: [1, "$$detail.Discount"] }
+              ]
+            },
+            product: {
+              ProductID: "$$detail.ProductID",
+              ProductName: {
+                $arrayElemAt: [
+                  "$Products.ProductName",
+                  { $indexOfArray: ["$Products.ProductID", "$$detail.ProductID"] }
+                ]
+              },
+              QuantityPerUnit: {
+                $arrayElemAt: [
+                  "$Products.QuantityPerUnit",
+                  { $indexOfArray: ["$Products.ProductID", "$$detail.ProductID"] }
+                ]
+              },
+              CategoryID: {
+                $arrayElemAt: [
+                  "$Products.CategoryID",
+                  { $indexOfArray: ["$Products.ProductID", "$$detail.ProductID"] }
+                ]
+              },
+              CategoryName: {
+                $arrayElemAt: [
+                  "$Categories.CategoryName",
+                  { $indexOfArray: ["$Categories.CategoryID", "$$detail.CategoryID"] }
+                ]
+              }
+            }
+          }
+        }
+      },
+      Freight: "$Freight",
+      OrderTotal: {
+        $sum: {
+          $map: {
+            input: "$Orderdetails",
+            as: "detail",
+            in: {
+              $multiply: [
+                "$$detail.UnitPrice",
+                "$$detail.Quantity",
+                { $subtract: [1, "$$detail.Discount"] }
+              ]
+            }
+          }
+        }
+      },
+      Shipment: {
+        Shipper: {
+          ShipperID: "$Shipper.ShipperID",
+          CompanyName: "$Shipper.CompanyName"
+        },
+        ShipName: "$ShipName",
+        ShipAddress: "$ShipAddress",
+        ShipCity: "$ShipCity",
+        ShipCountry: "$ShipCountry"
+      }
+    }
+  },
+  {
+    $out: "OrdersInfo"
+  }
+]);
+```
+
 # Zadanie 2
 
 stwórz kolekcję `CustomerInfo` zawierającą następujące dane o każdym kliencie
@@ -124,6 +282,100 @@ stwórz kolekcję `CustomerInfo` zawierającą następujące dane o każdym klie
   }
 
 ]
+```
+
+```js
+db.customers.aggregate([
+  {
+    $lookup: {
+      from: "orders",
+      localField: "CustomerID",
+      foreignField: "CustomerID",
+      as: "Orders"
+    }
+  },
+  {
+    $unwind: {
+      path: "$Orders",
+      preserveNullAndEmptyArrays: true
+    }
+  },
+  {
+    $lookup: {
+      from: "employees",
+      localField: "Orders.EmployeeID",
+      foreignField: "EmployeeID",
+      as: "Orders.Employee"
+    }
+  },
+  {
+    $unwind: {
+      path: "$Orders.Employee",
+      preserveNullAndEmptyArrays: true
+    }
+  },
+  {
+    $lookup: {
+      from: "orderdetails",
+      localField: "Orders.OrderID",
+      foreignField: "OrderID",
+      as: "Orders.Orderdetails"
+    }
+  },
+  {
+    $lookup: {
+      from: "shippers",
+      localField: "Orders.ShipVia",
+      foreignField: "ShipperID",
+      as: "Orders.Shipper"
+    }
+  },
+  {
+    $unwind: {
+      path: "$Orders.Shipper",
+      preserveNullAndEmptyArrays: true
+    }
+  },
+  {
+    $group: {
+      _id: "$CustomerID", // Trzeba zminić ID na generowane losowo
+      CustomerID: { $first: "$CustomerID" },
+      CompanyName: { $first: "$CompanyName" },
+      City: { $first: "$City" },
+      Country: { $first: "$Country" },
+      Orders: {
+        $push: {
+          OrderID: "$Orders.OrderID",
+          Employee: {
+            EmployeeID: "$Orders.Employee.EmployeeID",
+            FirstName: "$Orders.Employee.FirstName",
+            LastName: "$Orders.Employee.LastName",
+            Title: "$Orders.Employee.Title"
+          },
+          Dates: {
+            OrderDate: "$Orders.OrderDate",
+            RequiredDate: "$Orders.RequiredDate"
+          },
+          Orderdetails: "$Orders.Orderdetails",
+          Freight: "$Orders.Freight",
+          Shipment: {
+            Shipper: {
+              ShipperID: "$Orders.Shipper.ShipperID",
+              CompanyName: "$Orders.Shipper.CompanyName"
+            },
+            ShipName: "$Orders.ShipName",
+            ShipAddress: "$Orders.ShipAddress",
+            ShipCity: "$Orders.ShipCity",
+            ShipCountry: "$Orders.ShipCountry"
+          }
+        }
+      }
+    }
+  },
+  {
+    $out: "CustomerInfo"
+  }
+]);
 ```
 
 # Zadanie 3
