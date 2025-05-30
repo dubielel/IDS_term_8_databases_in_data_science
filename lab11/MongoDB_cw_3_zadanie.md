@@ -5,7 +5,7 @@
 
 ---
 
-**Imiona i nazwiska autorów:**
+**Imiona i nazwiska autorów: Kacper Cienkosz, Miłosz Dubiel**
 
 --- 
 
