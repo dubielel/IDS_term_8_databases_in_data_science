@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MongoDB_cw_2.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="dokumentowe-bazy-danych-%E2%80%93-mongodb">Dokumentowe bazy danych – MongoDB</h1>
+<p>Ćwiczenie 2</p>
+<hr>
+<p>Odtwórz z backupu bazę <code>north0</code></p>
+<pre class="hljs"><code><div>mongorestore --nsInclude='north0.*' ./dump/
+</div></code></pre>
+<pre class="hljs"><code><div>use north0
+</div></code></pre>
+<p>Baza <code>north0</code> jest kopią relacyjnej bazy danych <code>Northwind</code></p>
+<ul>
+<li>poszczególne kolekcje odpowiadają tabelom w oryginalnej bazie <code>Northwind</code></li>
+</ul>
+<p>zapoznaj się ze strukturą dokumentów w bazie <code>North0</code></p>
+<pre class="hljs"><code><div>db.customers.find()
+db.orders.find();
+db.orderdetails.find();
+
+</div></code></pre>
+<hr>
+<p>produkty, kategorie, dostawcy</p>
+<pre class="hljs"><code><div>db.categories.find().limit(<span class="hljs-number">2</span>);
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67eb06a27b1ef941c950fb49"</span>},  
+    <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"CategoryName"</span>: <span class="hljs-string">"Beverages"</span>,  
+    <span class="hljs-string">"Description"</span>: <span class="hljs-string">"Soft drinks, coffees, teas, beers, and ales"</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67eb06a27b1ef941c950fb4a"</span>},  
+    <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">2</span>,  
+    <span class="hljs-string">"CategoryName"</span>: <span class="hljs-string">"Condiments"</span>,  
+    <span class="hljs-string">"Description"</span>: <span class="hljs-string">"Sweet and savory sauces, relishes, spreads, and seasonings"</span>  
+  }  
+]
+</div></code></pre>
+<pre class="hljs"><code><div>db.products.find().limit(<span class="hljs-number">2</span>);
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a0607abb3b972d6f4e1f50"</span>},  
+    <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chai"</span>,  
+    <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"10 boxes x 20 bags"</span>,  
+    <span class="hljs-string">"ReorderLevel"</span>: <span class="hljs-number">10</span>,  
+    <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">18</span>,  
+    <span class="hljs-string">"UnitsInStock"</span>: <span class="hljs-number">39</span>,  
+    <span class="hljs-string">"UnitsOnOrder"</span>: <span class="hljs-number">0</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a0607abb3b972d6f4e1f51"</span>},  
+    <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">2</span>,  
+    <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chang"</span>,  
+    <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"24 - 12 oz bottles"</span>,  
+    <span class="hljs-string">"ReorderLevel"</span>: <span class="hljs-number">25</span>,  
+    <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">19</span>,  
+    <span class="hljs-string">"UnitsInStock"</span>: <span class="hljs-number">17</span>,  
+    <span class="hljs-string">"UnitsOnOrder"</span>: <span class="hljs-number">40</span>  
+  }  
+]
+</div></code></pre>
+<pre class="hljs"><code><div>db.suppliers.find().limit(<span class="hljs-number">2</span>);
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a05d3cbb3b972d6f4e09f7"</span>},  
+    <span class="hljs-string">"Address"</span>: <span class="hljs-string">"49 Gilbert St."</span>,  
+    <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+    <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Exotic Liquids"</span>,  
+    <span class="hljs-string">"ContactName"</span>: <span class="hljs-string">"Charlotte Cooper"</span>,  
+    <span class="hljs-string">"ContactTitle"</span>: <span class="hljs-string">"Purchasing Manager"</span>,  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+    <span class="hljs-string">"Fax"</span>: <span class="hljs-literal">null</span>,  
+    <span class="hljs-string">"HomePage"</span>: <span class="hljs-literal">null</span>,  
+    <span class="hljs-string">"Phone"</span>: <span class="hljs-string">"(171) 555-2222"</span>,  
+    <span class="hljs-string">"PostalCode"</span>: <span class="hljs-string">"EC1 4SD"</span>,  
+    <span class="hljs-string">"Region"</span>: <span class="hljs-literal">null</span>,  
+    <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a05d3cbb3b972d6f4e09f8"</span>},  
+    <span class="hljs-string">"Address"</span>: <span class="hljs-string">"P.O. Box 78934"</span>,  
+    <span class="hljs-string">"City"</span>: <span class="hljs-string">"New Orleans"</span>,  
+    <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"New Orleans Cajun Delights"</span>,  
+    <span class="hljs-string">"ContactName"</span>: <span class="hljs-string">"Shelley Burke"</span>,  
+    <span class="hljs-string">"ContactTitle"</span>: <span class="hljs-string">"Order Administrator"</span>,  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+    <span class="hljs-string">"Fax"</span>: <span class="hljs-literal">null</span>,  
+    <span class="hljs-string">"HomePage"</span>: <span class="hljs-string">"#CAJUN.HTM#"</span>,  
+    <span class="hljs-string">"Phone"</span>: <span class="hljs-string">"(100) 555-4822"</span>,  
+    <span class="hljs-string">"PostalCode"</span>: <span class="hljs-string">"70117"</span>,  
+    <span class="hljs-string">"Region"</span>: <span class="hljs-string">"LA"</span>,  
+    <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">2</span>  
+  }  
+]
+</div></code></pre>
+<hr>
+<h1 id="przyk%C5%82ad-1">Przykład 1</h1>
+<pre class="hljs"><code><div>db.products.aggregate([  
+    {  
+        <span class="hljs-attr">$match</span> : { }  
+    },  
+  
+    <span class="hljs-comment">//suppliers  </span>
+    {  
+        <span class="hljs-attr">$lookup</span> : {  
+            <span class="hljs-attr">from</span>: <span class="hljs-string">"suppliers"</span>,  
+            <span class="hljs-attr">localField</span>: <span class="hljs-string">"SupplierID"</span>,  
+            <span class="hljs-attr">foreignField</span>: <span class="hljs-string">"SupplierID"</span>,  
+            <span class="hljs-attr">as</span>: <span class="hljs-string">"Supplier"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$limit</span> : <span class="hljs-number">2</span>  
+    }  
+])
+</div></code></pre>
+<ul>
+<li>
+<p>pole <code>Suplier</code> jest tablicą</p>
+<ul>
+<li>zawiera 1 obiekt</li>
+</ul>
+</li>
+<li>
+<p>wynik</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a0607abb3b972d6f4e1f50"</span>},  
+    <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chai"</span>,  
+    <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"10 boxes x 20 bags"</span>,  
+    <span class="hljs-string">"ReorderLevel"</span>: <span class="hljs-number">10</span>,  
+    <span class="hljs-string">"Supplier"</span>: [  
+      {  
+        <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a05d3cbb3b972d6f4e09f7"</span>},  
+        <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+        <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Exotic Liquids"</span>,  
+        <span class="hljs-string">"ContactName"</span>: <span class="hljs-string">"Charlotte Cooper"</span>,  
+        <span class="hljs-string">"ContactTitle"</span>: <span class="hljs-string">"Purchasing Manager"</span>,  
+        <span class="hljs-string">"Address"</span>: <span class="hljs-string">"49 Gilbert St."</span>,  
+        <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+        <span class="hljs-string">"Region"</span>: <span class="hljs-literal">null</span>,  
+        <span class="hljs-string">"PostalCode"</span>: <span class="hljs-string">"EC1 4SD"</span>,  
+        <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+        <span class="hljs-string">"Phone"</span>: <span class="hljs-string">"(171) 555-2222"</span>,  
+        <span class="hljs-string">"Fax"</span>: <span class="hljs-literal">null</span>,  
+        <span class="hljs-string">"HomePage"</span>: <span class="hljs-literal">null</span>  
+      }  
+    ],  
+    <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">18</span>,  
+    <span class="hljs-string">"UnitsInStock"</span>: <span class="hljs-number">39</span>,  
+    <span class="hljs-string">"UnitsOnOrder"</span>: <span class="hljs-number">0</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a0607abb3b972d6f4e1f51"</span>},  
+    <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">2</span>,  
+    <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chang"</span>,  
+    <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"24 - 12 oz bottles"</span>,  
+    <span class="hljs-string">"ReorderLevel"</span>: <span class="hljs-number">25</span>,  
+    <span class="hljs-string">"Supplier"</span>: [  
+      {  
+        <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a05d3cbb3b972d6f4e09f7"</span>},  
+        <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+        <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Exotic Liquids"</span>,  
+        <span class="hljs-string">"ContactName"</span>: <span class="hljs-string">"Charlotte Cooper"</span>,  
+        <span class="hljs-string">"ContactTitle"</span>: <span class="hljs-string">"Purchasing Manager"</span>,  
+        <span class="hljs-string">"Address"</span>: <span class="hljs-string">"49 Gilbert St."</span>,  
+        <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+        <span class="hljs-string">"Region"</span>: <span class="hljs-literal">null</span>,  
+        <span class="hljs-string">"PostalCode"</span>: <span class="hljs-string">"EC1 4SD"</span>,  
+        <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+        <span class="hljs-string">"Phone"</span>: <span class="hljs-string">"(171) 555-2222"</span>,  
+        <span class="hljs-string">"Fax"</span>: <span class="hljs-literal">null</span>,  
+        <span class="hljs-string">"HomePage"</span>: <span class="hljs-literal">null</span>  
+      }  
+    ],  
+    <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">19</span>,  
+    <span class="hljs-string">"UnitsInStock"</span>: <span class="hljs-number">17</span>,  
+    <span class="hljs-string">"UnitsOnOrder"</span>: <span class="hljs-number">40</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li><code>$unwind</code>
+<ul>
+<li>pole <code>Supplier</code>  jest obiektem/dokumentem</li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.products.aggregate([  
+    {  
+        <span class="hljs-attr">$match</span> : { }  
+    },  
+  
+    <span class="hljs-comment">//suppliers  </span>
+    {  
+        <span class="hljs-attr">$lookup</span> : {  
+            <span class="hljs-attr">from</span>: <span class="hljs-string">"suppliers"</span>,  
+            <span class="hljs-attr">localField</span>: <span class="hljs-string">"SupplierID"</span>,  
+            <span class="hljs-attr">foreignField</span>: <span class="hljs-string">"SupplierID"</span>,  
+            <span class="hljs-attr">as</span>: <span class="hljs-string">"Supplier"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$unwind</span> : <span class="hljs-string">"$Supplier"</span>  
+    },  
+   {  
+        <span class="hljs-attr">$limit</span> : <span class="hljs-number">2</span>  
+   }  
+])
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a0607abb3b972d6f4e1f50"</span>},  
+    <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chai"</span>,  
+    <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"10 boxes x 20 bags"</span>,  
+    <span class="hljs-string">"ReorderLevel"</span>: <span class="hljs-number">10</span>,  
+    <span class="hljs-string">"Supplier"</span>: {  
+      <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a05d3cbb3b972d6f4e09f7"</span>},  
+      <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+      <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Exotic Liquids"</span>,  
+      <span class="hljs-string">"ContactName"</span>: <span class="hljs-string">"Charlotte Cooper"</span>,  
+      <span class="hljs-string">"ContactTitle"</span>: <span class="hljs-string">"Purchasing Manager"</span>,  
+      <span class="hljs-string">"Address"</span>: <span class="hljs-string">"49 Gilbert St."</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+      <span class="hljs-string">"Region"</span>: <span class="hljs-literal">null</span>,  
+      <span class="hljs-string">"PostalCode"</span>: <span class="hljs-string">"EC1 4SD"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+      <span class="hljs-string">"Phone"</span>: <span class="hljs-string">"(171) 555-2222"</span>,  
+      <span class="hljs-string">"Fax"</span>: <span class="hljs-literal">null</span>,  
+      <span class="hljs-string">"HomePage"</span>: <span class="hljs-literal">null</span>  
+    },  
+    <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">18</span>,  
+    <span class="hljs-string">"UnitsInStock"</span>: <span class="hljs-number">39</span>,  
+    <span class="hljs-string">"UnitsOnOrder"</span>: <span class="hljs-number">0</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a0607abb3b972d6f4e1f51"</span>},  
+    <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">2</span>,  
+    <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chang"</span>,  
+    <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"24 - 12 oz bottles"</span>,  
+    <span class="hljs-string">"ReorderLevel"</span>: <span class="hljs-number">25</span>,  
+    <span class="hljs-string">"Supplier"</span>: {  
+      <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a05d3cbb3b972d6f4e09f7"</span>},  
+      <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+      <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Exotic Liquids"</span>,  
+      <span class="hljs-string">"ContactName"</span>: <span class="hljs-string">"Charlotte Cooper"</span>,  
+      <span class="hljs-string">"ContactTitle"</span>: <span class="hljs-string">"Purchasing Manager"</span>,  
+      <span class="hljs-string">"Address"</span>: <span class="hljs-string">"49 Gilbert St."</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+      <span class="hljs-string">"Region"</span>: <span class="hljs-literal">null</span>,  
+      <span class="hljs-string">"PostalCode"</span>: <span class="hljs-string">"EC1 4SD"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+      <span class="hljs-string">"Phone"</span>: <span class="hljs-string">"(171) 555-2222"</span>,  
+      <span class="hljs-string">"Fax"</span>: <span class="hljs-literal">null</span>,  
+      <span class="hljs-string">"HomePage"</span>: <span class="hljs-literal">null</span>  
+    },  
+    <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">19</span>,  
+    <span class="hljs-string">"UnitsInStock"</span>: <span class="hljs-number">17</span>,  
+    <span class="hljs-string">"UnitsOnOrder"</span>: <span class="hljs-number">40</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>projekcja
+<ul>
+<li>tylko wybrane pola z <code>Supplier</code></li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.products.aggregate([  
+    {  
+        <span class="hljs-attr">$match</span> : { }  
+    },  
+  
+    <span class="hljs-comment">//suppliers  </span>
+    {  
+        <span class="hljs-attr">$lookup</span> : {  
+            <span class="hljs-attr">from</span>: <span class="hljs-string">"suppliers"</span>,  
+            <span class="hljs-attr">localField</span>: <span class="hljs-string">"SupplierID"</span>,  
+            <span class="hljs-attr">foreignField</span>: <span class="hljs-string">"SupplierID"</span>,  
+            <span class="hljs-attr">as</span>: <span class="hljs-string">"Supplier_tmp"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$unwind</span> : <span class="hljs-string">"$Supplier_tmp"</span>  
+    },  
+    {  
+        <span class="hljs-attr">$addFields</span>: {  
+            <span class="hljs-attr">Supplier</span>: {  
+                <span class="hljs-attr">SupplierID</span>: <span class="hljs-string">"$SupplierID"</span>,  
+                <span class="hljs-attr">CompanyName</span>: <span class="hljs-string">"$Supplier_tmp.CompanyName"</span>,  
+                <span class="hljs-attr">Country</span>: <span class="hljs-string">"$Supplier_tmp.Country"</span>  
+            }  
+       }  
+    },  
+    {  
+        <span class="hljs-attr">$project</span>: {  
+            <span class="hljs-attr">SupplierID</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-attr">Supplier_tmp</span>: <span class="hljs-number">0</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$limit</span> : <span class="hljs-number">2</span>  
+    }  
+])
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a0607abb3b972d6f4e1f50"</span>},  
+    <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chai"</span>,  
+    <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"10 boxes x 20 bags"</span>,  
+    <span class="hljs-string">"ReorderLevel"</span>: <span class="hljs-number">10</span>,  
+    <span class="hljs-string">"Supplier"</span>: {  
+      <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+      <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Exotic Liquids"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>  
+    },  
+    <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">18</span>,  
+    <span class="hljs-string">"UnitsInStock"</span>: <span class="hljs-number">39</span>,  
+    <span class="hljs-string">"UnitsOnOrder"</span>: <span class="hljs-number">0</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a0607abb3b972d6f4e1f51"</span>},  
+    <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">2</span>,  
+    <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chang"</span>,  
+    <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"24 - 12 oz bottles"</span>,  
+    <span class="hljs-string">"ReorderLevel"</span>: <span class="hljs-number">25</span>,  
+    <span class="hljs-string">"Supplier"</span>: {  
+      <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+      <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Exotic Liquids"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>  
+    },  
+    <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">19</span>,  
+    <span class="hljs-string">"UnitsInStock"</span>: <span class="hljs-number">17</span>,  
+    <span class="hljs-string">"UnitsOnOrder"</span>: <span class="hljs-number">40</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>dodaj do wyniku inf. o kategoriach</li>
+</ul>
+<pre class="hljs"><code><div>  
+db.products.aggregate([  
+    {  
+        <span class="hljs-attr">$match</span> : { }  
+    },  
+  
+    <span class="hljs-comment">//suppliers  </span>
+    {  
+        <span class="hljs-attr">$lookup</span> : {  
+            <span class="hljs-attr">from</span>: <span class="hljs-string">"suppliers"</span>,  
+            <span class="hljs-attr">localField</span>: <span class="hljs-string">"SupplierID"</span>,  
+            <span class="hljs-attr">foreignField</span>: <span class="hljs-string">"SupplierID"</span>,  
+            <span class="hljs-attr">as</span>: <span class="hljs-string">"Supplier_tmp"</span>  
+        }  
+    },  
+    <span class="hljs-comment">//categories  </span>
+    {  
+        <span class="hljs-attr">$lookup</span> : {  
+            <span class="hljs-attr">from</span>: <span class="hljs-string">"categories"</span>,  
+            <span class="hljs-attr">localField</span>: <span class="hljs-string">"CategoryID"</span>,  
+            <span class="hljs-attr">foreignField</span>: <span class="hljs-string">"CategoryID"</span>,  
+            <span class="hljs-attr">as</span>: <span class="hljs-string">"Category_tmp"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$unwind</span> : <span class="hljs-string">"$Supplier_tmp"</span>  
+    },  
+    {  
+        <span class="hljs-attr">$unwind</span> : <span class="hljs-string">"$Category_tmp"</span>  
+    },  
+    {  
+        <span class="hljs-attr">$addFields</span>: {  
+            <span class="hljs-attr">Supplier</span>: {  
+                <span class="hljs-attr">SupplierID</span>: <span class="hljs-string">"$SupplierID"</span>,  
+                <span class="hljs-attr">CompanyName</span>: <span class="hljs-string">"$Supplier_tmp.CompanyName"</span>,  
+                <span class="hljs-attr">Country</span>: <span class="hljs-string">"$Supplier_tmp.Country"</span>  
+            },  
+            <span class="hljs-attr">Category</span>: {  
+                <span class="hljs-attr">CategoryID</span>: <span class="hljs-string">"$CategoryID"</span>,  
+                <span class="hljs-attr">CategorynameName</span>: <span class="hljs-string">"$Category_tmp.CategoryName"</span>,  
+            }  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$project</span>: {  
+            <span class="hljs-attr">SupplierID</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-attr">Supplier_tmp</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-attr">CategoryID</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-attr">Category_tmp</span>: <span class="hljs-number">0</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$limit</span> : <span class="hljs-number">2</span>  
+    }  
+])
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a0607abb3b972d6f4e1f50"</span>},  
+    <span class="hljs-string">"Category"</span>: {  
+      <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">1</span>,  
+      <span class="hljs-string">"CategorynameName"</span>: <span class="hljs-string">"Beverages"</span>  
+    },  
+    <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chai"</span>,  
+    <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"10 boxes x 20 bags"</span>,  
+    <span class="hljs-string">"ReorderLevel"</span>: <span class="hljs-number">10</span>,  
+    <span class="hljs-string">"Supplier"</span>: {  
+      <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+      <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Exotic Liquids"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>  
+    },  
+    <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">18</span>,  
+    <span class="hljs-string">"UnitsInStock"</span>: <span class="hljs-number">39</span>,  
+    <span class="hljs-string">"UnitsOnOrder"</span>: <span class="hljs-number">0</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a0607abb3b972d6f4e1f51"</span>},  
+    <span class="hljs-string">"Category"</span>: {  
+      <span class="hljs-string">"CategoryID"</span>: <span class="hljs-number">1</span>,  
+      <span class="hljs-string">"CategorynameName"</span>: <span class="hljs-string">"Beverages"</span>  
+    },  
+    <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">2</span>,  
+    <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chang"</span>,  
+    <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"24 - 12 oz bottles"</span>,  
+    <span class="hljs-string">"ReorderLevel"</span>: <span class="hljs-number">25</span>,  
+    <span class="hljs-string">"Supplier"</span>: {  
+      <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>,  
+      <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Exotic Liquids"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>  
+    },  
+    <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">19</span>,  
+    <span class="hljs-string">"UnitsInStock"</span>: <span class="hljs-number">17</span>,  
+    <span class="hljs-string">"UnitsOnOrder"</span>: <span class="hljs-number">40</span>  
+  }  
+]
+</div></code></pre>
+<hr>
+<h1 id="przyk%C5%82ad-2">Przykład 2</h1>
+<ul>
+<li>dostawcy i produkty</li>
+</ul>
+<pre class="hljs"><code><div>db.suppliers.aggregate([  
+    {  
+        <span class="hljs-attr">$match</span> : { }  
+    },  
+  
+    <span class="hljs-comment">//products  </span>
+    {  
+        <span class="hljs-attr">$lookup</span> : {  
+            <span class="hljs-attr">from</span>: <span class="hljs-string">"products"</span>,  
+            <span class="hljs-attr">localField</span>: <span class="hljs-string">"SupplierID"</span>,  
+            <span class="hljs-attr">foreignField</span>: <span class="hljs-string">"SupplierID"</span>,  
+            <span class="hljs-attr">as</span>: <span class="hljs-string">"Products"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$addFields</span>: {  
+            <span class="hljs-attr">Products</span>: {  
+                <span class="hljs-attr">$map</span>: {  
+                    <span class="hljs-attr">input</span>: <span class="hljs-string">"$Products"</span>,  
+                    <span class="hljs-attr">as</span>: <span class="hljs-string">"product"</span>,  
+                    <span class="hljs-attr">in</span>: {  
+                        <span class="hljs-attr">ProductID</span>: <span class="hljs-string">"$$product.ProductID"</span>,  
+                        <span class="hljs-attr">ProductName</span>: <span class="hljs-string">"$$product.ProductName"</span>,  
+                        <span class="hljs-attr">UnitPrice</span>: <span class="hljs-string">"$$product.UnitPrice"</span>,  
+                        <span class="hljs-attr">Discontinued</span>: <span class="hljs-string">"$$product.Discontinued"</span>,  
+                    }  
+                }  
+            }  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$limit</span> : <span class="hljs-number">2</span>  
+    }  
+])
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a05d3cbb3b972d6f4e09f7"</span>},  
+    <span class="hljs-string">"Address"</span>: <span class="hljs-string">"49 Gilbert St."</span>,  
+    <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+    <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Exotic Liquids"</span>,  
+    <span class="hljs-string">"ContactName"</span>: <span class="hljs-string">"Charlotte Cooper"</span>,  
+    <span class="hljs-string">"ContactTitle"</span>: <span class="hljs-string">"Purchasing Manager"</span>,  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+    <span class="hljs-string">"Fax"</span>: <span class="hljs-literal">null</span>,  
+    <span class="hljs-string">"HomePage"</span>: <span class="hljs-literal">null</span>,  
+    <span class="hljs-string">"Phone"</span>: <span class="hljs-string">"(171) 555-2222"</span>,  
+    <span class="hljs-string">"PostalCode"</span>: <span class="hljs-string">"EC1 4SD"</span>,  
+    <span class="hljs-string">"Products"</span>: [  
+      {  
+        <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">1</span>,  
+        <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chai"</span>,  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">18</span>,  
+        <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>  
+      },  
+      {  
+        <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">2</span>,  
+        <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chang"</span>,  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">19</span>,  
+        <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>  
+      },  
+      {  
+        <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">3</span>,  
+        <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Aniseed Syrup"</span>,  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">10</span>,  
+        <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>  
+      }  
+    ],  
+    <span class="hljs-string">"Region"</span>: <span class="hljs-literal">null</span>,  
+    <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">1</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a05d3cbb3b972d6f4e09f8"</span>},  
+    <span class="hljs-string">"Address"</span>: <span class="hljs-string">"P.O. Box 78934"</span>,  
+    <span class="hljs-string">"City"</span>: <span class="hljs-string">"New Orleans"</span>,  
+    <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"New Orleans Cajun Delights"</span>,  
+    <span class="hljs-string">"ContactName"</span>: <span class="hljs-string">"Shelley Burke"</span>,  
+    <span class="hljs-string">"ContactTitle"</span>: <span class="hljs-string">"Order Administrator"</span>,  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+    <span class="hljs-string">"Fax"</span>: <span class="hljs-literal">null</span>,  
+    <span class="hljs-string">"HomePage"</span>: <span class="hljs-string">"#CAJUN.HTM#"</span>,  
+    <span class="hljs-string">"Phone"</span>: <span class="hljs-string">"(100) 555-4822"</span>,  
+    <span class="hljs-string">"PostalCode"</span>: <span class="hljs-string">"70117"</span>,  
+    <span class="hljs-string">"Products"</span>: [  
+      {  
+        <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">4</span>,  
+        <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chef Anton's Cajun Seasoning"</span>,  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">22</span>,  
+        <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>  
+      },  
+      {  
+        <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">5</span>,  
+        <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Chef Anton's Gumbo Mix"</span>,  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">21.35</span>,  
+        <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">true</span>  
+      },  
+      {  
+        <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">65</span>,  
+        <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Louisiana Fiery Hot Pepper Sauce"</span>,  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">21.05</span>,  
+        <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>  
+      },  
+      {  
+        <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">66</span>,  
+        <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Louisiana Hot Spiced Okra"</span>,  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">17</span>,  
+        <span class="hljs-string">"Discontinued"</span>: <span class="hljs-literal">false</span>  
+      }  
+    ],  
+    <span class="hljs-string">"Region"</span>: <span class="hljs-string">"LA"</span>,  
+    <span class="hljs-string">"SupplierID"</span>: <span class="hljs-number">2</span>  
+  }  
+]
+</div></code></pre>
+<hr>
+<h1 id="przyklad-3">Przyklad 3</h1>
+<ul>
+<li>zamówienia</li>
+</ul>
+<pre class="hljs"><code><div>db.orders.aggregate(  
+    {  
+        <span class="hljs-attr">$match</span> : { }  
+    },  
+  
+   <span class="hljs-comment">//customers  </span>
+    {  
+        <span class="hljs-attr">$lookup</span> : {  
+            <span class="hljs-attr">from</span>: <span class="hljs-string">"customers"</span>,  
+            <span class="hljs-attr">localField</span>: <span class="hljs-string">"CustomerID"</span>,  
+            <span class="hljs-attr">foreignField</span>: <span class="hljs-string">"CustomerID"</span>,  
+            <span class="hljs-attr">as</span>: <span class="hljs-string">"Customer"</span>  
+        }  
+  
+   },  
+   {  
+        <span class="hljs-attr">$unwind</span> : <span class="hljs-string">"$Customer"</span>  
+   },  
+   {  
+        <span class="hljs-attr">$project</span> : {  
+            <span class="hljs-string">"Customer._id"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Customer.ContactName"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Customer.ContactTitle"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Customer.City"</span>: <span class="hljs-number">0</span>,  
+<span class="hljs-comment">//             "Customer.Country": 0,  </span>
+            <span class="hljs-string">"Customer.Address"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Customer.PostalCode"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Customer.Region"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Customer.Phone"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Customer.Fax"</span>: <span class="hljs-number">0</span>  
+        }  
+    },  
+  
+    <span class="hljs-comment">//employees  </span>
+    {  
+        <span class="hljs-attr">$lookup</span> : {  
+            <span class="hljs-attr">from</span>: <span class="hljs-string">"employees"</span>,  
+                <span class="hljs-attr">localField</span>: <span class="hljs-string">"EmployeeID"</span>,  
+                <span class="hljs-attr">foreignField</span>: <span class="hljs-string">"EmployeeID"</span>,  
+                <span class="hljs-attr">as</span>: <span class="hljs-string">"Employee"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$unwind</span> : <span class="hljs-string">"$Employee"</span>  
+    },  
+    {  
+        <span class="hljs-attr">$project</span> : {  
+            <span class="hljs-string">"Employee._id"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.Title"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.TitleOfCourtesy"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.BirthDate"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.HireDate"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.Address"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.PostalCode"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.City"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.Region"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.Country"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.HomePhone"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.Extension"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.Photo"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.Notes"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.ReportsTo"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Employee.PhotoPath"</span>: <span class="hljs-number">0</span>  
+        }  
+    },  
+    <span class="hljs-comment">//shippers  </span>
+    {  
+        <span class="hljs-attr">$lookup</span> : {  
+            <span class="hljs-attr">from</span>: <span class="hljs-string">"shippers"</span>,  
+            <span class="hljs-attr">localField</span>: <span class="hljs-string">"ShipVia"</span>,  
+            <span class="hljs-attr">foreignField</span>: <span class="hljs-string">"ShipperID"</span>,  
+            <span class="hljs-attr">as</span>: <span class="hljs-string">"Shipper"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$unwind</span> : <span class="hljs-string">"$Shipper"</span>  
+    },  
+    {  
+        <span class="hljs-attr">$project</span> : {  
+            <span class="hljs-string">"Shipper._id"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"Shipper.Phone"</span>: <span class="hljs-number">0</span>  
+  
+        }  
+    },  
+    <span class="hljs-comment">//orderdetails  </span>
+    {  
+        <span class="hljs-attr">$lookup</span> : {  
+            <span class="hljs-attr">from</span>: <span class="hljs-string">"orderdetails_tmp"</span>,  
+            <span class="hljs-attr">localField</span>: <span class="hljs-string">"OrderID"</span>,  
+            <span class="hljs-attr">foreignField</span>: <span class="hljs-string">"OrderID"</span>,  
+            <span class="hljs-attr">as</span>: <span class="hljs-string">"Orderdetails"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$project</span> : {  
+              <span class="hljs-string">"Orderdetails._id"</span>: <span class="hljs-number">0</span>,  
+              <span class="hljs-string">"Orderdetails.OrderID"</span>: <span class="hljs-number">0</span>  
+  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$project</span> : {  
+              <span class="hljs-string">"CustomerID"</span>: <span class="hljs-number">0</span>,  
+              <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">0</span>,  
+              <span class="hljs-string">"ShipVia"</span>: <span class="hljs-number">0</span>  
+        }  
+   },  
+   {  
+    <span class="hljs-attr">$out</span> : <span class="hljs-string">"orders_tmp"</span>  
+   }  
+  
+)
+</div></code></pre>
+<pre class="hljs"><code><div>db.orders_tmp.find().limit(<span class="hljs-number">2</span>);
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a060b9bb3b972d6f4e1fc6"</span>},  
+    <span class="hljs-string">"Customer"</span>: {  
+      <span class="hljs-string">"CustomerID"</span>: <span class="hljs-string">"VINET"</span>,  
+      <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Vins et alcools Chevalier"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"France"</span>  
+    },  
+    <span class="hljs-string">"Employee"</span>: {  
+      <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">5</span>,  
+      <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Buchanan"</span>,  
+      <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Steven"</span>  
+    },  
+    <span class="hljs-string">"Freight"</span>: <span class="hljs-number">32.38</span>,  
+    <span class="hljs-string">"OrderDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1996-07-04T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"OrderID"</span>: <span class="hljs-number">10248</span>,  
+    <span class="hljs-string">"Orderdetails"</span>: [  
+      {  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">14</span>,  
+        <span class="hljs-string">"Quantity"</span>: <span class="hljs-number">12</span>,  
+        <span class="hljs-string">"Discount"</span>: <span class="hljs-number">0</span>,  
+        <span class="hljs-string">"product"</span>: {  
+          <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">11</span>,  
+          <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Queso Cabrales"</span>,  
+          <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"1 kg pkg."</span>  
+        },  
+        <span class="hljs-string">"TotalValue"</span>: <span class="hljs-number">168</span>  
+      },  
+      {  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">9.8</span>,  
+        <span class="hljs-string">"Quantity"</span>: <span class="hljs-number">10</span>,  
+        <span class="hljs-string">"Discount"</span>: <span class="hljs-number">0</span>,  
+        <span class="hljs-string">"product"</span>: {  
+          <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">42</span>,  
+          <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Singaporean Hokkien Fried Mee"</span>,  
+          <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"32 - 1 kg pkgs."</span>  
+        },  
+        <span class="hljs-string">"TotalValue"</span>: <span class="hljs-number">98</span>  
+      },  
+      {  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">34.8</span>,  
+        <span class="hljs-string">"Quantity"</span>: <span class="hljs-number">5</span>,  
+        <span class="hljs-string">"Discount"</span>: <span class="hljs-number">0</span>,  
+        <span class="hljs-string">"product"</span>: {  
+          <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">72</span>,  
+          <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Mozzarella di Giovanni"</span>,  
+          <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"24 - 200 g pkgs."</span>  
+        },  
+        <span class="hljs-string">"TotalValue"</span>: <span class="hljs-number">174</span>  
+      }  
+    ],  
+    <span class="hljs-string">"RequiredDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1996-08-01T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"ShipAddress"</span>: <span class="hljs-string">"59 rue de l'Abbaye"</span>,  
+    <span class="hljs-string">"ShipCity"</span>: <span class="hljs-string">"Reims"</span>,  
+    <span class="hljs-string">"ShipCountry"</span>: <span class="hljs-string">"France"</span>,  
+    <span class="hljs-string">"ShipName"</span>: <span class="hljs-string">"Vins et alcools Chevalier"</span>,  
+    <span class="hljs-string">"ShipPostalCode"</span>: <span class="hljs-string">"51100"</span>,  
+    <span class="hljs-string">"ShipRegion"</span>: <span class="hljs-literal">null</span>,  
+    <span class="hljs-string">"ShippedDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1996-07-16T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"Shipper"</span>: {  
+      <span class="hljs-string">"ShipperID"</span>: <span class="hljs-number">3</span>,  
+      <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Federal Shipping"</span>  
+    }  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"63a060b9bb3b972d6f4e1fc7"</span>},  
+    <span class="hljs-string">"Customer"</span>: {  
+      <span class="hljs-string">"CustomerID"</span>: <span class="hljs-string">"TOMSP"</span>,  
+      <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Toms Spezialitäten"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"Germany"</span>  
+    },  
+    <span class="hljs-string">"Employee"</span>: {  
+      <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">6</span>,  
+      <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Suyama"</span>,  
+      <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Michael"</span>  
+    },  
+    <span class="hljs-string">"Freight"</span>: <span class="hljs-number">11.61</span>,  
+    <span class="hljs-string">"OrderDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1996-07-05T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"OrderID"</span>: <span class="hljs-number">10249</span>,  
+    <span class="hljs-string">"Orderdetails"</span>: [  
+      {  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">18.6</span>,  
+        <span class="hljs-string">"Quantity"</span>: <span class="hljs-number">9</span>,  
+        <span class="hljs-string">"Discount"</span>: <span class="hljs-number">0</span>,  
+        <span class="hljs-string">"product"</span>: {  
+          <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">14</span>,  
+          <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Tofu"</span>,  
+          <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"40 - 100 g pkgs."</span>  
+        },  
+        <span class="hljs-string">"TotalValue"</span>: <span class="hljs-number">167.4</span>  
+      },  
+      {  
+        <span class="hljs-string">"UnitPrice"</span>: <span class="hljs-number">42.4</span>,  
+        <span class="hljs-string">"Quantity"</span>: <span class="hljs-number">40</span>,  
+        <span class="hljs-string">"Discount"</span>: <span class="hljs-number">0</span>,  
+        <span class="hljs-string">"product"</span>: {  
+          <span class="hljs-string">"ProductID"</span>: <span class="hljs-number">51</span>,  
+          <span class="hljs-string">"ProductName"</span>: <span class="hljs-string">"Manjimup Dried Apples"</span>,  
+          <span class="hljs-string">"QuantityPerUnit"</span>: <span class="hljs-string">"50 - 300 g pkgs."</span>  
+        },  
+        <span class="hljs-string">"TotalValue"</span>: <span class="hljs-number">1696</span>  
+      }  
+    ],  
+    <span class="hljs-string">"RequiredDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1996-08-16T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"ShipAddress"</span>: <span class="hljs-string">"Luisenstr. 48"</span>,  
+    <span class="hljs-string">"ShipCity"</span>: <span class="hljs-string">"Münster"</span>,  
+    <span class="hljs-string">"ShipCountry"</span>: <span class="hljs-string">"Germany"</span>,  
+    <span class="hljs-string">"ShipName"</span>: <span class="hljs-string">"Toms Spezialitäten"</span>,  
+    <span class="hljs-string">"ShipPostalCode"</span>: <span class="hljs-string">"44087"</span>,  
+    <span class="hljs-string">"ShipRegion"</span>: <span class="hljs-literal">null</span>,  
+    <span class="hljs-string">"ShippedDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1996-07-10T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"Shipper"</span>: {  
+      <span class="hljs-string">"ShipperID"</span>: <span class="hljs-number">1</span>,  
+      <span class="hljs-string">"CompanyName"</span>: <span class="hljs-string">"Speedy Express"</span>  
+    }  
+  }  
+]
+</div></code></pre>
+
+</body>
+</html>

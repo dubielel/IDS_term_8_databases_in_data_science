@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MongoDB_cw_1.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="dokumentowe-bazy-danych-%E2%80%93-mongodb">Dokumentowe bazy danych – MongoDB</h1>
+<p>Ćwiczenie 1</p>
+<hr>
+<ul>
+<li>informacja o wersji</li>
+</ul>
+<pre class="hljs"><code><div>db.version()
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>{  
+  <span class="hljs-string">"result"</span>: <span class="hljs-string">"7.0.7"</span>  
+}
+</div></code></pre>
+<hr>
+<ul>
+<li>lista baz danych na serwerze</li>
+</ul>
+<pre class="hljs"><code><div>show dbs;    
+show databases; 
+db.adminCommand(<span class="hljs-string">'listDatabases'</span>);
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"empty"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"name"</span>: <span class="hljs-string">"admin"</span>,  
+    <span class="hljs-string">"sizeOnDisk"</span>: <span class="hljs-number">40960</span>  
+  },  
+  {  
+    <span class="hljs-string">"empty"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"name"</span>: <span class="hljs-string">"config"</span>,  
+    <span class="hljs-string">"sizeOnDisk"</span>: <span class="hljs-number">98304</span>  
+  },   
+  {  
+    <span class="hljs-string">"empty"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"name"</span>: <span class="hljs-string">"local"</span>,  
+    <span class="hljs-string">"sizeOnDisk"</span>: <span class="hljs-number">40960</span>  
+  }  
+]
+</div></code></pre>
+<hr>
+<ul>
+<li>wybór bazy danych
+<ul>
+<li>baza o nazwie univ</li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>use univ;
+</div></code></pre>
+<ul>
+<li>informacja o bieżącej bazie danych</li>
+</ul>
+<pre class="hljs"><code><div>db;
+</div></code></pre>
+<ul>
+<li>informacja o kolekcjach</li>
+</ul>
+<pre class="hljs"><code><div>show collections;  
+db.getCollectionNames();
+</div></code></pre>
+<hr>
+<h1 id="proste-operacjezapytania">Proste operacje/zapytania</h1>
+<ul>
+<li>MongoDB simple query</li>
+<li><a href="https://www.mongodb.com/docs/manual/tutorial/query-documents/">https://www.mongodb.com/docs/manual/tutorial/query-documents/</a></li>
+</ul>
+<hr>
+<h1 id="przyk%C5%82ad-1">Przykład 1</h1>
+<ul>
+<li>proste operacje na dokumentach</li>
+</ul>
+<hr>
+<h1 id="%C4%87w-1">Ćw 1</h1>
+<ul>
+<li>wstaw/stwórz pierwszy dokument
+<ul>
+<li>w tym momencie tworzona jest baza danych i kolekcja (jeśli wcześniej nie istniały)</li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.student.insertOne(
+    {  
+        <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>,  
+        <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"John"</span>,  
+        <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Gold"</span>,  
+        <span class="hljs-string">"age"</span>: <span class="hljs-number">25</span>  
+    }  
+);
+</div></code></pre>
+<ul>
+<li>sprawdź listę baz i kolekcji</li>
+</ul>
+<pre class="hljs"><code><div>show databases;
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"empty"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"name"</span>: <span class="hljs-string">"admin"</span>,  
+    <span class="hljs-string">"sizeOnDisk"</span>: <span class="hljs-number">40960</span>  
+  },  
+  {  
+    <span class="hljs-string">"empty"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"name"</span>: <span class="hljs-string">"config"</span>,  
+    <span class="hljs-string">"sizeOnDisk"</span>: <span class="hljs-number">98304</span>  
+  },   
+  {  
+    <span class="hljs-string">"empty"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"name"</span>: <span class="hljs-string">"local"</span>,  
+    <span class="hljs-string">"sizeOnDisk"</span>: <span class="hljs-number">40960</span>  
+  },  
+  {  
+    <span class="hljs-string">"empty"</span>: <span class="hljs-literal">false</span>,  
+    <span class="hljs-string">"name"</span>: <span class="hljs-string">"univ"</span>,  
+    <span class="hljs-string">"sizeOnDisk"</span>: <span class="hljs-number">8192</span>  
+  }  
+]
+</div></code></pre>
+<pre class="hljs"><code><div>show collections;
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"badge"</span>: <span class="hljs-string">""</span>,  
+    <span class="hljs-string">"name"</span>: <span class="hljs-string">"student"</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>wyszukaj dokumenty w kolekcji <code>employees</code></li>
+</ul>
+<pre class="hljs"><code><div>db.student.find();  
+db.student.find({});
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e86e45b1c69e3d7e42c9c0"</span>},  
+    <span class="hljs-string">"age"</span>: <span class="hljs-number">25</span>,  
+    <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"John"</span>,  
+    <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Gold"</span>,  
+    <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>  
+  }  
+]
+</div></code></pre>
+<hr>
+<h1 id="%C4%87w-2">Ćw 2</h1>
+<ul>
+<li>stwórz indeks zapewniający unikalność atrybutu <code>&quot;student_id&quot; </code></li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">// tworzenie indeksu</span>
+db.student.createIndex({ <span class="hljs-string">"student_id"</span> : <span class="hljs-number">1</span> }, { <span class="hljs-string">"unique"</span>: <span class="hljs-literal">true</span> });  
+
+<span class="hljs-comment">// inf. o indeksach w kolekcji student</span>
+db.student.getIndexes();
+
+<span class="hljs-comment">// usunięcie indeksu o nazwie </span>
+db.student.getIndexes(<span class="hljs-string">"student_id_1"</span>);
+</div></code></pre>
+<ul>
+<li>wstaw kilka dokumentów do kolekcji  <code>student</code>
+<ul>
+<li>np</li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.student.insertOne(  
+    {  
+        <span class="hljs-string">"student_id"</span>: <span class="hljs-number">2</span>,  
+        <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"James"</span>,  
+        <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Bond"</span>  
+    }  
+);
+
+
+db.student.insertOne(  
+    {  
+        <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"John"</span>,  
+        <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Bond"</span>  
+    }  
+);
+</div></code></pre>
+<ul>
+<li>wyszukaj dokumenty w kolekcji  <code>student</code></li>
+</ul>
+<pre class="hljs"><code><div>db.student.find();  
+db.student.find({});  
+db.student.find({<span class="hljs-string">"firstname"</span>: <span class="hljs-string">"John"</span>});  
+db.student.find({<span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>}); 
+
+db.student.find({<span class="hljs-string">"_id"</span>: ObjectId(<span class="hljs-string">"67e669647013d10c86e71c87"</span>)});
+</div></code></pre>
+<ul>
+<li>
+<p>zmodyfikuj wybrane dokumenty</p>
+<ul>
+<li>po wykonaniu każdego z przykładów sprawdź wynik za pomocą  <code>db.student.find()</code></li>
+</ul>
+</li>
+<li>
+<p>np</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.student.updateOne(  
+    {<span class="hljs-string">"student_id"</span> : <span class="hljs-number">1</span>},  
+    {  
+        <span class="hljs-attr">$set</span>: {  
+            <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"Adam"</span>,  
+            <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Silver"</span>  
+        }  
+    }  
+)
+</div></code></pre>
+<pre class="hljs"><code><div>db.student.updateOne(  
+    {<span class="hljs-string">"student_id"</span> : <span class="hljs-number">1</span>},  
+    {  
+        <span class="hljs-attr">$inc</span>: {<span class="hljs-string">"age"</span>: <span class="hljs-number">5</span>}  
+    }  
+)
+</div></code></pre>
+<pre class="hljs"><code><div>db.student.updateOne(  
+    {<span class="hljs-string">"student_id"</span> : <span class="hljs-number">1</span>},  
+    {  
+        <span class="hljs-attr">$set</span>: {  
+            <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"John"</span>,  
+            <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Gold"</span>  
+        },  
+        <span class="hljs-attr">$inc</span>: {  
+            <span class="hljs-string">"age"</span>: <span class="hljs-number">-2</span>  
+        }  
+    }  
+)
+</div></code></pre>
+<pre class="hljs"><code><div>db.student.updateOne(  
+    {<span class="hljs-string">"student_id"</span> : <span class="hljs-number">2</span>},  
+    {  
+        <span class="hljs-attr">$set</span>: {  
+            <span class="hljs-string">"age"</span>:  <span class="hljs-number">19</span>  
+        }  
+    }  
+)
+</div></code></pre>
+<pre class="hljs"><code><div>db.student.updateOne(  
+    {<span class="hljs-string">"student_id"</span> : <span class="hljs-number">2</span>},  
+    {  
+        <span class="hljs-attr">$unset</span>: {  
+            <span class="hljs-string">"age"</span>: <span class="hljs-string">""</span>  
+        }  
+    }  
+)
+</div></code></pre>
+<ul>
+<li>
+<p>usuń wybrane dokumenty</p>
+<ul>
+<li>po wykonaniu każdego z przykładów sprawdź wynik za pomocą  <code>db.student.find()</code></li>
+</ul>
+</li>
+<li>
+<p>np</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.student.deleteOne({<span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>})  
+db.student.deleteMany({<span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>})  
+db.student.deleteOne({<span class="hljs-string">"_id"</span>: ObjectId(<span class="hljs-string">"67e669647013d10c86e71c87"</span>)});
+</div></code></pre>
+<ul>
+<li><code> replace</code></li>
+</ul>
+<pre class="hljs"><code><div>db.student.find({<span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>});
+</div></code></pre>
+<pre class="hljs"><code><div>db.student.replaceOne(  
+    {       
+	    <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>  
+    },  
+    {  
+        <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>,  
+        <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"Jan"</span>,  
+        <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Kowalski"</span>,  
+        <span class="hljs-string">"hobby"</span>: <span class="hljs-string">"Ski"</span>  
+    }  
+);
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67ec1a5b5d92f33cd84a2598"</span>},  
+    <span class="hljs-string">"hobby"</span>: <span class="hljs-string">"Ski"</span>,  
+    <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Kowalski"</span>,  
+    <span class="hljs-string">"lirstlame"</span>: <span class="hljs-string">"Jan"</span>,  
+    <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>tablice
+<ul>
+<li><code>grades</code> - tablica ocen studenta</li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.student.updateOne(
+    {
+        <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>
+    },
+    {
+        <span class="hljs-attr">$set</span> : {
+            <span class="hljs-string">"grades"</span> : [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">8</span>]
+        }
+    }
+);
+</div></code></pre>
+<pre class="hljs"><code><div>db.student.find({<span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>});
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67ec1a5b5d92f33cd84a2598"</span>},  
+    <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"Jan"</span>,  
+    <span class="hljs-string">"grades"</span>: [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">8</span>],  
+    <span class="hljs-string">"hobby"</span>: <span class="hljs-string">"Ski"</span>,  
+    <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Kowalski"</span>,  
+    <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>średnia ocena</li>
+</ul>
+<pre class="hljs"><code><div>db.student.aggregate([
+    {
+        <span class="hljs-attr">$match</span> : {
+		    <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>
+        }
+    },
+    {
+        <span class="hljs-attr">$project</span>: {
+            <span class="hljs-string">"firstname"</span>: <span class="hljs-number">1</span>,
+            <span class="hljs-string">"lastname"</span>: <span class="hljs-number">1</span>,
+            <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>,
+            <span class="hljs-string">"grades"</span>: <span class="hljs-number">1</span>,
+            <span class="hljs-string">"averagegrade"</span>: { <span class="hljs-attr">$avg</span>: <span class="hljs-string">"$grades"</span> }
+        }
+    }
+])
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67ec1a5b5d92f33cd84a2598"</span>},  
+    <span class="hljs-string">"averagegrade"</span>: <span class="hljs-number">5.2</span>,  
+    <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"Jan"</span>,  
+    <span class="hljs-string">"grades"</span>: [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">8</span>],  
+    <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Kowalski"</span>,  
+    <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>dodanie elementu do tablicy</li>
+</ul>
+<pre class="hljs"><code><div>db.student.updateOne(  
+    { <span class="hljs-attr">student_id</span>: <span class="hljs-number">1</span> },  
+    { <span class="hljs-attr">$push</span>: { <span class="hljs-attr">grades</span>: <span class="hljs-number">10</span> } }  
+);
+
+
+
+</div></code></pre>
+<pre class="hljs"><code><div>db.student.find({<span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>});
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67ec1a5b5d92f33cd84a2598"</span>},  
+    <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"Jan"</span>,  
+    <span class="hljs-string">"grades"</span>: [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">8</span>, <span class="hljs-number">10</span>],  
+    <span class="hljs-string">"hobby"</span>: <span class="hljs-string">"Ski"</span>,  
+    <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Kowalski"</span>,  
+    <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>modyfikacja elementu w tablicy
+<ul>
+<li>indeksy zaczynają się od 0</li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.student.updateOne(  
+    { <span class="hljs-attr">student_id</span>: <span class="hljs-number">1</span> },  
+    { <span class="hljs-attr">$set</span>: { <span class="hljs-string">"grades.2"</span>: <span class="hljs-number">12</span> } }  
+)
+</div></code></pre>
+<pre class="hljs"><code><div>db.student.find({<span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>});
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67ec1a5b5d92f33cd84a2598"</span>},  
+    <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"Jan"</span>,  
+    <span class="hljs-string">"grades"</span>: [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">12</span>, <span class="hljs-number">6</span>, <span class="hljs-number">8</span>, <span class="hljs-number">10</span>],  
+    <span class="hljs-string">"hobby"</span>: <span class="hljs-string">"Ski"</span>,  
+    <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Kowalski"</span>,  
+    <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li><code>$map</code>  -  wykonanie operacji dla każdego elementu tablicy
+<ul>
+<li>
+<p><a href="https://www.mongodb.com/docs/manual/reference/operator/aggregation/map/">https://www.mongodb.com/docs/manual/reference/operator/aggregation/map/</a></p>
+</li>
+<li>
+<p>w przykładzie poniżej</p>
+<ul>
+<li>dzielimy każdą ocenę przez 20</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.student.updateOne(
+    { <span class="hljs-attr">student_id</span>: <span class="hljs-number">1</span> },
+    [
+        {
+            <span class="hljs-attr">$set</span>: {
+                <span class="hljs-attr">grades</span>: {
+                    <span class="hljs-attr">$map</span>: {
+                        <span class="hljs-attr">input</span>: <span class="hljs-string">"$grades"</span>,
+                        <span class="hljs-attr">as</span>: <span class="hljs-string">"g"</span>,
+                        <span class="hljs-attr">in</span>: { <span class="hljs-attr">$divide</span>: [<span class="hljs-string">"$$g"</span>, <span class="hljs-number">20</span>] }
+                    }
+                }
+            }
+        }
+  ]
+)
+</div></code></pre>
+<pre class="hljs"><code><div>db.student.find({<span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>});
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67ec1a5b5d92f33cd84a2598"</span>},  
+    <span class="hljs-string">"firstname"</span>: <span class="hljs-string">"Jan"</span>,  
+    <span class="hljs-string">"grades"</span>: [<span class="hljs-number">0.15</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.6</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">0.4</span>, <span class="hljs-number">0.5</span>],  
+    <span class="hljs-string">"hobby"</span>: <span class="hljs-string">"Ski"</span>,  
+    <span class="hljs-string">"lastname"</span>: <span class="hljs-string">"Kowalski"</span>,  
+    <span class="hljs-string">"student_id"</span>: <span class="hljs-number">1</span>  
+  }  
+]
+</div></code></pre>
+<hr>
+<h1 id="%C4%87w-3">Ćw 3</h1>
+<ul>
+<li>
+<p>Wykonaj kilka własnych eksperymentów z operacjami CRUD</p>
+</li>
+<li>
+<p>przydatne linki</p>
+<ul>
+<li><a href="https://www.mongodb.com/docs/manual/crud/">https://www.mongodb.com/docs/manual/crud/</a></li>
+<li><a href="https://www.mongodb.com/docs/manual/reference/method/db.collection.find/">https://www.mongodb.com/docs/manual/reference/method/db.collection.find/</a></li>
+<li><a href="https://www.mongodb.com/docs/manual/reference/method/db.collection.insertOne/">https://www.mongodb.com/docs/manual/reference/method/db.collection.insertOne/</a></li>
+<li><a href="https://www.mongodb.com/docs/manual/reference/method/db.collection.updateOne/">https://www.mongodb.com/docs/manual/reference/method/db.collection.updateOne/</a></li>
+<li><a href="https://www.mongodb.com/docs/manual/reference/method/db.collection.deleteOne/">https://www.mongodb.com/docs/manual/reference/method/db.collection.deleteOne/</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1 id="%C4%87w-4">Ćw 4</h1>
+<ul>
+<li>usuń kolekcję <code>student</code></li>
+</ul>
+<pre class="hljs"><code><div>db.student.drop();
+</div></code></pre>
+<ul>
+<li>usuń bazę danych <code> univ</code></li>
+</ul>
+<pre class="hljs"><code><div>db.dropDatabase();
+</div></code></pre>
+<hr>
+<h1 id="przyk%C5%82ad-2">Przykład 2</h1>
+<hr>
+<h1 id="%C4%87w-4">Ćw 4</h1>
+<ul>
+<li>wybierz bazę <code>employees</code></li>
+</ul>
+<pre class="hljs"><code><div>use employees;
+
+db;
+</div></code></pre>
+<ul>
+<li>wstaw dokument do kolekcji  <code>employees</code></li>
+</ul>
+<pre class="hljs"><code><div>db.employees.insertOne(  
+    {  
+        <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">1</span>,  
+        <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Nancy"</span>,  
+        <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Davolio"</span>,  
+        <span class="hljs-string">"Address"</span> : {  
+            <span class="hljs-string">"Street"</span>: <span class="hljs-string">"507 - 20th Ave. E. Apt. 2A"</span>,  
+            <span class="hljs-string">"City"</span>: <span class="hljs-string">"Seattle"</span>,  
+            <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>  
+        },  
+        <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+        <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>,  
+        <span class="hljs-string">"BirthDate"</span>: ISODate(<span class="hljs-string">"1948-12-08T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"HireDate"</span>: ISODate(<span class="hljs-string">"1992-05-01T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-9857"</span>, <span class="hljs-string">"(206) 555-9858"</span>],  
+        <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1000</span>  
+    }  
+)
+</div></code></pre>
+<ul>
+<li>sprawdź zawartość kolekcji</li>
+</ul>
+<pre class="hljs"><code><div>db.employees.find();
+</div></code></pre>
+<ul>
+<li>wstaw kilka kolejnych dokumentów za pomocą <code>insertMany</code></li>
+</ul>
+<pre class="hljs"><code><div>db.employees.insertMany(  
+[  
+    {  
+        <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">2</span>,  
+         <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Andrew"</span>,  
+        <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Fuller"</span>,  
+        <span class="hljs-string">"Address"</span> : {  
+            <span class="hljs-string">"Street"</span>: <span class="hljs-string">"908 W. Capital Way"</span>,  
+            <span class="hljs-string">"City"</span>: <span class="hljs-string">"Tacoma"</span>,  
+            <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+        },  
+        <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Vice President, Sales"</span>,  
+        <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Dr."</span>,  
+        <span class="hljs-string">"BirthDate"</span>: ISODate(<span class="hljs-string">"1952-02-19T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"HireDate"</span>: ISODate(<span class="hljs-string">"1992-08-14T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-9482"</span>],  
+        <span class="hljs-string">"Salary"</span>: <span class="hljs-number">10000</span>  
+    },  
+    {  
+        <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">3</span>,  
+        <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Janet"</span>,  
+        <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Leverling"</span>,  
+        <span class="hljs-string">"Address"</span> : {  
+            <span class="hljs-string">"Street"</span>: <span class="hljs-string">"722 Moss Bay Blvd."</span>,  
+            <span class="hljs-string">"City"</span>: <span class="hljs-string">"Kirkland"</span>,  
+            <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+         },  
+        <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+        <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>,  
+        <span class="hljs-string">"BirthDate"</span>: ISODate(<span class="hljs-string">"1963-08-30T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"HireDate"</span>: ISODate(<span class="hljs-string">"1992-04-01T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-3412"</span>],  
+        <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1200</span>  
+    },  
+    {  
+        <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">4</span>,  
+        <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Margaret"</span>,  
+        <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Peacock"</span>,  
+        <span class="hljs-string">"Address"</span> : {  
+            <span class="hljs-string">"Street"</span>: <span class="hljs-string">"4110 Old Redmond Rd."</span>,  
+            <span class="hljs-string">"City"</span>: <span class="hljs-string">"Redmond"</span>,  
+            <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+        },  
+        <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+        <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mrs."</span>,  
+        <span class="hljs-string">"BirthDate"</span>: ISODate(<span class="hljs-string">"1937-09-19T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"HireDate"</span>: ISODate(<span class="hljs-string">"1993-05-03T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-8122"</span>],  
+        <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1100</span>  
+    },  
+     {  
+        <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">5</span>,  
+        <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Steven"</span>,  
+        <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Buchanan"</span>,  
+        <span class="hljs-string">"Address"</span> : {  
+            <span class="hljs-string">"Street"</span>: <span class="hljs-string">"14 Garrett Hill"</span>,  
+            <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+            <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+        },  
+        <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Manager"</span>,  
+        <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mr."</span>,  
+        <span class="hljs-string">"BirthDate"</span>: ISODate(<span class="hljs-string">"1955-03-04T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"HireDate"</span>: ISODate(<span class="hljs-string">"1993-10-17T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(71) 555-4848"</span>],  
+        <span class="hljs-string">"Salary"</span>: <span class="hljs-number">2000</span>  
+    },  
+    {  
+        <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">6</span>,  
+        <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Michael"</span>,  
+        <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Suyama"</span>,  
+        <span class="hljs-string">"Address"</span> : {  
+            <span class="hljs-string">"Street"</span>: <span class="hljs-string">"Coventry House Miner Rd."</span>,  
+            <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+            <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+        },  
+        <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+        <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mr."</span>,  
+        <span class="hljs-string">"BirthDate"</span>: ISODate(<span class="hljs-string">"1963-07-02T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"HireDate"</span>: ISODate(<span class="hljs-string">"1993-10-17T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(71) 555-7773"</span>],  
+        <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1500</span>  
+    },  
+    {  
+        <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">7</span>,  
+        <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Robert"</span>,  
+        <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"King"</span>,  
+        <span class="hljs-string">"Address"</span> : {  
+            <span class="hljs-string">"Street"</span>:  <span class="hljs-string">"Edgeham Hollow Winchester Way"</span>,  
+            <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+            <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+        },  
+        <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+        <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mr."</span>,  
+        <span class="hljs-string">"BirthDate"</span>: ISODate(<span class="hljs-string">"1960-05-29T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"HireDate"</span>: ISODate(<span class="hljs-string">"1994-01-02T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(71) 555-5598"</span>],  
+        <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1000</span>  
+    },  
+    {  
+        <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">8</span>,  
+        <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Laura"</span>,  
+        <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Callahan"</span>,  
+        <span class="hljs-string">"Address"</span> : {  
+            <span class="hljs-string">"Street"</span>:  <span class="hljs-string">"4726 - 11th Ave. N.E."</span>,  
+            <span class="hljs-string">"City"</span>: <span class="hljs-string">"Seattle"</span>,  
+            <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+        },  
+        <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Inside Sales Coordinator"</span>,  
+        <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>,  
+        <span class="hljs-string">"BirthDate"</span>: ISODate(<span class="hljs-string">"1958-01-09T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"HireDate"</span>: ISODate(<span class="hljs-string">"1994-03-05T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-1189"</span>],  
+        <span class="hljs-string">"Salary"</span>: <span class="hljs-number">3000</span>  
+    },  
+    {  
+        <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">9</span>,  
+        <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Anne"</span>,  
+        <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Dodsworth"</span>,  
+        <span class="hljs-string">"Address"</span> : {  
+            <span class="hljs-string">"Street"</span>: <span class="hljs-string">"7 Houndstooth Rd."</span>,  
+            <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+            <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+        },  
+        <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+        <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>,  
+        <span class="hljs-string">"BirthDate"</span>: ISODate(<span class="hljs-string">"1966-01-27T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"HireDate"</span>: ISODate(<span class="hljs-string">"1994-11-15T00:00:00.000Z"</span>),  
+        <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(71) 555-4444"</span>],  
+        <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1400</span>  
+    }  
+]  
+)
+</div></code></pre>
+<hr>
+<h1 id="cw-5">Cw 5</h1>
+<ul>
+<li>
+<p>w <code> DataGrip</code>  możesz posłużyć się poleceniami <code>SQL</code></p>
+<ul>
+<li>podzbiór poleceń <code>SQL</code> - proste polecenia <code>SELECT</code></li>
+</ul>
+</li>
+<li>
+<p>wykonaj kilka takich poleceń</p>
+<ul>
+<li>przeanalizuj wyniki</li>
+</ul>
+</li>
+<li>
+<p>np.</p>
+</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> employees;  
+<span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> employees <span class="hljs-keyword">where</span> Address.Country = <span class="hljs-string">"USA"</span>;  
+<span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> employees <span class="hljs-keyword">where</span> Address.Country = <span class="hljs-string">"USA"</span> <span class="hljs-keyword">and</span> TitleOfCourtesy = <span class="hljs-string">"Ms."</span>;  
+  
+<span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> employees <span class="hljs-keyword">where</span> Salary &gt; <span class="hljs-number">1200</span>;
+</div></code></pre>
+<ul>
+<li>
+<p>napisz odpowiadające im polecenia <code>find</code></p>
+</li>
+<li>
+<p>np</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.employees.find({})  
+db.employees.find({<span class="hljs-string">"Address.Country"</span>: <span class="hljs-string">"USA"</span>})  
+db.employees.find({<span class="hljs-attr">$and</span>: [{<span class="hljs-string">"Address.Country"</span>: <span class="hljs-string">"USA"</span>}, {<span class="hljs-string">"TitleOfCourtesy"</span> : <span class="hljs-string">"Ms."</span>}]})  
+
+db.employees.find(
+    {
+        <span class="hljs-attr">$and</span>: [
+            {<span class="hljs-string">"Address.Country"</span>: <span class="hljs-string">"USA"</span>},
+            {<span class="hljs-string">"TitleOfCourtesy"</span> : <span class="hljs-string">"Ms."</span>}
+        ]
+    }
+)
+  
+db.employees.find({ <span class="hljs-attr">Salary</span>: { <span class="hljs-attr">$gt</span>: <span class="hljs-number">1200</span> } })
+</div></code></pre>
+<ul>
+<li>operacja projekcji (wybór atrybutów w zbiorze wynikowym)</li>
+</ul>
+<pre class="hljs"><code><div>db.employees.find({})  
+</div></code></pre>
+<pre class="hljs"><code><div>db.employees.find(
+	{},
+	{<span class="hljs-string">"FirstName"</span>: <span class="hljs-number">1</span>, <span class="hljs-string">"LastName"</span>:<span class="hljs-number">1</span>}
+)  
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879dbb1c69e3d7e42c9c3"</span>},  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Nancy"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Davolio"</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c5"</span>},  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Andrew"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Fuller"</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c6"</span>},  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Janet"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Leverling"</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c7"</span>},  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Margaret"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Peacock"</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c8"</span>},  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Steven"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Buchanan"</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c9"</span>},  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Michael"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Suyama"</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9ca"</span>},  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Robert"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"King"</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9cb"</span>},  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Laura"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Callahan"</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9cc"</span>},  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Anne"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Dodsworth"</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>warunek i projekcja</li>
+</ul>
+<pre class="hljs"><code><div>db.employees.find(  
+    {  
+        <span class="hljs-string">"Address.Country"</span>: <span class="hljs-string">"USA"</span>  
+    },  
+    {  
+        <span class="hljs-string">"FirstName"</span>: <span class="hljs-number">1</span>,  
+        <span class="hljs-string">"LastName"</span>:<span class="hljs-number">1</span>  
+    }  
+)
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Nancy"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Davolio"</span>  
+  },  
+  {  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Andrew"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Fuller"</span>  
+  },  
+  {  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Janet"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Leverling"</span>  
+  },  
+  {  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Margaret"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Peacock"</span>  
+  },  
+  {  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Laura"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Callahan"</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>inne przykłady
+<ul>
+<li>1 - atrybut pojawi się w zbiorze wynikowym</li>
+<li>0 - atrybut nie pojawi się</li>
+<li>mogą wystąpić albo 1 albo 0
+<ul>
+<li>nie dotyczy atrybutu <code>_id_</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.employees.find({},{<span class="hljs-string">"_id"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">"FirstName"</span>: <span class="hljs-number">1</span>, <span class="hljs-string">"LastName"</span>: <span class="hljs-number">1</span> })  
+  
+db.employees.find({},{<span class="hljs-string">"_id"</span>: <span class="hljs-number">1</span>, <span class="hljs-string">"FirstName"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">"LastName"</span>: <span class="hljs-number">0</span>})
+
+<span class="hljs-comment">// to jest błąd  </span>
+db.employees.find({},{<span class="hljs-string">"_id"</span>: <span class="hljs-number">1</span>, <span class="hljs-string">"FirstName"</span>: <span class="hljs-number">1</span>, <span class="hljs-string">"LastName"</span>: <span class="hljs-number">0</span>})
+</div></code></pre>
+<ul>
+<li><code>count</code></li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">select</span> <span class="hljs-keyword">count</span>(*) <span class="hljs-keyword">from</span> employees;  
+<span class="hljs-keyword">select</span> <span class="hljs-keyword">count</span>(*) <span class="hljs-keyword">from</span> employees <span class="hljs-keyword">where</span> Address.Country = <span class="hljs-string">"USA"</span>;  
+<span class="hljs-keyword">select</span> <span class="hljs-keyword">count</span>(*) <span class="hljs-keyword">from</span> employees <span class="hljs-keyword">where</span> Address.Country = <span class="hljs-string">"USA"</span> <span class="hljs-keyword">and</span> TitleOfCourtesy = <span class="hljs-string">"Ms."</span>;  
+  
+<span class="hljs-keyword">select</span> <span class="hljs-keyword">count</span>(*) <span class="hljs-keyword">from</span> employees <span class="hljs-keyword">where</span> Salary &gt; <span class="hljs-number">1200</span>;  
+</div></code></pre>
+<pre class="hljs"><code><div>db.employees.find({}).count();  
+db.employees.find({<span class="hljs-string">"Address.Country"</span>: <span class="hljs-string">"USA"</span>}).count(); 
+
+db.employees.find({<span class="hljs-attr">$and</span>: [{<span class="hljs-string">"Address.Country"</span>: <span class="hljs-string">"USA"</span>}, {<span class="hljs-string">"TitleOfCourtesy"</span> : <span class="hljs-string">"Ms."</span>}]}).count();  
+
+
+db.employees.find(  
+    {  
+        <span class="hljs-attr">$and</span>: [  
+            {<span class="hljs-string">"Address.Country"</span>: <span class="hljs-string">"USA"</span>},  
+            {<span class="hljs-string">"TitleOfCourtesy"</span> : <span class="hljs-string">"Ms."</span>}  
+        ]  
+     }  
+).count();
+</div></code></pre>
+<pre class="hljs"><code><div>db.employees.find({ <span class="hljs-attr">Salary</span>: { <span class="hljs-attr">$gt</span>: <span class="hljs-number">1200</span> } }).count();
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"result"</span>: <span class="hljs-number">5</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li><code>$or</code>  <code>$and</code></li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> employees <span class="hljs-keyword">where</span> Salary &gt; <span class="hljs-number">1100</span>  <span class="hljs-keyword">and</span> Salary &lt; <span class="hljs-number">1500</span> 
+</div></code></pre>
+<pre class="hljs"><code><div>db.employees.find({  
+  <span class="hljs-attr">Salary</span>: { <span class="hljs-attr">$gt</span>: <span class="hljs-number">1100</span>, <span class="hljs-attr">$lt</span>: <span class="hljs-number">1500</span> }  
+})  
+  
+db.employees.find(  
+    {  
+        <span class="hljs-attr">$and</span>: [  
+            { <span class="hljs-attr">Salary</span>: { <span class="hljs-attr">$gt</span>: <span class="hljs-number">1100</span> } },  
+            { <span class="hljs-attr">Salary</span>: { <span class="hljs-attr">$lt</span>: <span class="hljs-number">1500</span> } }  
+        ]  
+    }  
+);
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c6"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"722 Moss Bay Blvd."</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"Kirkland"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1963-08-30T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">3</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Janet"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1992-04-01T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Leverling"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-3412"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1200</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9cc"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"7 Houndstooth Rd."</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1966-01-27T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">9</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Anne"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1994-11-15T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Dodsworth"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(71) 555-4444"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1400</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>  
+  }  
+]
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> employees <span class="hljs-keyword">where</span> Salary &lt;= <span class="hljs-number">1100</span>  <span class="hljs-keyword">or</span> Salary &gt;= <span class="hljs-number">1500</span>
+</div></code></pre>
+<pre class="hljs"><code><div>db.employees.find(  
+    {  
+        <span class="hljs-attr">$or</span>: [  
+            { <span class="hljs-attr">Salary</span>: { <span class="hljs-attr">$lte</span>: <span class="hljs-number">1100</span> } },  
+            { <span class="hljs-attr">Salary</span>: { <span class="hljs-attr">$gte</span>: <span class="hljs-number">1500</span> } }  
+        ]  
+    }  
+);
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879dbb1c69e3d7e42c9c3"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"507 - 20th Ave. E.\r\nApt. 2A"</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"Seattle"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1948-12-08T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Nancy"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1992-05-01T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Davolio"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-9857"</span>, <span class="hljs-string">"(206) 555-9858"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1000</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c5"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"908 W. Capital Way"</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"Tacoma"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1952-02-19T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">2</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Andrew"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1992-08-14T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Fuller"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-9482"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">10000</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Vice President, Sales"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Dr."</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c7"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"4110 Old Redmond Rd."</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"Redmond"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1937-09-19T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">4</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Margaret"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1993-05-03T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Peacock"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-8122"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1100</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mrs."</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c8"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"14 Garrett Hill"</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1955-03-04T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">5</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Steven"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1993-10-17T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Buchanan"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(71) 555-4848"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">2000</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Manager"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mr."</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c9"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"Coventry House Miner Rd."</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1963-07-02T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">6</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Michael"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1993-10-17T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Suyama"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(71) 555-7773"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1500</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mr."</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9ca"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"Edgeham Hollow Winchester Way"</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"London"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1960-05-29T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">7</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Robert"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1994-01-02T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"King"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(71) 555-5598"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1000</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mr."</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9cb"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"4726 - 11th Ave. N.E."</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"Seattle"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1958-01-09T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">8</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Laura"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1994-03-05T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Callahan"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-1189"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">3000</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Inside Sales Coordinator"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>  
+  }  
+]
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> employees <span class="hljs-keyword">where</span> <span class="hljs-keyword">year</span>(HireDate) = <span class="hljs-number">1992</span>
+</div></code></pre>
+<pre class="hljs"><code><div>db.employees.find(  
+    {  
+        <span class="hljs-attr">$expr</span>: {  
+            <span class="hljs-attr">$eq</span>: [ { <span class="hljs-attr">$year</span>: <span class="hljs-string">"$HireDate"</span> }, <span class="hljs-number">1992</span> ]  
+        }  
+    }  
+);  
+  
+  
+db.employees.find(  
+    {  
+        <span class="hljs-attr">HireDate</span>: {  
+            <span class="hljs-attr">$gte</span>: ISODate(<span class="hljs-string">"1992-01-01T00:00:00Z"</span>),  
+            <span class="hljs-attr">$lt</span>: ISODate(<span class="hljs-string">"1993-01-01T00:00:00Z"</span>)  
+        }  
+    }  
+);
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879dbb1c69e3d7e42c9c3"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"507 - 20th Ave. E.\r\nApt. 2A"</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"Seattle"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1948-12-08T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">1</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Nancy"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1992-05-01T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Davolio"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-9857"</span>, <span class="hljs-string">"(206) 555-9858"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1000</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c5"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"908 W. Capital Way"</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"Tacoma"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1952-02-19T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">2</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Andrew"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1992-08-14T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Fuller"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-9482"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">10000</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Vice President, Sales"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Dr."</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67e879e2b1c69e3d7e42c9c6"</span>},  
+    <span class="hljs-string">"Address"</span>: {  
+      <span class="hljs-string">"Street"</span>: <span class="hljs-string">"722 Moss Bay Blvd."</span>,  
+      <span class="hljs-string">"City"</span>: <span class="hljs-string">"Kirkland"</span>,  
+      <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>  
+    },  
+    <span class="hljs-string">"BirthDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1963-08-30T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"EmployeeID"</span>: <span class="hljs-number">3</span>,  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Janet"</span>,  
+    <span class="hljs-string">"HireDate"</span>: {<span class="hljs-string">"$date"</span>: <span class="hljs-string">"1992-04-01T00:00:00.000Z"</span>},  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Leverling"</span>,  
+    <span class="hljs-string">"Phone"</span>: [<span class="hljs-string">"(206) 555-3412"</span>],  
+    <span class="hljs-string">"Salary"</span>: <span class="hljs-number">1200</span>,  
+    <span class="hljs-string">"Title"</span>: <span class="hljs-string">"Sales Representative"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>  
+  }  
+]
+</div></code></pre>
+<hr>
+<h1 id="%C4%87w-6">Ćw 6</h1>
+<ul>
+<li>Wykonaj kilka własnych eksperymentów</li>
+</ul>
+<hr>
+<h1 id="operacje-agregacji">Operacje agregacji</h1>
+<ul>
+<li>aggregate</li>
+<li>aggregation pipline</li>
+<li><a href="https://www.mongodb.com/docs/manual/core/aggregation-pipeline/">https://www.mongodb.com/docs/manual/core/aggregation-pipeline/</a></li>
+</ul>
+<pre class="hljs"><code><div>db.&lt;collection&gt;.aggregate(
+
+[
+
+   {stage <span class="hljs-number">1</span>},
+
+   {stage <span class="hljs-number">2</span>},
+
+    …..
+
+   {stage N}
+
+]
+
+)
+</div></code></pre>
+<ul>
+<li>
+<p><a href="https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/#std-label-aggregation-pipeline-operator-reference">https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/#std-label-aggregation-pipeline-operator-reference</a></p>
+</li>
+<li>
+<p>Stages</p>
+<ul>
+<li><code>$match</code></li>
+<li><code>$project</code></li>
+<li><code>$group</code></li>
+<li><code>$unwind</code></li>
+<li><code>$lookup</code></li>
+<li><code>$out</code></li>
+<li>...</li>
+</ul>
+</li>
+<li>
+<p>Aggregation vs SQL</p>
+<ul>
+<li><a href="https://www.mongodb.com/docs/manual/reference/sql-aggregation-comparison/">https://www.mongodb.com/docs/manual/reference/sql-aggregation-comparison/</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1 id="przyk%C5%82ad-3">Przykład 3</h1>
+<hr>
+<h1 id="%C4%87w-6">Ćw 6</h1>
+<ul>
+<li>baza <code>employees</code>  z poprzedniego przykładu</li>
+</ul>
+<pre class="hljs"><code><div>use employees;
+
+db;
+
+db.employees.find();
+</div></code></pre>
+<ul>
+<li>Operacje agregacji
+<ul>
+<li><code>aggregate</code></li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.employees.aggregate([  
+    {  
+        <span class="hljs-attr">$match</span>: {  
+            <span class="hljs-string">"Address.Country"</span>: <span class="hljs-string">"USA"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$project</span>: {  
+            <span class="hljs-string">"_id"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"LastName"</span>: <span class="hljs-number">1</span>,  
+            <span class="hljs-string">"FirstName"</span>: <span class="hljs-number">1</span>}  
+    },  
+    {  
+        <span class="hljs-attr">$sort</span>: {<span class="hljs-attr">LastName</span>: <span class="hljs-number">-1</span>}  
+    }  
+])
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Nancy"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Davolio"</span>  
+  },  
+  {  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Andrew"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Fuller"</span>  
+  },  
+  {  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Janet"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Leverling"</span>  
+  },  
+  {  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Margaret"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Peacock"</span>  
+  },  
+  {  
+    <span class="hljs-string">"FirstName"</span>: <span class="hljs-string">"Laura"</span>,  
+    <span class="hljs-string">"LastName"</span>: <span class="hljs-string">"Callahan"</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>dodatkowe pole <code>FullName</code></li>
+</ul>
+<pre class="hljs"><code><div>db.employees.aggregate([  
+    {  
+        <span class="hljs-attr">$match</span>: {  
+            <span class="hljs-string">"Address.Country"</span>: <span class="hljs-string">"USA"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$project</span>: {  
+            <span class="hljs-string">"_id"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"First"</span>: <span class="hljs-string">"$LastName"</span>,  
+            <span class="hljs-string">"Last"</span>: <span class="hljs-string">"$LastName"</span>,  
+            <span class="hljs-string">"FullName"</span>: {  
+                <span class="hljs-attr">$concat</span>: [<span class="hljs-string">"$FirstName"</span>, <span class="hljs-string">" "</span>, <span class="hljs-string">"$LastName"</span>]  
+            }  
+  
+       }  
+    },  
+    {  
+        <span class="hljs-attr">$sort</span>: {<span class="hljs-attr">lastname</span>: <span class="hljs-number">-1</span>}  
+    }  
+])
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"First"</span>: <span class="hljs-string">"Davolio"</span>,  
+    <span class="hljs-string">"FullName"</span>: <span class="hljs-string">"Nancy Davolio"</span>,  
+    <span class="hljs-string">"Last"</span>: <span class="hljs-string">"Davolio"</span>  
+  },  
+  {  
+    <span class="hljs-string">"First"</span>: <span class="hljs-string">"Fuller"</span>,  
+    <span class="hljs-string">"FullName"</span>: <span class="hljs-string">"Andrew Fuller"</span>,  
+    <span class="hljs-string">"Last"</span>: <span class="hljs-string">"Fuller"</span>  
+  },  
+  {  
+    <span class="hljs-string">"First"</span>: <span class="hljs-string">"Leverling"</span>,  
+    <span class="hljs-string">"FullName"</span>: <span class="hljs-string">"Janet Leverling"</span>,  
+    <span class="hljs-string">"Last"</span>: <span class="hljs-string">"Leverling"</span>  
+  },  
+  {  
+    <span class="hljs-string">"First"</span>: <span class="hljs-string">"Peacock"</span>,  
+    <span class="hljs-string">"FullName"</span>: <span class="hljs-string">"Margaret Peacock"</span>,  
+    <span class="hljs-string">"Last"</span>: <span class="hljs-string">"Peacock"</span>  
+  },  
+  {  
+    <span class="hljs-string">"First"</span>: <span class="hljs-string">"Callahan"</span>,  
+    <span class="hljs-string">"FullName"</span>: <span class="hljs-string">"Laura Callahan"</span>,  
+    <span class="hljs-string">"Last"</span>: <span class="hljs-string">"Callahan"</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>grupowanie
+<ul>
+<li><code>$group</code></li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">select</span> TitleOfCourtesy, <span class="hljs-keyword">count</span>(*)  
+<span class="hljs-keyword">from</span> employees  
+<span class="hljs-keyword">where</span>  Address.Country = <span class="hljs-string">"USA"</span>  
+<span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> TitleOfCourtesy
+</div></code></pre>
+<pre class="hljs"><code><div>db.employees.aggregate([  
+    {  
+        <span class="hljs-attr">$match</span>: {  
+            <span class="hljs-string">"Address.Country"</span>: <span class="hljs-string">"USA"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$group</span>: {  
+            <span class="hljs-string">"_id"</span>: <span class="hljs-string">"$TitleOfCourtesy"</span>,  
+            <span class="hljs-string">"cnt"</span>: {<span class="hljs-string">"$sum"</span>: <span class="hljs-number">1</span>}  
+        }  
+    }  
+])
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: <span class="hljs-string">"Dr."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">1</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: <span class="hljs-string">"Mrs."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">1</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: <span class="hljs-string">"Ms."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">3</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>dodatkowa projekcja, zmiana nazwy</li>
+</ul>
+<pre class="hljs"><code><div>db.employees.aggregate([  
+    {  
+        <span class="hljs-attr">$match</span>: {  
+            <span class="hljs-string">"Address.Country"</span>: <span class="hljs-string">"USA"</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$group</span>: {  
+            <span class="hljs-string">"_id"</span>: <span class="hljs-string">"$TitleOfCourtesy"</span>,  
+            <span class="hljs-string">"cnt"</span>: {<span class="hljs-string">"$sum"</span>: <span class="hljs-number">1</span>}  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$project</span>: {  
+            <span class="hljs-string">"_id"</span>: <span class="hljs-number">0</span>,  
+            <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"$_id"</span>,  
+            <span class="hljs-string">"cnt"</span>: <span class="hljs-number">1</span>}  
+    },  
+  
+])
+</div></code></pre>
+<ul>
+<li>grupowanie wg kilku atrybutów</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">select</span> Address.Country, TitleOfCourtesy, <span class="hljs-keyword">count</span>(*) cnt  
+<span class="hljs-keyword">from</span> employees  
+<span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> Address.Country, TitleOfCourtesy
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> cnt <span class="hljs-keyword">desc</span>;
+</div></code></pre>
+<pre class="hljs"><code><div>db.employees.aggregate([  
+    {  
+        <span class="hljs-attr">$group</span>: {  
+            <span class="hljs-attr">_id</span>: {  
+                <span class="hljs-attr">country</span>: <span class="hljs-string">"$Address.Country"</span>,  
+                <span class="hljs-attr">title</span>: <span class="hljs-string">"$TitleOfCourtesy"</span>  
+            },  
+            <span class="hljs-attr">cnt</span>: { <span class="hljs-attr">$sum</span>: <span class="hljs-number">1</span> }  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$project</span>: {  
+        <span class="hljs-attr">_id</span>: <span class="hljs-number">0</span>,  
+        <span class="hljs-attr">country</span>: <span class="hljs-string">"$_id.country"</span>,  
+        <span class="hljs-attr">title</span>: <span class="hljs-string">"$_id.title"</span>,  
+        <span class="hljs-attr">cnt</span>: <span class="hljs-number">1</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$sort</span>: {<span class="hljs-attr">cnt</span>: <span class="hljs-number">-1</span>}  
+    }  
+])
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mr."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">3</span>  
+  },  
+  {  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">3</span>  
+  },  
+  {  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Dr."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">1</span>  
+  },  
+  {  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">1</span>  
+  },  
+  {  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mrs."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">1</span>  
+  }  
+]
+
+</div></code></pre>
+<ul>
+<li>zapis wyniku
+<ul>
+<li><code>$out</code></li>
+<li>zapis zbioru wynikowego to kolekcji o wskazanej nazwie</li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>db.employees.aggregate([  
+    {  
+        <span class="hljs-attr">$group</span>: {  
+            <span class="hljs-attr">_id</span>: {  
+                <span class="hljs-attr">Country</span>: <span class="hljs-string">"$Address.Country"</span>,  
+                <span class="hljs-attr">TitleOfCourtesy</span>: <span class="hljs-string">"$TitleOfCourtesy"</span>  
+            },  
+            <span class="hljs-attr">cnt</span>: { <span class="hljs-attr">$sum</span>: <span class="hljs-number">1</span> }  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$project</span>: {  
+        <span class="hljs-attr">_id</span>: <span class="hljs-number">0</span>,  
+        <span class="hljs-attr">Country</span>: <span class="hljs-string">"$_id.Country"</span>,  
+        <span class="hljs-attr">TitleOfCourtesy</span>: <span class="hljs-string">"$_id.TitleOfCourtesy"</span>,  
+        <span class="hljs-attr">cnt</span>: <span class="hljs-number">1</span>  
+        }  
+    },  
+    {  
+        <span class="hljs-attr">$out</span>: <span class="hljs-string">"em_by_country_title"</span>  
+    }  
+])
+</div></code></pre>
+<ul>
+<li>lista kolekcji</li>
+</ul>
+<pre class="hljs"><code><div>show collections;
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"badge"</span>: <span class="hljs-string">""</span>,  
+    <span class="hljs-string">"name"</span>: <span class="hljs-string">"em_by_country_title"</span>  
+  },  
+  {  
+    <span class="hljs-string">"badge"</span>: <span class="hljs-string">""</span>,  
+    <span class="hljs-string">"name"</span>: <span class="hljs-string">"employees"</span>  
+  }  
+]
+</div></code></pre>
+<ul>
+<li>zawartość kolekcji  <code>em_by_title</code></li>
+</ul>
+<pre class="hljs"><code><div>db.em_by_country_title.find();
+</div></code></pre>
+<ul>
+<li>wynik</li>
+</ul>
+<pre class="hljs"><code><div>[  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67ec20f77b1ef941c9512dcb"</span>},  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mrs."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">1</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67ec20f77b1ef941c9512dcc"</span>},  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">3</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67ec20f77b1ef941c9512dcd"</span>},  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"USA"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Dr."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">1</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67ec20f77b1ef941c9512dce"</span>},  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Mr."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">3</span>  
+  },  
+  {  
+    <span class="hljs-string">"_id"</span>: {<span class="hljs-string">"$oid"</span>: <span class="hljs-string">"67ec20f77b1ef941c9512dcf"</span>},  
+    <span class="hljs-string">"Country"</span>: <span class="hljs-string">"UK"</span>,  
+    <span class="hljs-string">"TitleOfCourtesy"</span>: <span class="hljs-string">"Ms."</span>,  
+    <span class="hljs-string">"cnt"</span>: <span class="hljs-number">1</span>  
+  }  
+]
+</div></code></pre>
+<hr>
+<h1 id="%C4%87w-7">Ćw 7</h1>
+<ul>
+<li>Wykonaj kilka własnych eksperymentów</li>
+</ul>
+<hr>
+<h1 id="%C4%87w-8">Ćw 8</h1>
+<ul>
+<li>usuń kolekcje <code>employees</code> i  <code>em_usa_by_titl</code></li>
+</ul>
+<pre class="hljs"><code><div>db.employees.drop();
+db.em_usa_by_title.drop();
+</div></code></pre>
+<ul>
+<li>usuń bazę danych <code>employees</code></li>
+</ul>
+<pre class="hljs"><code><div>db.dropDatabase();
+</div></code></pre>
+
+</body>
+</html>
