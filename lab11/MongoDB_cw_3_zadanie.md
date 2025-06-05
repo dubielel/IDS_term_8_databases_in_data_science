@@ -303,95 +303,156 @@ stwórz kolekcję `CustomerInfo` zawierającą następujące dane o każdym klie
 
 ```js
 db.customers.aggregate([
+  // Look up orders for each customer
   {
     $lookup: {
       from: "orders",
       localField: "CustomerID",
       foreignField: "CustomerID",
-      as: "Orders"
-    }
+      as: "Orders",
+    },
   },
-  {
-    $unwind: {
-      path: "$Orders",
-      preserveNullAndEmptyArrays: true
-    }
-  },
+  { $unwind: { path: "$Orders", preserveNullAndEmptyArrays: true } },
+  // Look up employee for each order
   {
     $lookup: {
       from: "employees",
       localField: "Orders.EmployeeID",
       foreignField: "EmployeeID",
-      as: "Orders.Employee"
-    }
+      as: "Employee",
+    },
   },
-  {
-    $unwind: {
-      path: "$Orders.Employee",
-      preserveNullAndEmptyArrays: true
-    }
-  },
+  { $unwind: { path: "$Employee", preserveNullAndEmptyArrays: true } },
+  // Look up orderdetails for each order
   {
     $lookup: {
       from: "orderdetails",
       localField: "Orders.OrderID",
       foreignField: "OrderID",
-      as: "Orders.Orderdetails"
-    }
+      as: "Orderdetails",
+    },
   },
+  // Unwind orderdetails to join products and categories
+  { $unwind: { path: "$Orderdetails", preserveNullAndEmptyArrays: true } },
+  {
+    $lookup: {
+      from: "products",
+      localField: "Orderdetails.ProductID",
+      foreignField: "ProductID",
+      as: "Product",
+    },
+  },
+  { $unwind: { path: "$Product", preserveNullAndEmptyArrays: true } },
+  {
+    $lookup: {
+      from: "categories",
+      localField: "Product.CategoryID",
+      foreignField: "CategoryID",
+      as: "Category",
+    },
+  },
+  { $unwind: { path: "$Category", preserveNullAndEmptyArrays: true } },
+  // Look up shipper for each order
   {
     $lookup: {
       from: "shippers",
       localField: "Orders.ShipVia",
       foreignField: "ShipperID",
-      as: "Orders.Shipper"
-    }
+      as: "Shipper",
+    },
   },
-  {
-    $unwind: {
-      path: "$Orders.Shipper",
-      preserveNullAndEmptyArrays: true
-    }
-  },
+  { $unwind: { path: "$Shipper", preserveNullAndEmptyArrays: true } },
+  // Group orderdetails per order
   {
     $group: {
-      _id: "$CustomerID", // Trzeba zminić ID na generowane losowo
+      _id: {
+        customerId: "$CustomerID",
+        orderId: "$Orders.OrderID",
+      },
+      CustomerID: { $first: "$CustomerID" },
+      CompanyName: { $first: "$CompanyName" },
+      City: { $first: "$City" },
+      Country: { $first: "$Country" },
+      OrderID: { $first: "$Orders.OrderID" },
+      Employee: {
+        $first: {
+          EmployeeID: "$Employee.EmployeeID",
+          FirstName: "$Employee.FirstName",
+          LastName: "$Employee.LastName",
+          Title: "$Employee.Title",
+        },
+      },
+      Dates: {
+        $first: {
+          OrderDate: "$Orders.OrderDate",
+          RequiredDate: "$Orders.RequiredDate",
+        },
+      },
+      Freight: { $first: "$Orders.Freight" },
+      Shipment: {
+        $first: {
+          Shipper: {
+            ShipperID: "$Shipper.ShipperID",
+            CompanyName: "$Shipper.CompanyName",
+          },
+          ShipName: "$Orders.ShipName",
+          ShipAddress: "$Orders.ShipAddress",
+          ShipCity: "$Orders.ShipCity",
+          ShipCountry: "$Orders.ShipCountry",
+        },
+      },
+      Orderdetails: {
+        $push: {
+          UnitPrice: "$Orderdetails.UnitPrice",
+          Quantity: "$Orderdetails.Quantity",
+          Discount: "$Orderdetails.Discount",
+          Value: {
+            $multiply: [
+              "$Orderdetails.UnitPrice",
+              "$Orderdetails.Quantity",
+              { $subtract: [1, "$Orderdetails.Discount"] },
+            ],
+          },
+          product: {
+            ProductID: "$Product.ProductID",
+            ProductName: "$Product.ProductName",
+            QuantityPerUnit: "$Product.QuantityPerUnit",
+            CategoryID: "$Category.CategoryID",
+            CategoryName: "$Category.CategoryName",
+          },
+        },
+      },
+    },
+  },
+  // Calculate OrderTotal
+  {
+    $addFields: {
+      OrderTotal: { $sum: "$Orderdetails.Value" },
+    },
+  },
+  // Group orders per customer
+  {
+    $group: {
+      _id: "$CustomerID",
       CustomerID: { $first: "$CustomerID" },
       CompanyName: { $first: "$CompanyName" },
       City: { $first: "$City" },
       Country: { $first: "$Country" },
       Orders: {
         $push: {
-          OrderID: "$Orders.OrderID",
-          Employee: {
-            EmployeeID: "$Orders.Employee.EmployeeID",
-            FirstName: "$Orders.Employee.FirstName",
-            LastName: "$Orders.Employee.LastName",
-            Title: "$Orders.Employee.Title"
-          },
-          Dates: {
-            OrderDate: "$Orders.OrderDate",
-            RequiredDate: "$Orders.RequiredDate"
-          },
-          Orderdetails: "$Orders.Orderdetails",
-          Freight: "$Orders.Freight",
-          Shipment: {
-            Shipper: {
-              ShipperID: "$Orders.Shipper.ShipperID",
-              CompanyName: "$Orders.Shipper.CompanyName"
-            },
-            ShipName: "$Orders.ShipName",
-            ShipAddress: "$Orders.ShipAddress",
-            ShipCity: "$Orders.ShipCity",
-            ShipCountry: "$Orders.ShipCountry"
-          }
-        }
-      }
-    }
+          OrderID: "$OrderID",
+          Employee: "$Employee",
+          Dates: "$Dates",
+          Orderdetails: "$Orderdetails",
+          Freight: "$Freight",
+          OrderTotal: "$OrderTotal",
+          Shipment: "$Shipment",
+        },
+      },
+    },
   },
-  {
-    $out: "CustomerInfo"
-  }
+  { $unset: "_id" },
+  { $out: "CustomerInfo" },
 ]);
 ```
 
