@@ -484,7 +484,7 @@ Napisz polecenie/zapytanie: Dla każdego klienta pokaż wartość zakupionych pr
 
 - Spróbuj napisać to zapytanie wykorzystując
 
-- oryginalne kolekcje (`customers, orders, orderdertails, products, categories`)
+- oryginalne kolekcje (`customers, orders, orderdetails, products, categories`)
 - kolekcję `OrderInfo`
 - kolekcję `CustomerInfo`
 
@@ -509,7 +509,7 @@ Które wersje zapytań były "prostsze"?
 
 > Wyniki:
 > 
-> ### Zapytanie w oparciu o oryginalne kolekcje (`customers, orders, orderdertails, products, categories`)
+> ### Zapytanie w oparciu o oryginalne kolekcje (`customers, orders, orderdetails, products, categories`)
 > 
 > ```js
 > db.customers.aggregate([
@@ -765,7 +765,7 @@ Napisz polecenie/zapytanie: Dla każdego klienta podaj wartość sprzedaży z po
 
 Spróbuj napisać to zapytanie wykorzystując
 
-- oryginalne kolekcje (`customers, orders, orderdertails, products, categories`)
+- oryginalne kolekcje (`customers, orders, orderdetails, products, categories`)
 - kolekcję `OrderInfo`
 - kolekcję `CustomerInfo`
 
