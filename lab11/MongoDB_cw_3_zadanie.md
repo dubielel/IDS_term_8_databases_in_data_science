@@ -1018,7 +1018,7 @@ Które wersje zapytań były "prostsze"?
 > - obliczania miesięcznej wartości sprzedaży
 > - projekcji przetworzonych danych
 >
-> Powtarzają się w niezmienionej formie we wszystkich trzech zapytaniach. Natomiast główną różnicą pomiędzy nimi jest sposóp na wydobycie wszystkich potrzebnych danych do właśnie tego "wspólnego" etapu agregacji.
+> Powtarzają się w niezmienionej formie we wszystkich trzech zapytaniach. Natomiast główną różnicą pomiędzy nimi jest sposób na wydobycie wszystkich potrzebnych danych do właśnie tego "wspólnego" etapu agregacji.
 >
 > Odpowiadając na pytanie _Które wersje zapytań były "prostsze"?_: w tym przypadku również twierdzimy, że najprostsze było zapytanie z użyciem kolekcji `OrdersInfo`.
 
