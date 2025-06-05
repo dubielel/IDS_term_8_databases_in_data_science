@@ -104,156 +104,129 @@ stwórz kolekcję `OrdersInfo` zawierającą następujące dane o zamówieniach
 
 ```js
 db.orders.aggregate([
+  // Join customers
   {
     $lookup: {
       from: "customers",
       localField: "CustomerID",
       foreignField: "CustomerID",
-      as: "Customer"
+      as: "customer"
     }
   },
-  {
-    $unwind: "$Customer"
-  },
+  { $unwind: "$customer" },
+  // Join employees
   {
     $lookup: {
       from: "employees",
       localField: "EmployeeID",
       foreignField: "EmployeeID",
-      as: "Employee"
+      as: "employee"
     }
   },
-  {
-    $unwind: "$Employee"
-  },
-  {
-    $lookup: {
-      from: "orderdetails",
-      localField: "OrderID",
-      foreignField: "OrderID",
-      as: "Orderdetails"
-    }
-  },
-  {
-    $lookup: {
-      from: "products",
-      localField: "Orderdetails.ProductID",
-      foreignField: "ProductID",
-      as: "Products"
-    }
-  },
-  {
-    $lookup: {
-      from: "categories",
-      localField: "Products.CategoryID",
-      foreignField: "CategoryID",
-      as: "Categories"
-    }
-  },
+  { $unwind: "$employee" },
+  // Join shippers
   {
     $lookup: {
       from: "shippers",
       localField: "ShipVia",
       foreignField: "ShipperID",
-      as: "Shipper"
+      as: "shipper"
     }
   },
+  { $unwind: "$shipper" },
+  // Join orderdetails
   {
-    $unwind: "$Shipper"
+    $lookup: {
+      from: "orderdetails",
+      localField: "OrderID",
+      foreignField: "OrderID",
+      as: "order_details"
+    }
   },
+  // Unwind orderdetails for further lookups
+  { $unwind: "$order_details" },
+  // Join products
   {
-    $project: {
-      _id: 0,
-      OrderID: 1,
-      Customer: {
-        CustomerID: "$Customer.CustomerID",
-        CompanyName: "$Customer.CompanyName",
-        City: "$Customer.City",
-        Country: "$Customer.Country"
-      },
-      Employee: {
-        EmployeeID: "$Employee.EmployeeID",
-        FirstName: "$Employee.FirstName",
-        LastName: "$Employee.LastName",
-        Title: "$Employee.Title"
-      },
-      Dates: {
+    $lookup: {
+      from: "products",
+      localField: "order_details.ProductID",
+      foreignField: "ProductID",
+      as: "product"
+    }
+  },
+  { $unwind: "$product" },
+  // Join categories
+  {
+    $lookup: {
+      from: "categories",
+      localField: "product.CategoryID",
+      foreignField: "CategoryID",
+      as: "category"
+    }
+  },
+  { $unwind: "$category" },
+  // Group by order to collect order details
+  {
+    $group: {
+      _id: "$OrderID",
+      OrderID: { $first: "$OrderID" },
+      Customer: { $first: {
+        CustomerID: "$customer.CustomerID",
+        CompanyName: "$customer.CompanyName",
+        City: "$customer.City",
+        Country: "$customer.Country"
+      }},
+      Employee: { $first: {
+        EmployeeID: "$employee.EmployeeID",
+        FirstName: "$employee.FirstName",
+        LastName: "$employee.LastName",
+        Title: "$employee.Title"
+      }},
+      Dates: { $first: {
         OrderDate: "$OrderDate",
         RequiredDate: "$RequiredDate"
-      },
-      Orderdetails: {
-        $map: {
-          input: "$Orderdetails",
-          as: "detail",
-          in: {
-            UnitPrice: "$$detail.UnitPrice",
-            Quantity: "$$detail.Quantity",
-            Discount: "$$detail.Discount",
-            Value: {
-              $multiply: [
-                "$$detail.UnitPrice",
-                "$$detail.Quantity",
-                { $subtract: [1, "$$detail.Discount"] }
-              ]
-            },
-            product: {
-              ProductID: "$$detail.ProductID",
-              ProductName: {
-                $arrayElemAt: [
-                  "$Products.ProductName",
-                  { $indexOfArray: ["$Products.ProductID", "$$detail.ProductID"] }
-                ]
-              },
-              QuantityPerUnit: {
-                $arrayElemAt: [
-                  "$Products.QuantityPerUnit",
-                  { $indexOfArray: ["$Products.ProductID", "$$detail.ProductID"] }
-                ]
-              },
-              CategoryID: {
-                $arrayElemAt: [
-                  "$Products.CategoryID",
-                  { $indexOfArray: ["$Products.ProductID", "$$detail.ProductID"] }
-                ]
-              },
-              CategoryName: {
-                $arrayElemAt: [
-                  "$Categories.CategoryName",
-                  { $indexOfArray: ["$Categories.CategoryID", "$$detail.CategoryID"] }
-                ]
-              }
-            }
-          }
-        }
-      },
-      Freight: "$Freight",
-      OrderTotal: {
-        $sum: {
-          $map: {
-            input: "$Orderdetails",
-            as: "detail",
-            in: {
-              $multiply: [
-                "$$detail.UnitPrice",
-                "$$detail.Quantity",
-                { $subtract: [1, "$$detail.Discount"] }
-              ]
-            }
-          }
-        }
-      },
-      Shipment: {
+      }},
+      Freight: { $first: "$Freight" },
+      Shipment: { $first: {
         Shipper: {
-          ShipperID: "$Shipper.ShipperID",
-          CompanyName: "$Shipper.CompanyName"
+          ShipperID: "$shipper.ShipperID",
+          CompanyName: "$shipper.CompanyName"
         },
         ShipName: "$ShipName",
         ShipAddress: "$ShipAddress",
         ShipCity: "$ShipCity",
         ShipCountry: "$ShipCountry"
+      }},
+      Orderdetails: { $push: {
+        UnitPrice: "$order_details.UnitPrice",
+        Quantity: "$order_details.Quantity",
+        Discount: "$order_details.Discount",
+        Value: {
+          $multiply: [
+            "$order_details.UnitPrice",
+            "$order_details.Quantity",
+            { $subtract: [1, "$order_details.Discount"] }
+          ]
+        },
+        product: {
+          ProductID: "$product.ProductID",
+          ProductName: "$product.ProductName",
+          QuantityPerUnit: "$product.QuantityPerUnit",
+          CategoryID: "$category.CategoryID",
+          CategoryName: "$category.CategoryName"
+        }
+      }}
+    }
+  },
+  // Calculate OrderTotal
+  {
+    $addFields: {
+      OrderTotal: {
+        $sum: "$Orderdetails.Value"
       }
     }
   },
+  // Output to OrdersInfo
   {
     $out: "OrdersInfo"
   }
